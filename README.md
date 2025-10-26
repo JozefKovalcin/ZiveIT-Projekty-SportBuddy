@@ -19,17 +19,21 @@ Moderná webová aplikácia pre športových nadšencov - hľadanie spoluhráčo
 - Git
 - Ideálne WSL2 (Docker Engine nech beží tiež na WSL2)
 
-### Inštalácia (3 kroky)
+### Inštalácia (4 kroky)
 
 ```bash
 # 1. Klonuj projekt
-git clone https://github.com/your-username/sportbuddy.git
+git clone https://git.kemt.fei.tuke.sk/kb159dr/SportBuddy
 cd sportbuddy
 
-# 2. Spusti Docker Compose (automaticky stiahne dependencies a spustí všetky služby)
+# 2. Skopíruj environment variables (DÔLEŽITÉ!)
+cp .env.example .env
+# Voliteľne: uprav .env pre vlastné nastavenia
+
+# 3. Spusti Docker Compose (automaticky stiahne dependencies a spustí všetky služby)
 docker-compose up -d
 
-# 3. Otvor aplikáciu v prehliadači
+# 4. Otvor aplikáciu v prehliadači
 # Frontend: http://localhost:3000
 # Backend API: http://localhost:3001/api
 ```
@@ -40,7 +44,9 @@ Prvé spustenie trvá ~1-2 minúty (sťahovanie images + npm install).
 
 ## Pre vývojárov
 
-### Pri prvom spustení?
+### Pri prvom spustení:
+
+**⚠️ Pred spustením: Uisti sa, že máš `.env` súbor (pozri krok 2 v inštalácii vyššie)**
 
 1. **Docker stiahne images:**
    - `postgres:alpine` (databáza)
@@ -142,7 +148,12 @@ sportbuddy/
 
 ### Konfigurácia (.env súbor)
 
-Projekt používa jeden `.env` súbor v roote. **Pre produkčný build `.env` do Gitu! necommitovať**
+Projekt používa jeden `.env` súbor v roote. **Nikdy necommituj `.env` do Gitu!**
+
+**Pre nových vývojárov:**
+```bash
+cp .env.example .env
+```
 
 ### Premenné v .env:
 
@@ -269,7 +280,8 @@ docker build --target production -t sportbuddy-frontend .
 
 ### ❌ Necommituj:
 - `node_modules/` (automaticky ignorované)
-- `.env` (vývojarská verzia áno, produkčná dať do secrets!)
+- `.next/` (build artefakty)
+- `.env` (obsahuje secrets - NIKDY necommituj!)
 - `.vscode/`, `.idea/` (IDE nastavenia)
 
 ### 🔄 Po každom git pull:
@@ -291,6 +303,7 @@ docker-compose up -d --build
 
 # 3. Vyčisti všetko a začni odznova
 docker-compose down -v
+cp .env.example .env  # Obnov .env ak bol zmazaný
 docker-compose up -d --build
 
 # 4. Skontroluj logy
