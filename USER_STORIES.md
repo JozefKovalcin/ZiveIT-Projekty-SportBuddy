@@ -305,7 +305,7 @@ aby som vedel, kde sa aktivita koná a ako ďaleko to mám
 
 Ako používateľ
 chcem zdieľať aktivitu na sociálnych sieťach
-aby som mohl pozvať priateľov
+aby som mohol pozvať priateľov
 
 **Vývojár:** -
 
@@ -458,7 +458,7 @@ aby som vedel, s kým budem hrať
 
 Ako používateľ
 chcem dostávať notifikácie o nových aktivitách v mojom okolí podľa mojich preferencií
-aby som nezmeškol zaujímavé aktivity
+aby som nezmeškal zaujímavé aktivity
 
 **Vývojár:** -
 
