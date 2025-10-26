@@ -1,0 +1,64 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies (all node_modules in any subdirectory)
+node_modules/
+.pnp
+.pnp.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Next.js (all .next directories in any subdirectory)
+.next/
+out/
+dist/
+
+# Production builds
+build/
+
+# Misc
+.DS_Store
+*.pem
+*.log
+
+# Environment files (IMPORTANT: never commit .env with secrets!)
+.env
+.env*.local
+.env.production
+.env.development.local
+.env.test.local
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Prisma
+prisma/migrations/
+node_modules/.prisma/
+.prisma/
+
+# Docker (keep docker-compose.yml and Dockerfiles in Git)
+docker-compose.override.yml
+
+# OS
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

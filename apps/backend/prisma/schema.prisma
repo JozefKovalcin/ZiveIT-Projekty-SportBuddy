@@ -1,0 +1,213 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model for authentication and profile
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  password      String?
+  bio           String?
+  phone         String?
+  skillLevel    SkillLevel @default(BEGINNER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Better Auth relations
+  sessions      Session[]
+  accounts      Account[]
+
+  // App relations
+  activities    Activity[]
+  participations Participation[]
+  reviews       Review[]
+  favoriteVenues VenueFavorite[]
+}
+
+// Better Auth models
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  accountId         String
+  providerId        String
+  accessToken       String? @db.Text
+  refreshToken      String? @db.Text
+  idToken           String? @db.Text
+  expiresAt         DateTime?
+  password          String?
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([providerId, accountId])
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([identifier, value])
+}
+
+// Sport types enumeration
+enum SportType {
+  FOOTBALL
+  BASKETBALL
+  TENNIS
+  VOLLEYBALL
+  BADMINTON
+  TABLE_TENNIS
+  RUNNING
+  CYCLING
+  SWIMMING
+  GYM
+  OTHER
+}
+
+// Skill level enumeration
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+// Activity status
+enum ActivityStatus {
+  OPEN
+  FULL
+  CANCELLED
+  COMPLETED
+}
+
+// Venue (Športovisko) model
+model Venue {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  address     String
+  city        String
+  latitude    Float?
+  longitude   Float?
+  sportTypes  SportType[]
+  amenities   String[] // e.g., ["parking", "showers", "lockers"]
+  priceRange  String? // e.g., "Free", "5-10€", "10-20€"
+  phone       String?
+  website     String?
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  activities  Activity[]
+  reviews     Review[]
+  favorites   VenueFavorite[]
+
+  @@index([city])
+  @@index([sportTypes])
+}
+
+// Activity (Športová aktivita) model
+model Activity {
+  id              String         @id @default(cuid())
+  title           String
+  description     String?
+  sportType       SportType
+  skillLevel      SkillLevel
+  date            DateTime
+  duration        Int // in minutes
+  maxParticipants Int
+  currentParticipants Int @default(0)
+  status          ActivityStatus @default(OPEN)
+  isPublic        Boolean        @default(true)
+  venueId         String
+  organizerId     String
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  // Relations
+  venue          Venue           @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  organizer      User            @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+  participations Participation[]
+
+  @@index([sportType])
+  @@index([date])
+  @@index([status])
+  @@index([venueId])
+}
+
+// Participation (Účasť na aktivite) model
+model Participation {
+  id         String   @id @default(cuid())
+  userId     String
+  activityId String
+  status     String   @default("confirmed") // confirmed, pending, cancelled
+  joinedAt   DateTime @default(now())
+
+  // Relations
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, activityId])
+  @@index([activityId])
+}
+
+// Review (Recenzia športoviska) model
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int // 1-5 stars
+  comment   String?
+  venueId   String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  venue Venue @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([venueId])
+  @@index([userId])
+}
+
+// Venue favorites (Obľúbené športoviská)
+model VenueFavorite {
+  id        String   @id @default(cuid())
+  userId    String
+  venueId   String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  venue Venue @relation(fields: [venueId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, venueId])
+  @@index([userId])
+}
