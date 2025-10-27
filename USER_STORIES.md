@@ -237,7 +237,280 @@ aby som mal dobrý zážitok
 **Poznámka:** Základný design a theme switching je hotový, ale chýbajú loading states, error handling a notifikácie.
 
 ---
+## US-008: OAuth prihlásenie
 
+**Status:** 📋 PLANNED
+
+Ako používateľ
+chcem sa prihlásiť pomocou Google, Facebook alebo iných platforiem
+aby som nemusel vytvárať nové heslo a prihlásenie bolo rýchlejšie
+
+**Vývojár:** -
+
+### Tasky:
+- ⏸️ BetterAuth konfigurácia OAuth providers (Google, Facebook)
+- ⏸️ Google OAuth setup (Client ID, Secret)
+- ⏸️ Facebook OAuth setup (App ID, Secret)
+- ⏸️ Prisma schema: rozšírenie User modelu (providerId, provider)
+- ⏸️ API: OAuth callback handling
+- ⏸️ Tlačidlá "Prihlásiť cez Google/Facebook" na login/register stránke
+- ⏸️ Mapovanie OAuth dát na User profil (email, meno, avatar)
+- ⏸️ Handling existujúceho účtu (merge alebo error)
+- ⏸️ Session management pre OAuth users
+- ⏸️ Responzívne OAuth tlačidlá
+
+### Výsledné funkcie:
+- ⏸️ Google login funguje
+- ⏸️ Facebook login funguje
+- ⏸️ Automatické vytvorenie profilu
+- ⏸️ Merge s existujúcim emailom (optional)
+
+---
+
+## US-009: Mapa s lokalitami aktivít
+
+**Status:** 📋 PLANNED
+
+Ako používateľ
+chcem vidieť polohu aktivít na Google Maps
+aby som vedel, kde sa aktivita koná a ako ďaleko to mám
+
+**Vývojár:** -
+
+### Tasky:
+- ⏸️ Google Maps API setup (API key)
+- ⏸️ Prisma schema: pridať lat/lng do Activity modelu
+- ⏸️ Geocoding pri vytváraní aktivity (mesto/adresa → súradnice)
+- ⏸️ API: GET /api/activities s lat/lng dátami
+- ⏸️ React komponenta: MapView s Google Maps embed/SDK
+- ⏸️ Markery pre jednotlivé aktivity na mape
+- ⏸️ Info window pri kliknutí na marker (názov, šport, čas)
+- ⏸️ Prepínanie medzi zoznam view a mapa view na /activities
+- ⏸️ Mapa na detail stránke (/activities/[id])
+- ⏸️ Directions link (navigácia do Google Maps)
+- ⏸️ Responzívna mapa (mobile/desktop)
+- ⏸️ Loading state pre mapu
+
+### Výsledné funkcie:
+- ⏸️ Mapa na zozname aktivít
+- ⏸️ Mapa na detaile aktivity
+- ⏸️ Klikateľné markery
+- ⏸️ Navigácia do Google Maps
+
+---
+
+## US-010: Zdieľanie aktivít
+
+**Status:** 📋 PLANNED
+
+Ako používateľ
+chcem zdieľať aktivitu na sociálnych sieťach
+aby som mohol pozvať priateľov
+
+**Vývojár:** -
+
+### Tasky:
+- ⏸️ Share API implementácia (Web Share API)
+- ⏸️ Fallback pre desktopové prehliadače (Copy link + social share buttons)
+- ⏸️ Share buttons: Facebook, Instagram, WhatsApp, Twitter/X, Email
+- ⏸️ Generovanie share URL s UTM parametrami
+- ⏸️ Open Graph meta tags pre aktivitu (og:title, og:image, og:description)
+- ⏸️ Twitter Card meta tags
+- ⏸️ Preview image generátor (optional - dynamický OG image)
+- ⏸️ Share button na detail stránke
+- ⏸️ Share button na activity card (optional)
+- ⏸️ Toast notifikácia "Link skopírovaný"
+- ⏸️ Analytics tracking pre shares (optional)
+
+### Výsledné funkcie:
+- ⏸️ Web Share API na mobile
+- ⏸️ Social share tlačidlá
+- ⏸️ Copy link funkcia
+- ⏸️ Rich previews na sociálnych sieťach
+
+---
+
+## US-011: Pridanie do kalendára
+
+**Status:** 📋 PLANNED
+
+Ako používateľ
+chcem pridať aktivitu do môjho Google/Apple kalendára
+aby som nezabudol na termín
+
+**Vývojár:** -
+
+### Tasky:
+- ⏸️ Generovanie .ics súboru (iCalendar formát)
+- ⏸️ API: GET /api/activities/[id]/calendar (vracia .ics)
+- ⏸️ Google Calendar link generátor
+- ⏸️ Apple Calendar kompatibilita
+- ⏸️ Outlook Calendar link
+- ⏸️ Tlačidlo "Pridať do kalendára" na detaile
+- ⏸️ Dropdown menu s možnosťami (Google, Apple, Outlook, Download .ics)
+- ⏸️ ICS súbor obsahuje: názov, popis, lokácia, začiatok, koniec, alarm (1h pred)
+- ⏸️ Automatické nastavenie časového pásma
+- ⏸️ Responzívne tlačidlo
+
+### Výsledné funkcie:
+- ⏸️ Google Calendar export
+- ⏸️ Apple Calendar export
+- ⏸️ Outlook Calendar export
+- ⏸️ .ics download
+
+---
+
+## US-012: Pokročilé filtrovanie a preferencie
+
+**Status:** 📋 PLANNED
+
+Ako používateľ
+chcem filtrovať aktivity podľa skúseností, pohlavia, veku, ceny a ďalších kritérií
+aby som našiel aktivity, ktoré mi vyhovujú
+
+**Vývojár:** -
+
+### Tasky:
+#### Rozšírenie databázového modelu
+- ⏸️ Prisma schema: rozšírenie Activity (skillLevel, gender, minAge, maxAge, price)
+- ⏸️ Prisma schema: UserPreferences model (preferredSports, skillLevel, maxDistance, maxPrice)
+- ⏸️ Migrácia databázy
+
+#### Backend
+- ⏸️ API: GET /api/activities s rozšíreným filtrovaním
+- ⏸️ Filtrovanie: skillLevel (začiatočník, stredne pokročilý, pokročilý, expert)
+- ⏸️ Filtrovanie: gender (muži, ženy, zmiešané)
+- ⏸️ Filtrovanie: vekové rozpätie (minAge-maxAge)
+- ⏸️ Filtrovanie: cena (od-do)
+- ⏸️ API: GET/PUT /api/preferences (uloženie používateľských preferencií)
+
+#### Frontend - Filter panel
+- ⏸️ Bočný filter panel na /activities
+- ⏸️ Dropdown/Select pre úroveň (skillLevel)
+- ⏸️ Radio buttons pre pohlavie
+- ⏸️ Slider/Input pre vek (range)
+- ⏸️ Slider/Input pre cenu (range)
+- ⏸️ Checkbox pre športy
+- ⏸️ "Použiť filtre" a "Resetovať" tlačidlá
+- ⏸️ Uložené preferencie v /profile/preferences
+- ⏸️ Quick filter badges (zobrazenie aktívnych filtrov)
+- ⏸️ Mobile-friendly filter (bottom sheet/modal)
+
+#### Formulár na vytvorenie aktivity
+- ⏸️ Pridať polia: skillLevel, gender, minAge, maxAge do create formu
+- ⏸️ Validácia (minAge <= maxAge, price >= 0)
+
+### Výsledné funkcie:
+- ⏸️ Filtrovanie podľa všetkých kritérií
+- ⏸️ Uloženie preferencií
+- ⏸️ Rozšírený create form
+- ⏸️ Responzívny filter UI
+
+---
+
+## US-013: Verejný používateľský profil
+
+**Status:** 📋 PLANNED
+
+Ako používateľ
+chcem vidieť profily ostatných používateľov s ich predošlými aktivitami
+aby som vedel, s kým budem hrať
+
+**Vývojár:** -
+
+### Tasky:
+#### Backend
+- ⏸️ API: GET /api/users/[id] (verejné dáta)
+- ⏸️ API: GET /api/users/[id]/activities (absolvované aktivity)
+- ⏸️ Prisma query: počet aktivít, hodnotenie (optional)
+- ⏸️ Privacy nastavenia (ktoré dáta sú verejné)
+
+#### Frontend - Verejný profil
+- ⏸️ Stránka /users/[id]
+- ⏸️ Zobrazenie: meno, avatar, bio, mesto
+- ⏸️ Štatistiky: počet aktivít, obľúbené športy
+- ⏸️ Zoznam predošlých aktivít (completed)
+- ⏸️ Badge systém (optional: "Častý hráč", "Organizátor" atď.)
+- ⏸️ Hodnotenie/Recenzie od ostatných (optional)
+- ⏸️ Responzívny dizajn
+
+#### Prepojenia
+- ⏸️ Link na profil z activity card (pri účastníkoch)
+- ⏸️ Link na profil z activity detail (zoznam účastníkov)
+- ⏸️ Avatar klikateľný → profil
+
+#### Privacy
+- ⏸️ Nastavenie v /profile/privacy (čo je verejné)
+- ⏸️ Možnosť skryť predošlé aktivity
+- ⏸️ Možnosť skryť štatistiky
+
+### Výsledné funkcie:
+- ⏸️ Verejný profil stránka
+- ⏸️ História aktivít
+- ⏸️ Štatistiky používateľa
+- ⏸️ Privacy nastavenia
+
+---
+
+## US-014: Notifikácie o nových aktivitách
+
+**Status:** 📋 PLANNED
+
+Ako používateľ
+chcem dostávať notifikácie o nových aktivitách v mojom okolí podľa mojich preferencií
+aby som nezmeškal zaujímavé aktivity
+
+**Vývojár:** -
+
+### Tasky:
+#### Backend - Notifikačný systém
+- ⏸️ Prisma schema: Notification model (type, userId, activityId, read, createdAt)
+- ⏸️ API: GET /api/notifications (zoznam notifikácií)
+- ⏸️ API: PUT /api/notifications/[id]/read (označiť ako prečítané)
+- ⏸️ API: DELETE /api/notifications/[id]
+- ⏸️ Background job: kontrola nových aktivít podľa preferencií (cron job)
+- ⏸️ Matching engine: aktivita vs. user preferences (šport, location, price)
+- ⏸️ Rate limiting (max X notifikácií denne)
+
+#### Push notifikácie (optional)
+- ⏸️ Web Push API setup
+- ⏸️ Service Worker registrácia
+- ⏸️ Push subscription management
+- ⏸️ API: POST /api/notifications/subscribe
+- ⏸️ Browser notification permission request
+
+#### Email notifikácie
+- ⏸️ Email service setup (SendGrid, Resend, alebo Nodemailer)
+- ⏸️ Email template pre novú aktivitu
+- ⏸️ Digest email (denný/týždenný súhrn)
+- ⏸️ Unsubscribe link
+
+#### Frontend - Notification center
+- ⏸️ Notification bell icon v headeri
+- ⏸️ Badge s počtom neprečítaných
+- ⏸️ Dropdown/Panel s notifikáciami
+- ⏸️ Notification item: avatar, text, čas, link na aktivitu
+- ⏸️ "Označiť všetko ako prečítané"
+- ⏸️ "Vymazať všetky"
+- ⏸️ Link na /notifications (full page view)
+- ⏸️ Real-time updates (WebSocket alebo polling)
+
+#### Nastavenia notifikácií
+- ⏸️ Stránka /profile/notifications
+- ⏸️ Toggle: email notifikácie on/off
+- ⏸️ Toggle: push notifikácie on/off
+- ⏸️ Frekvencia: instant, denný digest, týždenný digest
+- ⏸️ Filter: len obľúbené športy, len v okolí X km
+- ⏸️ Quiet hours (nočný režim)
+
+### Výsledné funkcie:
+- ⏸️ In-app notifikácie
+- ⏸️ Push notifikácie (optional)
+- ⏸️ Email notifikácie
+- ⏸️ Notifikačné centrum
+- ⏸️ Konfigurovateľné nastavenia
+
+---
 ## Legenda
 
 - ✅ Hotové (Completed)
