@@ -23,7 +23,7 @@ Moderná webová aplikácia pre športových nadšencov - hľadanie spoluhráčo
 
 ```bash
 # 1. Klonuj projekt
-git clone https://git.kemt.fei.tuke.sk/kb159dr/SportBuddy
+git clone git@git.kemt.fei.tuke.sk:kb159dr/SportBuddy.git
 cd sportbuddy
 
 # 2. Skopíruj environment variables (DÔLEŽITÉ!)
