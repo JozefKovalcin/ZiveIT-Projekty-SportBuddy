@@ -124,6 +124,18 @@ export default function Navigation() {
                           <span>Dashboard</span>
                         </div>
                       </Link>
+                      <Link
+                        href="/profile"
+                        className="block px-4 py-3 text-base font-medium text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface-secondary)]/50 transition-all"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                          <span>Profil</span>
+                        </div>
+                      </Link>
                       <button
                         onClick={handleSignOut}
                         className="w-full text-left px-4 py-3 text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/20 transition-all"
@@ -251,6 +263,24 @@ export default function Navigation() {
                       <span>Dashboard</span>
                     </div>
                   </Link>
+                  <Link
+                    href="/profile"
+                    className="block px-4 py-3 text-base font-semibold bg-blue-50/50 text-blue-600 hover:text-blue-700 hover:bg-blue-100/60 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-950/60 rounded-lg hover-glow reveal-effect transition-all duration-200"
+                    style={{
+                      boxShadow: 'var(--shadow-sm)',
+                      backdropFilter: 'blur(20px)',
+                      WebkitBackdropFilter: 'blur(20px)',
+                      animation: isMobileMenuOpen ? `slideDown 0.4s ease-out ${navLinks.length * 0.08 + 0.12}s both` : 'none'
+                    }}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      <span>Profil</span>
+                    </div>
+                  </Link>
                   <button
                     onClick={handleSignOut}
                     className="w-full block px-4 py-3 text-base text-left font-semibold text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/20 rounded-lg hover-glow reveal-effect transition-all duration-200"
@@ -258,7 +288,7 @@ export default function Navigation() {
                       boxShadow: 'var(--shadow-sm)',
                       backdropFilter: 'blur(20px)',
                       WebkitBackdropFilter: 'blur(20px)',
-                      animation: isMobileMenuOpen ? `slideDown 0.4s ease-out ${navLinks.length * 0.08 + 0.16}s both` : 'none'
+                      animation: isMobileMenuOpen ? `slideDown 0.4s ease-out ${navLinks.length * 0.08 + 0.20}s both` : 'none'
                     }}
                   >
                     <div className="flex items-center space-x-3">

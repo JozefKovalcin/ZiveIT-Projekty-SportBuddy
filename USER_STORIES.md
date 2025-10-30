@@ -34,43 +34,43 @@ aby som mohol používať aplikáciu
 
 ## US-002: Používateľský profil & Dashboard
 
-**Status:** 📋 PLANNED
+**Status:** ✅ HOTOVÉ
 
 Ako používateľ
 chcem vidieť a upraviť môj profil a dashboard s mojimi aktivitami
 aby som mohol prezentovať svoje športové záujmy a mať prehľad o mojich udalostiach
 
-**Vývojár:** Kamil Berecký
+**Vývojár:** Jozef Kovalčín
 
 ### Tasky:
 #### Profil sekcia
-- ⏸️ Profil stránka (/profile) - **NEIMPLEMENTOVANÉ**
-- ⏸️ Zobrazenie: meno, email, mesto, bio, obľúbené športy
-- ⏸️ Formulár na editáciu profilu (/profile/edit)
-- ⏸️ Upload profilovej fotky
-- ⏸️ API: GET /api/profile
-- ⏸️ API: PUT /api/profile
-- ⏸️ Validácia formulára
-- ⏸️ Responzívny dizajn
+- ✅ Profil stránka (/profile) 
+- ✅ Zobrazenie: meno, email, mesto, bio, obľúbené športy
+- ✅ Formulár na editáciu profilu (/profile/edit)
+- ✅ Upload profilovej fotky
+- ✅ API: GET /api/profile
+- ✅ API: PUT /api/profile
+- ✅ Validácia formulára
+- ✅ Responzívny dizajn
 
 #### Dashboard sekcia
-- ⏸️ Dashboard stránka (/dashboard) - **EXISTUJE ale je prázdny**
-- ⏸️ API: GET /api/activities/my (filtrovanie podľa userId)
-- ⏸️ Dve sekcie: "Moje aktivity" (vytvorené) a "Prihlásený na" (joined)
-- ⏸️ Používanie Activity card komponentu
-- ⏸️ Loading state
-- ⏸️ Empty states
-- ⏸️ Quick actions: "Vytvoriť aktivitu", "Hľadať aktivity"
-- ⏸️ Štatistiky: počet aktivít, počet prihlásení - **Základné karty existujú**
-- ⏸️ Responzívny layout
+- ✅ Dashboard stránka (/dashboard)
+- ✅ API: GET /api/activities/my (filtrovanie podľa userId)
+- ✅ Dve sekcie: "Moje aktivity" (vytvorené) a "Prihlásený na" (joined)
+- ✅ Používanie Activity card komponentu
+- ✅ Loading state
+- ✅ Empty states
+- ✅ Quick actions: "Vytvoriť aktivitu", "Hľadať aktivity"
+- ✅ Štatistiky: počet aktivít, počet prihlásení
+- ✅ Responzívny layout
 
 ### Výsledné funkcie:
-- ⏸️ Zobrazenie profilu
-- ⏸️ Editácia profilu
-- ⏸️ Upload fotky
-- ⏸️ Dashboard so zoznamom - **Dashboard existuje, ale nezobrazuje zoznam aktivít**
-- ⏸️ Filtrovanie funguje
-- ⏸️ Štatistiky sa zobrazujú - **Iba placeholder štatistiky (0, 0, -)**
+- ✅ Zobrazenie profilu
+- ✅ Editácia profilu
+- ✅ Upload fotky
+- ✅ Dashboard so zoznamom
+- ✅ Filtrovanie funguje
+- ✅ Štatistiky sa zobrazujú
 
 **Poznámka:** Profil model existuje v databáze (User + Profile), ale žiadne UI stránky nie sú implementované. Dashboard stránka existuje s navigáciou a základnou štruktúrou (3 štatistické karty), ale neobsahuje žiadne reálne dáta ani zoznam aktivít.
 
