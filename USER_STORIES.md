@@ -40,7 +40,7 @@ Ako používateľ
 chcem vidieť a upraviť môj profil a dashboard s mojimi aktivitami
 aby som mohol prezentovať svoje športové záujmy a mať prehľad o mojich udalostiach
 
-**Vývojár:** -
+**Vývojár:** Kamil Berecký
 
 ### Tasky:
 #### Profil sekcia
@@ -184,7 +184,7 @@ Ako používateľ
 chcem vyhľadávať aktivity
 aby som rýchlo našiel, čo ma zaujíma
 
-**Vývojár:** -
+**Vývojár:** Kamil Berecký
 
 ### Tasky:
 - ✅ API: GET /api/activities?search=... (full-text cez názov, popis)
