@@ -524,43 +524,43 @@ aby ostatný vedeli, s kým hrajú
 
 ### Tasky:
 ### Backend
-⏸️ Prisma schema: Review model (rating 1-5, comment, reviewer, reviewed user)
-⏸️ API: POST /api/users/[id]/reviews
-⏸️ API: GET /api/users/[id]/reviews (zoznam recenzií)
-⏸️ Validácia: len pre účastníkov aktivity
-⏸️ Validácia: len po dátume aktivity
-⏸️ Validácia: jeden review na používateľa na aktivitu
-⏸️ Validácia: no spam, min 10 znakov pre comment
-⏸️ Výpočet priemerného ratingu (agregácia)
-⏸️ API: POST /api/reviews/[id]/report (report inappropriate review)
+- ⏸️ Prisma schema: Review model (rating 1-5, comment, reviewer, reviewed user)
+- ⏸️ API: POST /api/users/[id]/reviews
+- ⏸️ API: GET /api/users/[id]/reviews (zoznam recenzií)
+- ⏸️ Validácia: len pre účastníkov aktivity
+- ⏸️ Validácia: len po dátume aktivity
+- ⏸️ Validácia: jeden review na používateľa na aktivitu
+- ⏸️ Validácia: no spam, min 10 znakov pre comment
+- ⏸️ Výpočet priemerného ratingu (agregácia)
+- ⏸️ API: POST /api/reviews/[id]/report (report inappropriate review)
 
 ###Frontend - Review komponenty
-⏸️ Review modal po skončení aktivity
-⏸️ Star rating komponenta (1-5 hviezd, interactive)
-⏸️ Text area pre komentár (optional, max 500 znakov)
-⏸️ Character counter (500/500)
-⏸️ Anonymous option checkbox (meno skryté)
-⏸️ Submit a Cancel tlačidlá
-⏸️ Loading state pri odosielaní
+- ⏸️ Review modal po skončení aktivity
+- ⏸️ Star rating komponenta (1-5 hviezd, interactive)
+- ⏸️ Text area pre komentár (optional, max 500 znakov)
+- ⏸️ Character counter (500/500)
+- ⏸️ Anonymous option checkbox (meno skryté)
+- ⏸️ Submit a Cancel tlačidlá
+- ⏸️ Loading state pri odosielaní
 
 ### Frontend - Zobrazenie recenzií
-⏸️ Zobrazenie priemerného ratingu na profile (stars + číslo)
-⏸️ Zoznam recenzií na profile stránke
-⏸️ Review card komponenta (avatar, meno/anonymous, rating, komentár, dátum)
-⏸️ Pagination pre recenzie (10 per page)
-⏸️ Report inappropriate review button
-⏸️ "Žiadne recenzie" empty state
-⏸️ Responzívny dizajn
+- ⏸️ Zobrazenie priemerného ratingu na profile (stars + číslo)
+- ⏸️ Zoznam recenzií na profile stránke
+- ⏸️ Review card komponenta (avatar, meno/anonymous, rating, komentár, dátum)
+- ⏸️ Pagination pre recenzie (10 per page)
+- ⏸️ Report inappropriate review button
+- ⏸️ "Žiadne recenzie" empty state
+- ⏸️ Responzívny dizajn
 
 ### Notifikácie
-⏸️ Notifikácia pre používateľa pri novej recenzii
-⏸️ Email notifikácia o novom hodnotení (optional)
+- ⏸️ Notifikácia pre používateľa pri novej recenzii
+- ⏸️ Email notifikácia o novom hodnotení (optional)
 
 ### Výsledné funkcie:
-⏸️ Rating systém funguje
-⏸️ Reviews na profile
-⏸️ Priemerný rating sa zobrazuje
-⏸️ Report function
+- ⏸️ Rating systém funguje
+- ⏸️ Reviews na profile
+- ⏸️ Priemerný rating sa zobrazuje
+- ⏸️ Report function
 
 ---
 
@@ -576,48 +576,48 @@ aby sme mohli medzi sebou komunikovať
 
 ### Tasky:
 ### Backend
-⏸️ Prisma schema: Message model (activity_id, user_id, content, timestamp)
-⏸️ API: GET /api/activities/[id]/messages (s pagination)
-⏸️ API: POST /api/activities/[id]/messages
-⏸️ API: DELETE /api/messages/[id] (delete vlastnej správy)
-⏸️ Validácia: len pre prihlásených účastníkov
-⏸️ Validácia: max 500 znakov na správu
-⏸️ Real-time setup (Pusher/Ably konfigurácia alebo polling endpoint)
-⏸️ Unread message tracking (Message.read field)
-⏸️ API: PUT /api/messages/mark-read
+- ⏸️ Prisma schema: Message model (activity_id, user_id, content, timestamp)
+- ⏸️ API: GET /api/activities/[id]/messages (s pagination)
+- ⏸️ API: POST /api/activities/[id]/messages
+- ⏸️ API: DELETE /api/messages/[id] (delete vlastnej správy)
+- ⏸️ Validácia: len pre prihlásených účastníkov
+- ⏸️ Validácia: max 500 znakov na správu
+- ⏸️ Real-time setup (Pusher/Ably konfigurácia alebo polling endpoint)
+- ⏸️ Unread message tracking (Message.read field)
+- ⏸️ API: PUT /api/messages/mark-read
 
 ### Frontend - Chat UI
-⏸️ Chat UI komponenta (sidebar/panel na detaile aktivity)
-⏸️ Toggle button na otvorenie/zatvorenie chatu
-⏸️ Message list (scrollable container)
-⏸️ Message bubble komponenta (left/right podľa odosielateľa)
-⏸️ Zobrazenie mena a fotky odosielateľa
-⏸️ Timestamp pre každú správu (relatívny čas: "5 min ago")
-⏸️ Message input field (textarea s auto-resize)
-⏸️ Send button (disabled ak prázdne)
-⏸️ Character counter (500/500)
+- ⏸️ Chat UI komponenta (sidebar/panel na detaile aktivity)
+- ⏸️ Toggle button na otvorenie/zatvorenie chatu
+- ⏸️ Message list (scrollable container)
+- ⏸️ Message bubble komponenta (left/right podľa odosielateľa)
+- ⏸️ Zobrazenie mena a fotky odosielateľa
+- ⏸️ Timestamp pre každú správu (relatívny čas: "5 min ago")
+- ⏸️ Message input field (textarea s auto-resize)
+- ⏸️ Send button (disabled ak prázdne)
+- ⏸️ Character counter (500/500)
 
 ### Real-time funkcie
-⏸️ Real-time message receiving (Pusher/Ably integration)
-⏸️ Auto-scroll na novú správu (smooth scroll)
-⏸️ Unread message badge (počet neprečítaných)
-⏸️ "Typing..." indikátor (optional)
-⏸️ Message delivered/read status (optional)
+- ⏸️ Real-time message receiving (Pusher/Ably integration)
+- ⏸️ Auto-scroll na novú správu (smooth scroll)
+- ⏸️ Unread message badge (počet neprečítaných)
+- ⏸️ "Typing..." indikátor (optional)
+- ⏸️ Message delivered/read status (optional)
 
 ### UX vylepšenia
-⏸️ Emoji picker (optional - React Emoji Picker)
-⏸️ Message delete option (len vlastné správy)
-⏸️ "Load more" pre staršie správy (pagination)
-⏸️ Empty state ("Začnite konverzáciu...")
-⏸️ Loading skeleton pre načítavanie správ
-⏸️ Error handling (offline, failed send)
-⏸️ Responzívny dizajn (mobile drawer)
+- ⏸️ Emoji picker (optional - React Emoji Picker)
+- ⏸️ Message delete option (len vlastné správy)
+- ⏸️ "Load more" pre staršie správy (pagination)
+- ⏸️ Empty state ("Začnite konverzáciu...")
+- ⏸️ Loading skeleton pre načítavanie správ
+- ⏸️ Error handling (offline, failed send)
+- ⏸️ Responzívny dizajn (mobile drawer)
 
 ### Výsledné funkcie:
-⏸️ Chat funguje
-⏸️ Real-time updates
-⏸️ Len pre účastníkov
-⏸️ Message history
+- ⏸️ Chat funguje
+- ⏸️ Real-time updates
+- ⏸️ Len pre účastníkov
+- ⏸️ Message history
 
 ---
 
@@ -633,79 +633,79 @@ aby som rýchlo našiel odpovede na moje otázky o platforme
 
 ### Tasky:
 ### Backend - AI Infrastructure
-⏸️ API: POST /api/ai/support-chat
-⏸️ OpenAI Assistants API integration
-⏸️ API rate limiting (10 requests/day pre free users)
-⏸️ Token usage tracking a cost monitoring
-⏸️ Error handling a fallback responses
-⏸️ API: GET /api/ai/chat-history (pre daného používateľa)
-⏸️ API: DELETE /api/ai/chat-history (vymazanie histórie)
+- ⏸️ API: POST /api/ai/support-chat
+- ⏸️ OpenAI Assistants API integration
+- ⏸️ API rate limiting (10 requests/day pre free users)
+- ⏸️ Token usage tracking a cost monitoring
+- ⏸️ Error handling a fallback responses
+- ⏸️ API: GET /api/ai/chat-history (pre daného používateľa)
+- ⏸️ API: DELETE /api/ai/chat-history (vymazanie histórie)
 
 ### RAG Setup (Retrieval Augmented Generation)
-⏸️ Pinecone/Supabase Vector database setup
-⏸️ Knowledge base creation (FAQ dokumenty)
-⏸️ Platform guide embeddings (ako používať features)
-⏸️ FAQ dokumenty embeddings
-⏸️ Vector search implementation
-⏸️ Context injection do AI promptu
-⏸️ Relevance scoring a filtering
+- ⏸️ Pinecone/Supabase Vector database setup
+- ⏸️ Knowledge base creation (FAQ dokumenty)
+- ⏸️ Platform guide embeddings (ako používať features)
+- ⏸️ FAQ dokumenty embeddings
+- ⏸️ Vector search implementation
+- ⏸️ Context injection do AI promptu
+- ⏸️ Relevance scoring a filtering
 
 ### Context-Aware Features
-⏸️ Current page detection (URL tracking)
-⏸️ User profile info injection (ak prihlásený)
-⏸️ Recent user actions tracking (last 5 actions)
-⏸️ Dynamic prompt construction based on context
-⏸️ Session-based conversation memory
+- ⏸️ Current page detection (URL tracking)
+- ⏸️ User profile info injection (ak prihlásený)
+- ⏸️ Recent user actions tracking (last 5 actions)
+- ⏸️ Dynamic prompt construction based on context
+- ⏸️ Session-based conversation memory
 
 ### Frontend - Chat Widget
-⏸️ Floating chat button (bottom right, sticky)
-⏸️ Badge notification (nová odpoveď)
-⏸️ Chat window komponenta (minimize/maximize/close)
-⏸️ Chat header s titulom a actions
-⏸️ Message list (user + AI bubbles)
-⏸️ Message input field
-⏸️ Send button
-⏸️ Loading indicator (typing dots)
-⏸️ Scroll to bottom button
+- ⏸️ Floating chat button (bottom right, sticky)
+- ⏸️ Badge notification (nová odpoveď)
+- ⏸️ Chat window komponenta (minimize/maximize/close)
+- ⏸️ Chat header s titulom a actions
+- ⏸️ Message list (user + AI bubbles)
+- ⏸️ Message input field
+- ⏸️ Send button
+- ⏸️ Loading indicator (typing dots)
+- ⏸️ Scroll to bottom button
 
 ### Quick Actions
-⏸️ Quick action buttons: "Ako vytvoriť aktivitu?"
-⏸️ Quick action buttons: "Ako sa prihlásiť?"
-⏸️ Quick action buttons: "Ako nájsť aktivity?"
-⏸️ Quick action buttons: "Ako upraviť profil?"
-⏸️ Dynamic suggestions based on page
+- ⏸️ Quick action buttons: "Ako vytvoriť aktivitu?"
+- ⏸️ Quick action buttons: "Ako sa prihlásiť?"
+- ⏸️ Quick action buttons: "Ako nájsť aktivity?"
+- ⏸️ Quick action buttons: "Ako upraviť profil?"
+- ⏸️ Dynamic suggestions based on page
 
 ### Advanced Features
-⏸️ Chat history persistence (conversation_id v localStorage)
-⏸️ "Nová konverzácia" button (reset context)
-⏸️ Escalation to human support button
-⏸️ Human support form (meno, email, správa)
-⏸️ Multilingual support (SK/EN auto-detection)
-⏸️ Copy response button
-⏸️ Thumbs up/down feedback
-⏸️ "Bolo to užitočné?" feedback
+- ⏸️ Chat history persistence (conversation_id v localStorage)
+- ⏸️ "Nová konverzácia" button (reset context)
+- ⏸️ Escalation to human support button
+- ⏸️ Human support form (meno, email, správa)
+- ⏸️ Multilingual support (SK/EN auto-detection)
+- ⏸️ Copy response button
+- ⏸️ Thumbs up/down feedback
+- ⏸️ "Bolo to užitočné?" feedback
 
 ### Analytics
-⏸️ Common questions tracking (analytics dashboard)
-⏸️ User satisfaction metrics (feedback aggregation)
-⏸️ Response time monitoring
-⏸️ Escalation rate tracking
-⏸️ Most helpful answers identification
+- ⏸️ Common questions tracking (analytics dashboard)
+- ⏸️ User satisfaction metrics (feedback aggregation)
+- ⏸️ Response time monitoring
+- ⏸️ Escalation rate tracking
+- ⏸️ Most helpful answers identification
 
 ### UX Polish
-⏸️ Smooth animations (open/close, messages)
-⏸️ Typing indicator when AI is responding
-⏸️ Error states ("Niečo sa pokazilo, skúste znova")
-⏸️ Offline detection a warning
-⏸️ Mobile responsive design
-⏸️ Keyboard shortcuts (ESC to close)
-⏸️ Welcome message on first open
+- ⏸️ Smooth animations (open/close, messages)
+- ⏸️ Typing indicator when AI is responding
+- ⏸️ Error states ("Niečo sa pokazilo, skúste znova")
+- ⏸️ Offline detection a warning
+- ⏸️ Mobile responsive design
+- ⏸️ Keyboard shortcuts (ESC to close)
+- ⏸️ Welcome message on first open
 
 ### Výsledné funkcie:
-⏸️ AI chatbot funguje
-⏸️ RAG s knowledge base
-⏸️ Context-aware answers
-⏸️ Chat history
+- ⏸️ AI chatbot funguje
+- ⏸️ RAG s knowledge base
+- ⏸️ Context-aware answers
+- ⏸️ Chat history
 
 
 ## US-018: AI Matchmaking pre hráčov
@@ -720,90 +720,91 @@ aby som hral s ľuďmi na mojej úrovni
 
 ### Tasky:
 ### Backend - Database & Models
-⏸️ Prisma schema: MatchScore model (user1_id, user2_id, score, factors)
-⏸️ Prisma schema: rozšírenie User (playStyle, preferredTimes, skillLevels)
-⏸️ Database indexes pre rýchle vyhľadávanie
-⏸️ Cache layer pre match scores (Redis - optional)
+- ⏸️ Prisma schema: MatchScore model (user1_id, user2_id, score, factors)
+- ⏸️ Prisma schema: rozšírenie User (playStyle, preferredTimes, skillLevels)
+- ⏸️ Database indexes pre rýchle vyhľadávanie
+- ⏸️ Cache layer pre match scores (Redis - optional)
 
 ### Compatibility Algorithm
-⏸️ Skill level matching algorithm (weight: 25%)
-⏸️ Play style preferences matching (competitive/casual) (weight: 20%)
-⏸️ Age group similarity calculation (weight: 15%)
-⏸️ Location proximity (Haversine distance) (weight: 20%)
-⏸️ Schedule compatibility analysis (weight: 10%)
-⏸️ Past activity ratings correlation (weight: 10%)
-⏸️ Sport preferences overlap
-⏸️ Final score calculation (weighted sum 0-100%)
+- ⏸️ Skill level matching algorithm (weight: 25%)
+- ⏸️ Play style preferences matching (competitive/casual) (weight: 20%)
+- ⏸️ Age group similarity calculation (weight: 15%)
+- ⏸️ Location proximity (Haversine distance) (weight: 20%)
+- ⏸️ Schedule compatibility analysis (weight: 10%)
+- ⏸️ Past activity ratings correlation (weight: 10%)
+- ⏸️ Sport preferences overlap
+- ⏸️ Final score calculation (weighted sum 0-100%)
 
 ### AI Integration
-⏸️ OpenAI embeddings generation pre user profiles
-⏸️ Vector similarity search (cosine similarity)
-⏸️ Embedding storage (Pinecone/Supabase Vector)
-⏸️ Batch embedding generation (pre existing users)
-⏸️ Incremental embedding updates (pri zmene profilu)
-⏸️ API: POST /api/ai/match-users
+- ⏸️ OpenAI embeddings generation pre user profiles
+- ⏸️ Vector similarity search (cosine similarity)
+- ⏸️ Embedding storage (Pinecone/Supabase Vector)
+- ⏸️ Batch embedding generation (pre existing users)
+- ⏸️ Incremental embedding updates (pri zmene profilu)
+- ⏸️ API: POST /api/ai/match-users
 
 ### Backend APIs
-⏸️ API: GET /api/users/matches (top matches pre používateľa)
-⏸️ API: GET /api/activities/[id]/suggested-users (pre danú aktivitu)
-⏸️ API: POST /api/matches/[userId]/invite (pozvať matched usera)
-⏸️ Match score caching (24h refresh)
-⏸️ Pagination pre match results
-⏸️ Filtering options (min score, max distance)
+- ⏸️ API: GET /api/users/matches (top matches pre používateľa)
+- ⏸️ API: GET /api/activities/[id]/suggested-users (pre danú aktivitu)
+- ⏸️ API: POST /api/matches/[userId]/invite (pozvať matched usera)
+- ⏸️ Match score caching (24h refresh)
+- ⏸️ Pagination pre match results
+- ⏸️ Filtering options (min score, max distance)
 
 ### Frontend - Match Discovery
-⏸️ "Nájdi mi spoluhráča" feature page (/find-partners)
-⏸️ Match score zobrazenie (1-100% progress bar + badge)
-⏸️ Match card komponenta (avatar, meno, score, factors)
-⏸️ Match explanation tooltip: "Podobná úroveň, blízka lokalita..."
-⏸️ "Perfect match" badge (90%+ score) - special styling
-⏸️ "Good match" badge (70-89%)
-⏸️ Skill level indicators (beginner/intermediate/advanced)
+- ⏸️ "Nájdi mi spoluhráča" feature page (/find-partners)
+- ⏸️ Match score zobrazenie (1-100% progress bar + badge)
+- ⏸️ Match card komponenta (avatar, meno, score, factors)
+- ⏸️ Match explanation tooltip: "Podobná úroveň, blízka lokalita..."
+- ⏸️ "Perfect match" badge (90%+ score) - special styling
+- ⏸️ "Good match" badge (70-89%)
+- ⏸️ Skill level indicators (beginner/intermediate/advanced)
 
 ### Frontend - Activity Integration
-⏸️ Suggested users section na activity detail
-⏸️ "Odporúčaní spoluhráči" widget (top 3)
-⏸️ Invite matched user button
-⏸️ Invite modal (personalizovaná správa)
-⏸️ Toast notifikácia po odoslaní pozvánky
+- ⏸️ Suggested users section na activity detail
+- ⏸️ "Odporúčaní spoluhráči" widget (top 3)
+- ⏸️ Invite matched user button
+- ⏸️ Invite modal (personalizovaná správa)
+- ⏸️ Toast notifikácia po odoslaní pozvánky
 
 ### Match Breakdown UI
-⏸️ Expandable match details (klik na match card)
-⏸️ Factor breakdown visualization:
-- ⏸️ Skill level match (progress bar)
-- ⏸️ Location proximity (distance in km)
-- ⏸️ Schedule compatibility (calendar icon)
-- ⏸️ Play style match (competitive/casual)
-- ⏸️ Common sports (badge list)
-⏸️ "Prečo sme kompatibilní" text explanation (AI-generated)
+- ⏸️ Expandable match details (klik na match card)
+- ⏸️ Factor breakdown visualization:
+ - ⏸️ Skill level match (progress bar)
+ - ⏸️ Location proximity (distance in km)
+ - ⏸️ Schedule compatibility (calendar icon)
+ - ⏸️ Play style match (competitive/casual)
+ - ⏸️ Common sports (badge list)
+- ⏸️ "Prečo sme kompatibilní" text explanation (AI-generated)
 
 ### Email Digest
-⏸️ Weekly "Best matches" email template
-⏸️ Email service integration (SendGrid/Resend)
-⏸️ Cron job: weekly match calculation a email send
-⏸️ Top 5 matches v emaili
-⏸️ CTA button: "Pozri všetky matched"
-⏸️ Unsubscribe option
+- ⏸️ Weekly "Best matches" email template
+- ⏸️ Email service integration (SendGrid/Resend)
+- ⏸️ Cron job: weekly match calculation a email send
+- ⏸️ Top 5 matches v emaili
+- ⏸️ CTA button: "Pozri všetky matched"
+- ⏸️ Unsubscribe option
 
 ### User Preferences
-⏸️ Match preferences page (/profile/match-preferences)
-⏸️ Toggle: enable/disable matchmaking
-⏸️ Max distance slider (5-50 km)
-⏸️ Preferred age range
-⏸️ Play style preference (competitive/casual/both)
-⏸️ Notification frequency (instant/weekly/never)
+- ⏸️ Match preferences page (/profile/match-preferences)
+- ⏸️ Toggle: enable/disable matchmaking
+- ⏸️ Max distance slider (5-50 km)
+- ⏸️ Preferred age range
+- ⏸️ Play style preference (competitive/casual/both)
+- ⏸️ Notification frequency (instant/weekly/never)
 
 ### Analytics & Optimization
-⏸️ Match success tracking (koľko invites accepted)
-⏸️ Algorithm performance monitoring
-⏸️ A/B testing framework (different weight combinations)
-⏸️ User feedback collection ("Bol toto dobrý match?")
+- ⏸️ Match success tracking (koľko invites accepted)
+- ⏸️ Algorithm performance monitoring
+- ⏸️ A/B testing framework (different weight combinations)
+- ⏸️ User feedback collection ("Bol toto dobrý match?")
 
 ### Výsledné funkcie:
-⏸️ Matchmaking algorithm
-⏸️ Compatibility scores
-⏸️ User suggestions
-⏸️ Weekly digest
+- ⏸️ Matchmaking algorithm
+- ⏸️ Compatibility scores
+- ⏸️ User suggestions
+- ⏸️ Weekly digest
+
 
 ---
 
