@@ -534,7 +534,7 @@ aby ostatný vedeli, s kým hrajú
 - ⏸️ Výpočet priemerného ratingu (agregácia)
 - ⏸️ API: POST /api/reviews/[id]/report (report inappropriate review)
 
-###Frontend - Review komponenty
+### Frontend - Review komponenty
 - ⏸️ Review modal po skončení aktivity
 - ⏸️ Star rating komponenta (1-5 hviezd, interactive)
 - ⏸️ Text area pre komentár (optional, max 500 znakov)
