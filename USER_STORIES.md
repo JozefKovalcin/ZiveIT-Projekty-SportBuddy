@@ -84,7 +84,7 @@ Ako používateľ
 chcem vytvoriť novú športovú aktivitu
 aby som našiel spoluhráčov
 
-**Vývojár:** -
+**Vývojár:** Kamil Berecký
 
 ### Tasky:
 - ✅ Prisma schema: Activity model
@@ -116,7 +116,7 @@ Ako používateľ
 chcem vidieť zoznam aktivít a ich detail
 aby som vedel, čo je k dispozícii
 
-**Vývojár:** -
+**Vývojár:** Kamil Berecký
 
 ### Tasky:
 - ✅ API: GET /api/activities (pagination 20/page)
@@ -151,7 +151,7 @@ Ako používateľ
 chcem sa prihlásiť na aktivitu
 aby som rezervoval miesto
 
-**Vývojár:** -
+**Vývojár:** Kamil Berecký
 
 ### Tasky:
 - ✅ Prisma schema: Booking model (many-to-many User-Activity)
