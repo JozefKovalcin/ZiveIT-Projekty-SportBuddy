@@ -6,9 +6,9 @@ Moderná webová aplikácia pre športových nadšencov - hľadanie spoluhráčo
 
 **Frontend:** Next.js (latest), React (latest), TypeScript (latest), Tailwind CSS (latest)
 **Backend:** Next.js API Routes, Prisma ORM (latest), Better Auth (latest), PostgreSQL (latest)
-**DevOps:** Docker & Docker Compose, Node.js (alpine), npm Workspaces
+**DevOps:** Docker & Docker Compose, Node.js (alpine)
 
-> **Poznámka:** Všetky verzie používajú latest Alpine Linux images a npm packages pre najnovšie stabilné vydania.
+> **Poznámka:** Všetky verzie používajú najnovšie Alpine Linux obrazy a npm balíčky pre najnovšie stabilné vydania.
 
 ---
 
@@ -26,11 +26,10 @@ Moderná webová aplikácia pre športových nadšencov - hľadanie spoluhráčo
 git clone git@git.kemt.fei.tuke.sk:kb159dr/SportBuddy.git
 cd sportbuddy
 
-# 2. Skopíruj environment variables (DÔLEŽITÉ!)
+# 2. Skopíruj premenné prostredia (DÔLEŽITÉ!)
 cp .env.example .env
-# Voliteľne: uprav .env pre vlastné nastavenia
 
-# 3. Spusti Docker Compose (automaticky stiahne dependencies a spustí všetky služby)
+# 3. Spusti Docker Compose (automaticky stiahne závislosti a spustí všetky služby)
 docker-compose up -d
 
 # 4. Otvor aplikáciu v prehliadači
@@ -38,7 +37,7 @@ docker-compose up -d
 # Backend API: http://localhost:3001/api
 ```
 
-Prvé spustenie trvá ~1-2 minúty (sťahovanie images + npm install).
+Prvé spustenie trvá ~1-2 minúty (sťahovanie obrazov + npm install).
 
 ---
 
@@ -48,27 +47,27 @@ Prvé spustenie trvá ~1-2 minúty (sťahovanie images + npm install).
 
 **⚠️ Pred spustením: Uisti sa, že máš `.env` súbor (pozri krok 2 v inštalácii vyššie)**
 
-1. **Docker stiahne images:**
+1. **Docker stiahne obrazy:**
    - `postgres:alpine` (databáza)
-   - `node:alpine` (Node.js runtime)
+   - `node:alpine` (Node.js prostredie)
 
 2. **Backend automaticky:**
-   - Nainštaluje npm dependencies
-   - Vygeneruje Prisma Client
+   - Nainštaluje npm závislosti
+   - Vygeneruje Prisma klienta
    - Vytvorí databázové tabuľky (`prisma db push`)
-   - Spustí development server na porte **3001**
+   - Spustí vývojársky server na porte **3001**
 
 3. **Frontend automaticky:**
-   - Nainštaluje npm dependencies
-   - Spustí development server na porte **3000**
+   - Nainštaluje npm závislosti
+   - Spustí vývojársky server na porte **3000**
 
 4. **PostgreSQL:**
    - Vytvorí databázu `sportbuddy`
    - Beží na porte **5432**
 
-### Hot Reload (automatické načítanie zmien)
+### Automatické načítanie zmien (Hot Reload)
 
-Vďaka **volume mounts** - okamžitý hot reload:
+Vďaka **pripojeniu zväzkov (volume mounts)** - okamžité načítanie zmien:
 
 ```
 Zmeníš súbor → Uložíš (Ctrl+S) → Zmena sa okamžite prejaví v prehliadači
@@ -78,18 +77,18 @@ Nemusíš reštartovať Docker kontajnery!
 
 ---
 
-## Docker príkazy pre development
+## Príkazy Docker pre vývoj
 
 ```bash
 # Spustenie všetkých služieb
 docker-compose up -d
 
-# Sledovanie logov (užitočné pre debugging)
+# Sledovanie záznamov (užitočné pre ladenie)
 docker-compose logs -f
 docker-compose logs -f backend    # len backend
 docker-compose logs -f frontend   # len frontend
 
-# Rebuild po zmene Dockerfile
+# Opätovné zostavenie po zmene Dockerfile
 docker-compose up -d --build
 
 # Zastavenie služieb
@@ -98,11 +97,11 @@ docker-compose down
 # Vyčistenie všetkého (vrátane databázy!)
 docker-compose down -v
 
-# Exec do kontajnera (pre manuálne príkazy)
+# Pripojenie do kontajnera (pre manuálne príkazy)
 docker-compose exec backend sh
 docker-compose exec frontend sh
 
-# Prisma Studio (GUI pre databázu)
+# Prisma Studio (grafické rozhranie pre databázu)
 docker-compose exec backend npx prisma studio
 # Otvor: http://localhost:5555
 ```
@@ -114,41 +113,83 @@ docker-compose exec backend npx prisma studio
 ```
 sportbuddy/
 ├── apps/
-│   ├── backend/              # Backend API (Next.js + Prisma)
-│   │   ├── src/
-│   │   │   ├── app/api/      # API endpoints
-│   │   │   └── lib/          # Server utilities (auth, prisma)
+│   ├── backend/                    # Backend API (Next.js + Prisma)
 │   │   ├── prisma/
-│   │   │   └── schema.prisma # Databázová schéma
-│   │   ├── Dockerfile        # Unifikovaný Docker image (dev + prod)
-│   │   └── package.json
+│   │   │   ├── schema.prisma       # Databázová schéma
+│   │   │   └── seed.ts             # Počiatočné dáta do databázy (športoviská)
+│   │   ├── src/
+│   │   │   ├── app/api/            # API koncové body
+│   │   │   │   ├── activities/     # Activity CRUD + prihlásenie/odhlásenie
+│   │   │   │   ├── auth/           # Better Auth koncové body + vlastný reset hesla
+│   │   │   │   ├── profile/        # API používateľského profilu
+│   │   │   │   └── venues/         # API športovísk
+│   │   │   └── lib/                # Serverové utility
+│   │   │       ├── auth.ts         # Better Auth konfigurácia
+│   │   │       ├── auth-client.ts  # Nastavenie Auth klienta
+│   │   │       ├── email.ts        # Brevo emailová služba (na reset hesla)
+│   │   │       ├── get-session.ts  # Session helper
+│   │   │       └── prisma.ts       # Prisma klient
+│   │   ├── Dockerfile              # Multi-stage Docker (dev + prod)
+│   │   ├── middleware.ts           # Next.js middleware
+│   │   ├── next.config.mjs         # Next.js konfigurácia (CORS hlavičky)
+│   │   ├── package.json            # Závislosti
+│   │   └── tsconfig.json           # TypeScript konfigurácia
 │   │
-│   └── frontend/             # Frontend UI (Next.js + React)
+│   └── frontend/                   # Frontend UI (Next.js + React)
+│       ├── public/
+│       │   ├── manifest.json       # PWA manifest
+│       │   └── sw.js               # Service Worker
 │       ├── src/
-│       │   ├── app/          # Next.js App Router stránky
-│       │   ├── components/   # React komponenty
-│       │   └── contexts/     # React Context (theme, atď.)
-│       ├── Dockerfile        # Unifikovaný Docker image (dev + prod)
-│       └── package.json
+│       │   ├── app/                # Next.js App Router stránky
+│       │   │   ├── auth/           # Autentifikačné stránky (prihlásenie, registrácia)
+│       │   │   ├── dashboard/      # Stránka dashboardu
+│       │   │   ├── profile/        # Stránky profilu
+│       │   │   ├── globals.css     # Globálne štýly
+│       │   │   ├── layout.tsx      # Hlavné rozloženie
+│       │   │   └── page.tsx        # Domovská stránka
+│       │   ├── components/         # React komponenty
+│       │   │   ├── ui/             # UI elementy (Button, Card, Input)
+│       │   │   ├── HtmlWrapper.tsx
+│       │   │   ├── Navigation.tsx
+│       │   │   ├── TemplateWrapper.tsx
+│       │   │   └── ThemeToggle.tsx
+│       │   ├── contexts/
+│       │   │   └── ThemeContext.tsx # Kontext tmavého režimu
+│       │   └── lib/
+│       │       └── auth-client.ts  # Better Auth klient
+│       ├── Dockerfile              # Viacstupňový Docker (dev + prod)
+│       ├── next.config.mjs         # Next.js konfigurácia
+│       ├── package.json            # Závislosti
+│       ├── postcss.config.mjs      # PostCSS konfigurácia
+│       ├── tailwind.config.ts      # Tailwind CSS konfigurácia
+│       └── tsconfig.json           # TypeScript konfigurácia
 │
 ├── packages/
-│   └── shared/               # Zdieľané TypeScript typy
-│       └── src/types/        # SportType, SkillLevel, atď.
+│   └── shared/                     # Zdieľané TypeScript typy
+│       ├── src/
+│       │   ├── types/
+│       │   │   └── index.ts        # Zdieľané typy (SportType, SkillLevel, atď.)
+│       │   └── index.ts            # Exporty balíčka
+│       └── package.json
 │
-├── docker-compose.yml        # Docker konfigurácia
-├── .env                      # Environment variables (lokálne, NIE v Gite!)
-├── .env.example              # Template (commituj do Gitu)
-├── README.md                 # Návod na používanie
-└── USER_STORIES.md           # Prehľad user stories a taskov
+├── .dockerignore                   # Dockerignore
+├── .env                            # Premenné prostredia (len lokálne, nie v Gite!)
+├── .env.example                    # Šablóna premenných prostredia (commituj toto)
+├── .gitignore                      # Gitignore
+├── docker-compose.yml              # Docker Compose konfigurácia (3 služby)
+├── README.md                       # Projektová dokumentácia
+└── USER_STORIES.md                 # User stories & tasky
 ```
+
+**Poznámka:** V Docker projekte nepotrebujeme root `package.json`, `tsconfig.json` ani `package-lock.json` súbory. Každá aplikácia má vlastné závislosti.
 
 ---
 
-## Environment Variables
+## Premenné prostredia
 
 ### Konfigurácia (.env súbor)
 
-Projekt používa jeden `.env` súbor v roote. **Nikdy necommituj `.env` do Gitu!**
+Projekt používa jeden `.env` súbor v root adresári. **Nikdy necommituj `.env` do Gitu!**
 
 **Pre nových vývojárov:**
 ```bash
@@ -167,6 +208,8 @@ POSTGRES_DB=sportbuddy
 DATABASE_URL="postgresql://sportbuddy:sportbuddy123@postgres:5432/sportbuddy"
 BETTER_AUTH_SECRET="change-this-in-production"
 BETTER_AUTH_URL="http://localhost:3001"
+BREVO_API_KEY="tvoj-skutocny-brevo-api-key"
+pozn. - V apps/backend/src/lib/email.ts zmeň sender email na svoj overený email
 
 # Frontend
 NEXT_PUBLIC_API_URL="http://localhost:3001"
@@ -178,11 +221,11 @@ GOOGLE_CLIENT_SECRET=""
 
 ---
 
-## Development workflow
+## Pracovný postup pri vývoji
 
 ### 1. Práca na user stories
 
-Pozri [USER_STORIES.md](USER_STORIES.md) pre aktuálny stav projektu a zoznam taskov.
+Pozri [USER_STORIES.md](USER_STORIES.md) pre aktuálny stav projektu a zoznam úloh.
 
 ### 2. Práca s databázou (Prisma)
 
@@ -191,27 +234,27 @@ Pozri [USER_STORIES.md](USER_STORIES.md) pre aktuálny stav projektu a zoznam ta
 # → Potom spusti:
 docker-compose exec backend npx prisma db push
 
-# Otvor Prisma Studio (GUI)
+# Otvor Prisma Studio (grafické rozhranie)
 docker-compose exec backend npx prisma studio
 
 # Reset databázy (POZOR: vymaže všetky dáta!)
 docker-compose exec backend npx prisma db push --force-reset
 ```
 
-### 3. Debugging
+### 3. Ladenie
 
 ```bash
-# Backend logy (API requesty, errory)
+# Záznamy backendu (API požiadavky, chyby)
 docker-compose logs -f backend
 
-# Frontend logy (build output, errors)
+# Záznamy frontendu (výstup zostavenia, chyby)
 docker-compose logs -f frontend
 
-# Databáza logy
+# Záznamy databázy
 docker-compose logs -f postgres
 ```
 
-### 4. Pridávanie nových dependencies
+### 4. Pridávanie nových závislostí
 
 ```bash
 # Backend
@@ -229,20 +272,20 @@ docker-compose restart frontend
 
 ---
 
-## Docker architektúra
+## Architektúra Docker projektu
 
-### Unifikované Dockerfiles
+### Zjednotené Dockerfiles
 
-Každý Dockerfile má **multi-stage build** s dvoma režimami:
+Každý Dockerfile má **viacstupňové zostavenie (multi-stage build)** s dvoma režimami:
 
-- **Development stage** (používa docker-compose.yml)
-  - Hot reload cez volume mounts
+- **Vývojársky režim** (používa docker-compose.yml)
+  - Automatické načítanie zmien cez pripojenie zväzkov
   - `npm run dev`
-  - Debug-friendly
+  - Vhodné pre ladenie
 
-- **Production stage** (pre nasadenie)
-  - Optimalizovaný build
-  - Multi-stage image (menší size)
+- **Produkčný režim** (pre nasadenie)
+  - Optimalizované zostavenie
+  - Viacstupňový obraz (menšia veľkosť)
   - `npm run build`
 
 ### Ako to funguje?
@@ -269,25 +312,25 @@ docker build --target production -t sportbuddy-frontend .
 
 ---
 
-## Pre vývojárov - Best Practices
+## Pre vývojárov - Osvedčené postupy
 
 ### ✅ Commituj:
 - Všetok kód v `apps/*/src/`
-- `package.json`, `package-lock.json` (po pridaní dependencies)
+- `package.json`, `package-lock.json` (po pridaní závislostí)
 - `prisma/schema.prisma` (po zmene schémy)
 - `Dockerfile`, `docker-compose.yml`
 - `.env.example` (template bez secrets)
 
 ### ❌ Necommituj:
 - `node_modules/` (automaticky ignorované)
-- `.next/` (build artefakty)
-- `.env` (obsahuje secrets - NIKDY necommituj!)
-- `.vscode/`, `.idea/` (IDE nastavenia)
+- `.next/` (výsledky zostavenia obrazov)
+- `.env` (obsahuje tajné kľúče - NIKDY necommituj!)
+- `.vscode/`, `.idea/` (nastavenia IDE)
 
 ### 🔄 Po každom git pull:
 
 ```bash
-# Ak niekto zmenil Dockerfile alebo dependencies
+# Ak niekto zmenil Dockerfile alebo závislosti
 docker-compose down
 docker-compose up -d --build
 ```
@@ -295,10 +338,10 @@ docker-compose up -d --build
 ### 🐛 Keď niečo nefunguje:
 
 ```bash
-# 1. Skús restart
+# 1. Skús reštart
 docker-compose restart
 
-# 2. Skús rebuild
+# 2. Skús opätovné zostavenie
 docker-compose up -d --build
 
 # 3. Vyčisti všetko a začni odznova
@@ -306,7 +349,7 @@ docker-compose down -v
 cp .env.example .env  # Obnov .env ak bol zmazaný
 docker-compose up -d --build
 
-# 4. Skontroluj logy
+# 4. Skontroluj záznamy
 docker-compose logs -f
 ```
 
@@ -314,8 +357,8 @@ docker-compose logs -f
 
 ## Ďalšie kroky
 
-1. **Prečítaj si** [USER_STORIES.md](USER_STORIES.md) - zoznam všetkých user stories a ich stav
-2. **Vyber si task**
+1. **Prečítaj si** [USER_STORIES.md](USER_STORIES.md) - zoznam všetkých používateľských príbehov a ich stav
+2. **Vyber si úlohu**
 3. **Pozri databázovú schému** - `apps/backend/prisma/schema.prisma`
 4. **Pozri API - backend** - `apps/backend/src/app/api/`
 

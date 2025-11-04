@@ -30,6 +30,7 @@ model User {
   participations Participation[]
   reviews       Review[]
   favoriteVenues VenueFavorite[]
+  passwordResets PasswordReset[]
 }
 
 // Profile model for user details (separate from auth)
@@ -87,6 +88,20 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@unique([identifier, value])
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([token])
+  @@index([userId])
 }
 
 // Sport types enumeration

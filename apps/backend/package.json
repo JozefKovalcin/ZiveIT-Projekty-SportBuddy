@@ -12,11 +12,15 @@
     "lint": "next lint",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "tsx prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@getbrevo/brevo": "latest",
     "@prisma/client": "latest",
-    "bcryptjs": "latest",
     "better-auth": "latest",
     "next": "latest",
     "react": "latest",
@@ -29,6 +33,7 @@
     "eslint": "latest",
     "eslint-config-next": "latest",
     "prisma": "latest",
+    "tsx": "latest",
     "typescript": "latest"
   }
 }

@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       data: {
         userId: session.user.id,
         activityId: activity.id,
-        status: "confirmed",
+        status: "CONFIRMED",
       },
     });
 

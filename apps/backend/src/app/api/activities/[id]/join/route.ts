@@ -68,7 +68,7 @@ export async function POST(
       data: {
         userId: session.user.id,
         activityId: id,
-        status: "confirmed",
+        status: "CONFIRMED",
       },
     });
 

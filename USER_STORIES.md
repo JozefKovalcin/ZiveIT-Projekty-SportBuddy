@@ -20,7 +20,7 @@ aby som mohol používať aplikáciu
 - ✅ Registračný formulár (/register)
 - ✅ Prihlasovací formulár (/login)
 - ✅ Validácia (email formát, heslo min 8 znakov)
-- ✅ Hash hesla (bcrypt)
+- ✅ Hash hesla (scrypt via Better Auth)
 - ✅ Session management (localStorage)
 - ✅ Responzívny dizajn formulárov
 
@@ -78,7 +78,7 @@ aby som mohol prezentovať svoje športové záujmy a mať prehľad o mojich uda
 
 ## US-003: Vytvorenie aktivity
 
-**Status:** 🔄 WIP (Work In Progress)
+**Status:** ✅ HOTOVÉ
 
 Ako používateľ
 chcem vytvoriť novú športovú aktivitu
@@ -91,26 +91,26 @@ aby som našiel spoluhráčov
 - ✅ API: POST /api/activities
 - ✅ Automatické pridanie tvorcu ako účastníka
 - ✅ Validácia (dátum v budúcnosti, cena >= 0)
-- ⏸️ Formulár na vytvorenie (/activities/create)
-- ⏸️ Polia: názov, šport (dropdown), dátum, čas, miesto, max hráčov, úroveň, cena, popis
-- ⏸️ React Hook Form + Zod validácia
-- ⏸️ Loading state pri submit
-- ⏸️ Redirect na detail po vytvorení
-- ⏸️ Responzívny formulár
+- ✅ Formulár na vytvorenie (/activities/create)
+- ✅ Polia: názov, šport (dropdown), dátum, čas, miesto, max hráčov, úroveň, cena, popis
+- ✅ React Hook Form + Zod validácia
+- ✅ Loading state pri submit
+- ✅ Redirect na detail po vytvorení
+- ✅ Responzívny formulár
 
 ### Výsledné funkcie:
 - ✅ API endpoint funguje
 - ✅ Funkčná validácia na BE
 - ✅ Aktivita sa uloží do DB
-- ⏸️ Frontend formulár chýba
-
-**Poznámka:** API je hotové, ale chýba frontend formulár na vytvorenie aktivity.
+- ✅ Frontend formulár implementovaný a funkčný
+- ✅ Automatické načítanie venues
+- ✅ Validácia na FE a BE
 
 ---
 
 ## US-004: Zoznam a detail aktivít
 
-**Status:** 🔄 WIP (Work In Progress)
+**Status:** ✅ HOTOVÉ
 
 Ako používateľ
 chcem vidieť zoznam aktivít a ich detail
@@ -122,30 +122,30 @@ aby som vedel, čo je k dispozícii
 - ✅ API: GET /api/activities (pagination 20/page)
 - ✅ API: GET /api/activities/[id]
 - ✅ Filtrovanie podľa športu, mesta, statusu
-- ⏸️ Stránka zoznamu (/activities)
-- ⏸️ Card komponenta pre aktivitu
-- ⏸️ Zobrazenie: názov, šport, dátum, čas, miesto, voľné miesta
-- ⏸️ Loading skeleton
-- ⏸️ Empty state ("Žiadne aktivity")
-- ⏸️ Detail stránka (/activities/[id])
-- ⏸️ Kompletné info + mapa (Google Maps embed)
-- ⏸️ Zoznam účastníkov
-- ⏸️ Progress bar obsadenosti
-- ⏸️ Responzívny grid/detail
+- ✅ Stránka zoznamu (/activities)
+- ✅ Card komponenta pre aktivitu
+- ✅ Zobrazenie: názov, šport, dátum, čas, miesto, voľné miesta
+- ✅ Loading skeleton
+- ✅ Empty state ("Žiadne aktivity")
+- ✅ Detail stránka (/activities/[id])
+- ✅ Kompletné info + mapa (Google Maps embed)
+- ✅ Zoznam účastníkov
+- ✅ Progress bar obsadenosti
+- ✅ Responzívny grid/detail
 
 ### Výsledné funkcie:
 - ✅ API endpoints fungujú
-- ⏸️ Zoznam aktivít (UI)
-- ⏸️ Detail aktivity (UI)
-- ⏸️ Pagination funguje
-
-**Poznámka:** Backend API je kompletný s filtrovaním, ale chýba celý frontend UI.
+- ✅ Zoznam aktivít (UI) s kartami
+- ✅ Detail aktivity s kompletnou informáciou
+- ✅ Mapa športoviska
+- ✅ Progress bar a zoznam účastníkov
+- ✅ Loading states a empty states
 
 ---
 
 ## US-005: Prihlasovanie na aktivity
 
-**Status:** 🔄 WIP (Work In Progress)
+**Status:** ✅ HOTOVÉ
 
 Ako používateľ
 chcem sa prihlásiť na aktivitu
@@ -159,20 +159,20 @@ aby som rezervoval miesto
 - ✅ Kontrola voľnej kapacity
 - ✅ Kontrola duplicity (už prihlásený)
 - ✅ Aktualizácia počtu hráčov
-- ⏸️ Tlačidlo "Prihlásiť sa" na detaile
-- ⏸️ Tlačidlo "Odhlásiť sa" ak som prihlásený
-- ⏸️ API: DELETE /api/activities/[id]/leave
-- ⏸️ Optimistic updates (TanStack Query)
-- ⏸️ Toast notifikácie
-- ⏸️ Badge "Prihlásený" na karte aktivity
+- ✅ Tlačidlo "Prihlásiť sa" na detaile
+- ✅ Tlačidlo "Odhlásiť sa" ak som prihlásený
+- ✅ API: DELETE /api/activities/[id]/join
+- ✅ Optimistic updates (TanStack Query)
+- ✅ Toast notifikácie
+- ✅ Badge "Prihlásený" na karte aktivity
 
 ### Výsledné funkcie:
-- ✅ Prihlásenie funguje (API)
-- ⏸️ Odhlásenie funguje
+- ✅ Prihlásenie funguje (API + UI)
+- ✅ Odhlásenie funguje (API + UI)
 - ✅ Počet hráčov sa aktualizuje
-- ⏸️ UI komponenty chýbajú
-
-**Poznámka:** Join API je hotové, ale chýba leave endpoint a všetky UI elementy.
+- ✅ UI komponenty implementované
+- ✅ Automatický refresh dát po akcii
+- ✅ Vizuálna indikácia stavu (organizátor/účastník)
 
 ---
 
@@ -805,6 +805,55 @@ aby som hral s ľuďmi na mojej úrovni
 - ⏸️ User suggestions
 - ⏸️ Weekly digest
 
+---
+
+## US-019: Reset hesla cez email
+
+**Status:** ✅ HOTOVÉ
+
+Ako používateľ
+chcem si obnoviť heslo ak som ho zabudol
+aby som sa mohol znova prihlásiť do aplikácie
+
+**Vývojár:** Kamil Berecký
+
+### Tasky:
+- ✅ Prisma schema: PasswordReset model (token, userId, expiresAt, used)
+- ✅ Email service setup (Brevo - 300 emailov/deň zadarmo)
+- ✅ Verified sender email (kberecky@gmail.com) v Brevo dashboard
+- ✅ API: POST /api/auth/forgot-password (generuje token a posiela email)
+- ✅ API: POST /api/auth/reset-password (resetuje heslo s tokenom)
+- ✅ Email template pre reset link (HTML s responsive dizajnom)
+- ✅ Stránka /auth/forgot-password (formulár na zadanie emailu)
+- ✅ Stránka /auth/reset-password?token=xxx (formulár na nové heslo)
+- ✅ Validácia tokenu (expiracia 1 hodina, used flag)
+- ✅ Bezpečné generovanie tokenu (crypto.randomBytes + SHA-256)
+- ✅ Hash nového hesla (scrypt s Better Auth parametrami: N:16384, r:16, p:1, dkLen:64)
+- ✅ Vymazanie tokenu po použití (used = true)
+- ✅ Správne URL pre frontend (NEXT_PUBLIC_FRONTEND_URL)
+- ✅ "Zabudli ste heslo?" link na signin stránke
+- ✅ Success/Error feedback messages (slovenský jazyk)
+- ✅ Rate limiting (max 3 requesty za hodinu na email)
+- ✅ Responzívny dizajn
+- ✅ Development mode (console log namiesto emailu keď BREVO_API_KEY="brevo_test_key")
+- ✅ Production mode (Brevo API integration s messageId tracking)
+- ✅ Všetky sessions sa vymažú po resete (force re-login)
+
+### Výsledné funkcie:
+- ✅ Odoslanie reset emailu funguje (Brevo API)
+- ✅ Token validácia funguje (expiracia, duplicita, použitie)
+- ✅ Reset hesla funguje s kompatibilným scrypt hashom
+- ✅ Email template je pekný a funkčný s correct frontend URL
+- ✅ Development mode bez Brevo API kľúča (console log)
+- ✅ Production ready s Brevo integration
+- ✅ Všetky sessions sa vymažú po resete (security)
+- ✅ Prihlásenie funguje po resete hesla
+
+**Technické detaily:**
+- Email service: Brevo (@getbrevo/brevo SDK)
+- Password hashing: Node.js crypto scrypt (Better Auth compatible)
+- Token storage: PostgreSQL (PasswordReset table)
+- Email delivery: 300/day limit (Brevo free tier)
 
 ---
 
