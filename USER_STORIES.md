@@ -283,7 +283,7 @@ aby som nemusel vytvárať nové heslo a prihlásenie bolo rýchlejšie
 
 ## US-009: Mapa s lokalitami aktivít
 
-**Status:** ✅ HOTOVÉ
+**Status:** 🔄 WIP (Work In Progress)
 
 Ako používateľ
 chcem vidieť polohu aktivít na Google Maps
@@ -383,7 +383,7 @@ aby som nezabudol na termín
 
 ## US-012: Pokročilé filtrovanie a preferencie
 
-**Status:** � WIP (Work In Progress)
+**Status:** 🔄 WIP (Work In Progress)
 
 Ako používateľ
 chcem filtrovať aktivity podľa skúseností, pohlavia, veku, ceny a ďalších kritérií
