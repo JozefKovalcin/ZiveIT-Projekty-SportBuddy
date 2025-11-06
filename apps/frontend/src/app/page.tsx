@@ -4,9 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { useSession } from "@/lib/auth-client";
 
 export default function Home() {
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
+  const { data: session } = useSession();
 
   const sports = [
     {
@@ -209,32 +211,64 @@ export default function Home() {
           style={{ boxShadow: "var(--shadow-xl)" }}
         >
           <div className="relative z-10">
-            <h2 className="text-3xl font-bold mb-4 text-[color:var(--fluent-text)]">
-              Pripravení začať?
-            </h2>
-            <p className="text-[color:var(--fluent-text-secondary)] mb-8 max-w-2xl mx-auto text-lg">
-              Zaregistrujte sa ešte dnes a staňte sa súčasťou aktívnej športovej
-              komunity.
-            </p>
-            <div className="flex gap-4 justify-center flex-wrap">
-              <Link href="/auth/signup">
-                <Button
-                  size="lg"
-                  className="!bg-[color:var(--fluent-accent)] !text-white hover:!bg-[color:var(--fluent-accent-hover)] font-bold text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all"
-                >
-                  Vytvoriť účet zadarmo
-                </Button>
-              </Link>
-              <Link href="/activities">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-2 border-[color:var(--fluent-border-strong)] !text-[color:var(--fluent-text)] hover:!bg-[color:var(--fluent-surface)] font-semibold text-lg px-8 py-6"
-                >
-                  Preskúmať aktivity
-                </Button>
-              </Link>
-            </div>
+            {session ? (
+              <>
+                <h2 className="text-3xl font-bold mb-4 text-[color:var(--fluent-text)]">
+                  Objavte nové športové zážitky
+                </h2>
+                <p className="text-[color:var(--fluent-text-secondary)] mb-8 max-w-2xl mx-auto text-lg">
+                  Preskúmajte aktivity vo vašom okolí a pripojte sa k športovej komunite.
+                </p>
+                <div className="flex gap-4 justify-center flex-wrap">
+                  <Link href="/activities">
+                    <Button
+                      size="lg"
+                      className="!bg-[color:var(--fluent-accent)] !text-white hover:!bg-[color:var(--fluent-accent-hover)] font-bold text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all"
+                    >
+                      Preskúmať aktivity
+                    </Button>
+                  </Link>
+                  <Link href="/activities/create">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="border-2 border-[color:var(--fluent-border-strong)] !text-[color:var(--fluent-text)] hover:!bg-[color:var(--fluent-surface)] font-semibold text-lg px-8 py-6"
+                    >
+                      Vytvoriť aktivitu
+                    </Button>
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 className="text-3xl font-bold mb-4 text-[color:var(--fluent-text)]">
+                  Pripravení začať?
+                </h2>
+                <p className="text-[color:var(--fluent-text-secondary)] mb-8 max-w-2xl mx-auto text-lg">
+                  Zaregistrujte sa ešte dnes a staňte sa súčasťou aktívnej športovej
+                  komunity.
+                </p>
+                <div className="flex gap-4 justify-center flex-wrap">
+                  <Link href="/auth/signup">
+                    <Button
+                      size="lg"
+                      className="!bg-[color:var(--fluent-accent)] !text-white hover:!bg-[color:var(--fluent-accent-hover)] font-bold text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all"
+                    >
+                      Vytvoriť účet zadarmo
+                    </Button>
+                  </Link>
+                  <Link href="/activities">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="border-2 border-[color:var(--fluent-border-strong)] !text-[color:var(--fluent-text)] hover:!bg-[color:var(--fluent-surface)] font-semibold text-lg px-8 py-6"
+                    >
+                      Preskúmať aktivity
+                    </Button>
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

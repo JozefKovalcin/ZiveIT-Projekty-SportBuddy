@@ -1,18 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-
-interface Venue {
-  id: string;
-  name: string;
-  address: string;
-  city: string;
-  sportTypes: string[];
-}
+import { LocationPicker } from "@/components/LocationPicker";
 
 const sportTypes = [
   { value: "FOOTBALL", label: "Futbal" },
@@ -35,11 +28,15 @@ const skillLevels = [
   { value: "EXPERT", label: "Expert" },
 ];
 
+const genderOptions = [
+  { value: "MIXED", label: "Bez preferencie" },
+  { value: "MALE", label: "Muži" },
+  { value: "FEMALE", label: "Ženy" },
+];
+
 export default function CreateActivityPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [venues, setVenues] = useState<Venue[]>([]);
-  const [loadingVenues, setLoadingVenues] = useState(true);
   const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
@@ -51,35 +48,33 @@ export default function CreateActivityPage() {
     time: "",
     duration: 90,
     maxParticipants: 10,
-    venueId: "",
+    gender: "MIXED" as "MALE" | "FEMALE" | "MIXED",
+    minAge: 18,
+    maxAge: 99,
+    price: 0,
     isPublic: true,
   });
 
-  useEffect(() => {
-    fetchVenues();
-  }, []);
-
-  const fetchVenues = async () => {
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/venues`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setVenues(data);
-        if (data.length > 0) {
-          setFormData((prev) => ({ ...prev, venueId: data[0].id }));
-        }
-      }
-    } catch (err) {
-      console.error("Error fetching venues:", err);
-    } finally {
-      setLoadingVenues(false);
-    }
-  };
+  const [location, setLocation] = useState({
+    address: "",
+    name: "",
+    latitude: undefined as number | undefined,
+    longitude: undefined as number | undefined,
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!location.address) {
+      setError("Prosím zadajte adresu aktivity");
+      return;
+    }
+
+    if (formData.minAge > formData.maxAge) {
+      setError("Minimálny vek nemôže byť väčší ako maximálny vek");
+      return;
+    }
+    
     setLoading(true);
     setError("");
 
@@ -98,6 +93,14 @@ export default function CreateActivityPage() {
           body: JSON.stringify({
             ...formData,
             date: dateTime.toISOString(),
+            location: location.address,
+            locationName: location.name || undefined,
+            latitude: location.latitude,
+            longitude: location.longitude,
+            gender: formData.gender,
+            minAge: formData.minAge,
+            maxAge: formData.maxAge,
+            price: formData.price,
           }),
         }
       );
@@ -132,18 +135,6 @@ export default function CreateActivityPage() {
           : value,
     }));
   };
-
-  if (loadingVenues) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-3xl mx-auto">
-          <p className="text-center text-[color:var(--fluent-text-secondary)]">
-            Načítavam...
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -233,57 +224,272 @@ export default function CreateActivityPage() {
                   <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
                     Dĺžka trvania (minúty) *
                   </label>
-                  <Input
-                    type="number"
-                    name="duration"
-                    value={formData.duration}
-                    onChange={handleChange}
-                    required
-                    min={15}
-                    max={480}
-                  />
+                  <div className="relative flex items-center">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          duration: Math.max(15, prev.duration - 15),
+                        }))
+                      }
+                      className="absolute left-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-l-lg transition-colors z-10"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      </svg>
+                    </button>
+                    <Input
+                      type="number"
+                      name="duration"
+                      value={formData.duration}
+                      onChange={handleChange}
+                      required
+                      min={15}
+                      max={480}
+                      step={15}
+                      className="text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          duration: Math.min(480, prev.duration + 15),
+                        }))
+                      }
+                      className="absolute right-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-r-lg transition-colors z-10"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
                     Max počet hráčov *
                   </label>
-                  <Input
-                    type="number"
-                    name="maxParticipants"
-                    value={formData.maxParticipants}
-                    onChange={handleChange}
-                    required
-                    min={2}
-                    max={50}
-                  />
+                  <div className="relative flex items-center">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          maxParticipants: Math.max(2, prev.maxParticipants - 1),
+                        }))
+                      }
+                      className="absolute left-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-l-lg transition-colors z-10"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      </svg>
+                    </button>
+                    <Input
+                      type="number"
+                      name="maxParticipants"
+                      value={formData.maxParticipants}
+                      onChange={handleChange}
+                      required
+                      min={2}
+                      max={50}
+                      className="text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          maxParticipants: Math.min(50, prev.maxParticipants + 1),
+                        }))
+                      }
+                      className="absolute right-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-r-lg transition-colors z-10"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {/* Športovisko */}
+              {/* Miesto konania */}
+              <div className="mb-6">
+                <LocationPicker
+                  value={location}
+                  onChange={setLocation}
+                />
+              </div>
+
+              {/* Pohlavie */}
               <div className="mb-6">
                 <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
-                  Športovisko *
+                  Pohlavie *
                 </label>
-                {venues.length === 0 ? (
-                  <p className="text-sm text-[color:var(--fluent-text-secondary)]">
-                    Žiadne športoviská nie sú dostupné. Kontaktujte
-                    administrátora.
-                  </p>
-                ) : (
-                  <select
-                    name="venueId"
-                    value={formData.venueId}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2.5 bg-[color:var(--fluent-surface-secondary)] border border-[color:var(--fluent-border)] rounded-lg text-[color:var(--fluent-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--fluent-accent)]"
-                  >
-                    {venues.map((venue) => (
-                      <option key={venue.id} value={venue.id}>
-                        {venue.name} - {venue.city}
-                      </option>
-                    ))}
-                  </select>
-                )}
+                <div className="grid grid-cols-3 gap-3">
+                  {genderOptions.map((option) => (
+                    <label
+                      key={option.value}
+                      className={`
+                        flex items-center justify-center px-4 py-3 rounded-lg border-2 cursor-pointer transition-all
+                        ${
+                          formData.gender === option.value
+                            ? 'border-[color:var(--fluent-accent)] bg-[color:var(--fluent-accent)]/10 text-[color:var(--fluent-accent)] font-semibold'
+                            : 'border-[color:var(--fluent-border)] bg-[color:var(--fluent-surface-secondary)] text-[color:var(--fluent-text)] hover:border-[color:var(--fluent-border-strong)]'
+                        }
+                      `}
+                    >
+                      <input
+                        type="radio"
+                        name="gender"
+                        value={option.value}
+                        checked={formData.gender === option.value}
+                        onChange={handleChange}
+                        className="sr-only"
+                      />
+                      <span className="text-sm">{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Vekové rozpätie a cena */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                    Min. vek *
+                  </label>
+                  <div className="relative flex items-center">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          minAge: Math.max(6, prev.minAge - 1),
+                        }))
+                      }
+                      className="absolute left-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-l-lg transition-colors z-10"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      </svg>
+                    </button>
+                    <Input
+                      type="number"
+                      name="minAge"
+                      value={formData.minAge}
+                      onChange={handleChange}
+                      required
+                      min={6}
+                      max={99}
+                      className="text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          minAge: Math.min(99, prev.minAge + 1),
+                        }))
+                      }
+                      className="absolute right-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-r-lg transition-colors z-10"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                    Max. vek *
+                  </label>
+                  <div className="relative flex items-center">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          maxAge: Math.max(6, prev.maxAge - 1),
+                        }))
+                      }
+                      className="absolute left-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-l-lg transition-colors z-10"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      </svg>
+                    </button>
+                    <Input
+                      type="number"
+                      name="maxAge"
+                      value={formData.maxAge}
+                      onChange={handleChange}
+                      required
+                      min={6}
+                      max={99}
+                      className="text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          maxAge: Math.min(99, prev.maxAge + 1),
+                        }))
+                      }
+                      className="absolute right-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-r-lg transition-colors z-10"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                    Cena (€)
+                  </label>
+                  <div className="relative flex items-center">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          price: Math.max(0, prev.price - 0.5),
+                        }))
+                      }
+                      className="absolute left-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-l-lg transition-colors z-10"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      </svg>
+                    </button>
+                    <Input
+                      type="number"
+                      name="price"
+                      value={formData.price}
+                      onChange={handleChange}
+                      min={0}
+                      step={0.5}
+                      placeholder="0 = zadarmo"
+                      className="text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          price: Math.round((prev.price + 0.5) * 10) / 10,
+                        }))
+                      }
+                      className="absolute right-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-r-lg transition-colors z-10"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Úroveň */}
@@ -350,7 +556,7 @@ export default function CreateActivityPage() {
                 <Button
                   type="submit"
                   variant="primary"
-                  disabled={loading || venues.length === 0}
+                  disabled={loading || !location.address}
                 >
                   {loading ? "Vytváranie..." : "Vytvoriť aktivitu"}
                 </Button>

@@ -17,14 +17,22 @@ interface Activity {
   maxParticipants: number;
   currentParticipants: number;
   status: string;
-  venue: {
+  location: string;
+  locationName: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  gender: string;
+  minAge: number;
+  maxAge: number;
+  price: number;
+  venue?: {
     id: string;
     name: string;
     city: string;
     address: string;
     latitude: number | null;
     longitude: number | null;
-  };
+  } | null;
   organizer: {
     id: string;
     name: string;
@@ -60,6 +68,12 @@ const skillLevelLabels: Record<string, string> = {
   INTERMEDIATE: "Mierne pokročilý",
   ADVANCED: "Pokročilý",
   EXPERT: "Expert",
+};
+
+const genderLabels: Record<string, string> = {
+  MALE: "Muži",
+  FEMALE: "Ženy",
+  MIXED: "Zmiešané",
 };
 
 const statusLabels: Record<string, { label: string; color: string }> = {
@@ -317,14 +331,36 @@ export default function ActivityDetailPage() {
 
                   <div>
                     <p className="text-sm text-[color:var(--fluent-text-secondary)] mb-1">
-                      Športovisko
+                      Miesto konania
                     </p>
-                    <p className="text-lg text-[color:var(--fluent-text)]">
-                      📍 {activity.venue.name}
+                    {activity.locationName && (
+                      <p className="text-lg font-medium text-[color:var(--fluent-text)]">
+                        📍 {activity.locationName}
+                      </p>
+                    )}
+                    <p className={`${activity.locationName ? 'text-sm' : 'text-lg'} text-[color:var(--fluent-text-secondary)]`}>
+                      {activity.location}
                     </p>
-                    <p className="text-sm text-[color:var(--fluent-text-secondary)]">
-                      {activity.venue.address}, {activity.venue.city}
-                    </p>
+                    {(activity.locationName || activity.location || (activity.latitude && activity.longitude)) && (
+                      <a
+                        href={
+                          activity.locationName
+                            ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(activity.locationName + ', ' + activity.location)}`
+                            : activity.location
+                            ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(activity.location)}`
+                            : `https://www.google.com/maps/search/?api=1&query=${activity.latitude},${activity.longitude}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 mt-2 px-4 py-2 bg-[color:var(--fluent-accent)] text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                          <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        Otvoriť v Mapách
+                      </a>
+                    )}
                   </div>
 
                   <div>
@@ -336,6 +372,36 @@ export default function ActivityDetailPage() {
                         activity.skillLevel}
                     </span>
                   </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-[color:var(--fluent-text-secondary)] mb-1">
+                        Pohlavie
+                      </p>
+                      <p className="text-lg text-[color:var(--fluent-text)]">
+                        {genderLabels[activity.gender] || activity.gender}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-[color:var(--fluent-text-secondary)] mb-1">
+                        Vekové rozpätie
+                      </p>
+                      <p className="text-lg text-[color:var(--fluent-text)]">
+                        {activity.minAge} - {activity.maxAge} rokov
+                      </p>
+                    </div>
+                  </div>
+
+                  {activity.price > 0 && (
+                    <div>
+                      <p className="text-sm text-[color:var(--fluent-text-secondary)] mb-1">
+                        Cena
+                      </p>
+                      <p className="text-lg font-semibold text-[color:var(--fluent-accent)]">
+                        {activity.price.toFixed(2)} €
+                      </p>
+                    </div>
+                  )}
 
                   {activity.description && (
                     <div>
@@ -352,20 +418,26 @@ export default function ActivityDetailPage() {
             </Card>
 
             {/* Map */}
-            {activity.venue.latitude && activity.venue.longitude && (
+            {activity.latitude && activity.longitude && (
               <Card>
                 <CardHeader>
                   <CardTitle>Mapa</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="aspect-video w-full rounded-lg overflow-hidden">
+                  <div className="aspect-video w-full rounded-lg overflow-hidden bg-[color:var(--fluent-surface-secondary)]">
                     <iframe
                       width="100%"
                       height="100%"
                       frameBorder="0"
                       style={{ border: 0 }}
-                      src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${activity.venue.latitude},${activity.venue.longitude}&zoom=15`}
+                      src={
+                        activity.locationName
+                          ? `https://maps.google.com/maps?q=${encodeURIComponent(activity.locationName + ', ' + activity.location)}&t=&z=15&ie=UTF8&iwloc=&output=embed`
+                          : `https://maps.google.com/maps?q=${activity.latitude},${activity.longitude}&t=&z=15&ie=UTF8&iwloc=&output=embed`
+                      }
                       allowFullScreen
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
                     ></iframe>
                   </div>
                 </CardContent>

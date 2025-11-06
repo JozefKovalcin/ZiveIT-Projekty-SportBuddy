@@ -16,12 +16,16 @@ interface Activity {
   maxParticipants: number;
   currentParticipants: number;
   status: string;
-  venue: {
+  location: string;
+  locationName: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  venue?: {
     id: string;
     name: string;
     city: string;
     address: string;
-  };
+  } | null;
   organizer: {
     id: string;
     name: string;
@@ -105,7 +109,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
           {/* Location */}
           <div className="mb-3">
             <p className="text-sm text-[color:var(--fluent-text)]">
-              📍 {activity.venue.name}, {activity.venue.city}
+              📍 {activity.locationName || activity.location}
             </p>
           </div>
 

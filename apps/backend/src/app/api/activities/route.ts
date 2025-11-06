@@ -24,8 +24,19 @@ const activitySchema = z.object({
   date: z.string().datetime(),
   duration: z.number().min(15).max(480),
   maxParticipants: z.number().min(2).max(50),
-  venueId: z.string(),
+  location: z.string().min(1), // Google Maps address
+  locationName: z.string().optional(), // Custom location name
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
+  venueId: z.string().optional(), // Now optional
+  gender: z.enum(["MALE", "FEMALE", "MIXED"]).default("MIXED"),
+  minAge: z.number().min(6).max(99).default(18),
+  maxAge: z.number().min(6).max(99).default(99),
+  price: z.number().min(0).default(0),
   isPublic: z.boolean().default(true),
+}).refine((data) => data.minAge <= data.maxAge, {
+  message: "Minimálny vek musí byť menší alebo rovný maximálnemu veku",
+  path: ["minAge"],
 });
 
 // GET /api/activities - Get all activities
@@ -35,11 +46,23 @@ export async function GET(request: NextRequest) {
     const sportType = searchParams.get("sportType");
     const city = searchParams.get("city");
     const status = searchParams.get("status") || "OPEN";
+    const skillLevel = searchParams.get("skillLevel");
+    const gender = searchParams.get("gender");
+    const minPrice = searchParams.get("minPrice");
+    const maxPrice = searchParams.get("maxPrice");
+    const minAge = searchParams.get("minAge");
+    const maxAge = searchParams.get("maxAge");
 
     const activities = await prisma.activity.findMany({
       where: {
         ...(sportType && { sportType: sportType as any }),
         status: status as any,
+        ...(skillLevel && { skillLevel: skillLevel as any }),
+        ...(gender && { gender: gender as any }),
+        ...(minPrice && { price: { gte: parseFloat(minPrice) } }),
+        ...(maxPrice && { price: { lte: parseFloat(maxPrice) } }),
+        ...(minAge && { maxAge: { gte: parseInt(minAge) } }), // User age >= activity minAge
+        ...(maxAge && { minAge: { lte: parseInt(maxAge) } }), // User age <= activity maxAge
         ...(city && {
           venue: {
             city: city,

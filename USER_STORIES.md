@@ -23,12 +23,14 @@ aby som mohol používať aplikáciu
 - ✅ Hash hesla (scrypt via Better Auth)
 - ✅ Session management (localStorage)
 - ✅ Responzívny dizajn formulárov
+- ✅ Podmienené zobrazenie "Vytvoriť účet" button (skrytie pre prihlásených) - Jozef Kovalčín
 
 ### Výsledné funkcie:
 - ✅ Fungujúca registrácia
 - ✅ Fungujúce prihlásenie
 - ✅ Session persistence
 - ✅ Redirect na /dashboard po prihlásení
+- ✅ Homepage nezobrazuje CTA button pre prihlásených používateľov
 
 ---
 
@@ -97,6 +99,10 @@ aby som našiel spoluhráčov
 - ✅ Loading state pri submit
 - ✅ Redirect na detail po vytvorení
 - ✅ Responzívny formulár
+- ✅ Google Maps LocationPicker pre výber adresy - Jozef Kovalčín
+- ✅ Automatické uloženie GPS súradníc a názvu miesta - Jozef Kovalčín
+- ✅ Rozšírenie formulára o filter polia (pohlavie, min vek, max vek, cena) - Jozef Kovalčín
+- ✅ Custom input tlačidlá s +/- tlačidlami - Jozef Kovalčín
 
 ### Výsledné funkcie:
 - ✅ API endpoint funguje
@@ -105,6 +111,9 @@ aby som našiel spoluhráčov
 - ✅ Frontend formulár implementovaný a funkčný
 - ✅ Automatické načítanie venues
 - ✅ Validácia na FE a BE
+- ✅ Google Maps autocomplete pre adresu
+- ✅ Uloženie lokácie, GPS súradníc a názvu miesta
+- ✅ Všetky US-012 filter polia v create forme
 
 ---
 
@@ -132,14 +141,19 @@ aby som vedel, čo je k dispozícii
 - ✅ Zoznam účastníkov
 - ✅ Progress bar obsadenosti
 - ✅ Responzívny grid/detail
+- ✅ Zobrazenie všetkých US-012 filter polí  - Jozef Kovalčín
+- ✅ Google Maps iframe s názvom miesta - Jozef Kovalčín
+- ✅ "Otvoriť v Mapách" tlačidlo s deep linking - Jozef Kovalčín
 
 ### Výsledné funkcie:
 - ✅ API endpoints fungujú
 - ✅ Zoznam aktivít (UI) s kartami
 - ✅ Detail aktivity s kompletnou informáciou
-- ✅ Mapa športoviska
+- ✅ Mapa športoviska s názvom lokality
 - ✅ Progress bar a zoznam účastníkov
 - ✅ Loading states a empty states
+- ✅ Zobrazenie pohlavia, vekového rozpätia a ceny
+- ✅ Deep linking do Google Maps/Apple Maps
 
 ---
 
@@ -269,33 +283,40 @@ aby som nemusel vytvárať nové heslo a prihlásenie bolo rýchlejšie
 
 ## US-009: Mapa s lokalitami aktivít
 
-**Status:** 📋 PLANNED
+**Status:** ✅ HOTOVÉ
 
 Ako používateľ
 chcem vidieť polohu aktivít na Google Maps
 aby som vedel, kde sa aktivita koná a ako ďaleko to mám
 
-**Vývojár:** -
+**Vývojár:** Jozef Kovalčín
 
 ### Tasky:
-- ⏸️ Google Maps API setup (API key)
-- ⏸️ Prisma schema: pridať lat/lng do Activity modelu
-- ⏸️ Geocoding pri vytváraní aktivity (mesto/adresa → súradnice)
-- ⏸️ API: GET /api/activities s lat/lng dátami
-- ⏸️ React komponenta: MapView s Google Maps embed/SDK
+- ✅ Google Maps API setup (API key)
+- ✅ Prisma schema: pridať lat/lng do Activity modelu
+- ✅ Prisma schema: location, locationName
+- ✅ LocationPicker komponenta s Google Maps Autocomplete
+- ✅ Geocoding pri vytváraní aktivity (adresa → súradnice)
+- ✅ API: GET /api/activities s lat/lng dátami
+- ✅ React komponenta: LocationPicker s Google Maps autocomplete SDK
+- ✅ Mapa na detail stránke (/activities/[id]) s iframe embed
+- ✅ Mapa zobrazuje názov miesta namiesto GPS súradníc
+- ✅ Tlačidlo "Otvoriť v Mapách" s deep linking
+- ✅ Responzívna mapa (mobile/desktop)
+- ✅ Custom styling pre autocomplete dropdown
 - ⏸️ Markery pre jednotlivé aktivity na mape
 - ⏸️ Info window pri kliknutí na marker (názov, šport, čas)
 - ⏸️ Prepínanie medzi zoznam view a mapa view na /activities
-- ⏸️ Mapa na detail stránke (/activities/[id])
-- ⏸️ Directions link (navigácia do Google Maps)
-- ⏸️ Responzívna mapa (mobile/desktop)
-- ⏸️ Loading state pre mapu
 
 ### Výsledné funkcie:
+- ✅ Google Maps autocomplete pri vytváraní aktivity
+- ✅ Automatické uloženie GPS súradníc
+- ✅ Mapa na detaile aktivity s názvom miesta
+- ✅ "Otvoriť v Mapách" button (funguje na PC aj mobile)
+- ✅ Deep linking do Google Maps/Apple Maps
+- ✅ Custom styled autocomplete dropdown
 - ⏸️ Mapa na zozname aktivít
-- ⏸️ Mapa na detaile aktivity
 - ⏸️ Klikateľné markery
-- ⏸️ Navigácia do Google Maps
 
 ---
 
@@ -362,26 +383,26 @@ aby som nezabudol na termín
 
 ## US-012: Pokročilé filtrovanie a preferencie
 
-**Status:** 📋 PLANNED
+**Status:** � WIP (Work In Progress)
 
 Ako používateľ
 chcem filtrovať aktivity podľa skúseností, pohlavia, veku, ceny a ďalších kritérií
 aby som našiel aktivity, ktoré mi vyhovujú
 
-**Vývojár:** -
+**Vývojár:** Jozef Kovalčín
 
 ### Tasky:
 #### Rozšírenie databázového modelu
-- ⏸️ Prisma schema: rozšírenie Activity (skillLevel, gender, minAge, maxAge, price)
-- ⏸️ Prisma schema: UserPreferences model (preferredSports, skillLevel, maxDistance, maxPrice)
-- ⏸️ Migrácia databázy
+- ✅ Prisma schema: rozšírenie Activity (skillLevel, gender, minAge, maxAge, price)
+- ✅ Prisma schema: UserPreferences model (preferredSports, skillLevel, maxDistance, maxPrice)
+- ✅ Migrácia databázy
 
 #### Backend
-- ⏸️ API: GET /api/activities s rozšíreným filtrovaním
-- ⏸️ Filtrovanie: skillLevel (začiatočník, stredne pokročilý, pokročilý, expert)
-- ⏸️ Filtrovanie: gender (muži, ženy, zmiešané)
-- ⏸️ Filtrovanie: vekové rozpätie (minAge-maxAge)
-- ⏸️ Filtrovanie: cena (od-do)
+- ✅ API: GET /api/activities s rozšíreným filtrovaním
+- ✅ Filtrovanie: skillLevel (začiatočník, stredne pokročilý, pokročilý, expert)
+- ✅ Filtrovanie: gender (muži, ženy, zmiešané)
+- ✅ Filtrovanie: vekové rozpätie (minAge-maxAge)
+- ✅ Filtrovanie: cena (od-do)
 - ⏸️ API: GET/PUT /api/preferences (uloženie používateľských preferencií)
 
 #### Frontend - Filter panel
@@ -397,13 +418,20 @@ aby som našiel aktivity, ktoré mi vyhovujú
 - ⏸️ Mobile-friendly filter (bottom sheet/modal)
 
 #### Formulár na vytvorenie aktivity
-- ⏸️ Pridať polia: skillLevel, gender, minAge, maxAge do create formu
-- ⏸️ Validácia (minAge <= maxAge, price >= 0)
+- ✅ Pridať polia: skillLevel, gender, minAge, maxAge, price do create formu
+- ✅ Custom styled number inputs s +/- tlačidlami
+- ✅ Validácia (minAge <= maxAge, price >= 0)
+- ✅ Backend validácia všetkých polí
+- ✅ Zobrazenie nových polí na detail stránke
 
 ### Výsledné funkcie:
-- ⏸️ Filtrovanie podľa všetkých kritérií
+- ✅ Databázový model rozšírený
+- ✅ Backend API podporuje filtrovanie
+- ✅ Rozšírený create form s všetkými poliami
+- ✅ Custom UI controls (duration, participants, age, price)
+- ✅ Detail stránka zobrazuje všetky nové polia
+- ⏸️ Filter panel UI na /activities
 - ⏸️ Uloženie preferencií
-- ⏸️ Rozšírený create form
 - ⏸️ Responzívny filter UI
 
 ---

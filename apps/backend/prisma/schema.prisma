@@ -135,6 +135,13 @@ enum ActivityStatus {
   COMPLETED
 }
 
+// Gender preference
+enum GenderPreference {
+  MALE
+  FEMALE
+  MIXED
+}
+
 // Participation status
 enum ParticipationStatus {
   CONFIRMED
@@ -182,13 +189,27 @@ model Activity {
   currentParticipants Int @default(0)
   status          ActivityStatus @default(OPEN)
   isPublic        Boolean        @default(true)
-  venueId         String
+  
+  // Filter fields for US-012
+  gender          GenderPreference @default(MIXED)
+  minAge          Int            @default(18)
+  maxAge          Int            @default(99)
+  price           Float          @default(0) // in EUR, 0 = free
+  
+  // Location fields - direct address input
+  location        String // Full address from Google Maps
+  locationName    String? // Optional custom name (e.g., "Park na Kolibe")
+  latitude        Float?
+  longitude       Float?
+  
+  // Venue is now optional for backward compatibility
+  venueId         String?
   organizerId     String
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
   // Relations
-  venue          Venue           @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  venue          Venue?          @relation(fields: [venueId], references: [id], onDelete: SetNull)
   organizer      User            @relation(fields: [organizerId], references: [id], onDelete: Cascade)
   participations Participation[]
 
@@ -196,6 +217,8 @@ model Activity {
   @@index([date])
   @@index([status])
   @@index([venueId])
+  @@index([gender])
+  @@index([skillLevel])
 }
 
 // Participation (Účasť na aktivite) model

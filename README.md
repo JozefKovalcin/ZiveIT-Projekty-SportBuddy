@@ -214,6 +214,10 @@ pozn. - V apps/backend/src/lib/email.ts zmeň sender email na svoj overený emai
 # Frontend
 NEXT_PUBLIC_API_URL="http://localhost:3001"
 
+# Google Maps API (pre výber lokácie aktivít)
+# Pozri GOOGLE_MAPS_SETUP.md pre inštrukcie
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=""
+
 # OAuth (voliteľné)
 GOOGLE_CLIENT_ID=""
 GOOGLE_CLIENT_SECRET=""
