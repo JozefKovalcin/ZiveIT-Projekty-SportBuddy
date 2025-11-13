@@ -47,16 +47,13 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Get activities user joined
+    // Get activities user joined (including those they organized if they also joined)
     const joinedActivities = await prisma.activity.findMany({
       where: {
         participations: {
           some: {
             userId: userId,
           },
-        },
-        organizerId: {
-          not: userId, // Exclude activities organized by user (already in createdActivities)
         },
       },
       include: {

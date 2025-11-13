@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    webpackBuildWorker: true,
+    webpackBuildWorker: false,
   },
   async headers() {
     return [

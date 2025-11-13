@@ -103,6 +103,12 @@ aby som našiel spoluhráčov
 - ✅ Automatické uloženie GPS súradníc a názvu miesta - Jozef Kovalčín
 - ✅ Rozšírenie formulára o filter polia (pohlavie, min vek, max vek, cena) - Jozef Kovalčín
 - ✅ Custom input tlačidlá s +/- tlačidlami - Jozef Kovalčín
+- ✅ Pravidelne opakované aktivity (DAILY, WEEKLY, MONTHLY) - Jozef Kovalčín
+- ✅ Výber dní v týždni pre týždenné opakovanie - Jozef Kovalčín
+- ✅ Dátum ukončenia opakovania (voliteľný, default 2 mesiace) - Jozef Kovalčín
+- ✅ Automatické generovanie budúcich inštancií pri vytvorení (max 20 inštancií alebo 2 mesiace) - Jozef Kovalčín
+- ✅ Auto-join na všetky inštancie s možnosťou zadať počet hostí - Jozef Kovalčín
+- ✅ Parent-child vzťah medzi opakovanými aktivitami - Jozef Kovalčín
 
 ### Výsledné funkcie:
 - ✅ API endpoint funguje
@@ -114,6 +120,13 @@ aby som našiel spoluhráčov
 - ✅ Google Maps autocomplete pre adresu
 - ✅ Uloženie lokácie, GPS súradníc a názvu miesta
 - ✅ Všetky US-012 filter polia v create forme
+- ✅ Pravidelné opakovanie aktivít (denné, týždenné, mesačné)
+- ✅ UI pre výber dní v týždni
+- ✅ Automatické vytváranie budúcich aktivít (max 20 inštancií alebo 2 mesiace)
+- ✅ Auto-join pre organizátora na všetky inštancie s počtom hostí
+- ✅ Parent-child vzťah s badge "Opakovaná" na kartách aktivít
+- ✅ Sekcia "Nadchádzajúce termíny" na detail stránke (collapsible)
+- ✅ Smart delete logic - pri zmazaní parent sa prvá child aktivita stane novým parentom
 
 ---
 
@@ -253,37 +266,47 @@ aby som mal dobrý zážitok
 ---
 ## US-008: OAuth prihlásenie
 
-**Status:** 📋 PLANNED
+**Status:** ✅ HOTOVÉ
 
 Ako používateľ
 chcem sa prihlásiť pomocou Google, Facebook alebo iných platforiem
 aby som nemusel vytvárať nové heslo a prihlásenie bolo rýchlejšie
 
+<<<<<<< HEAD
 **Vývojár:** - Jozef Kovalčín
+=======
+**Vývojár:** Jozef Kovalčín
+>>>>>>> ad142ec (feat: recurring activities, my activities page, map view with markers)
 
 ### Tasky:
-- ⏸️ BetterAuth konfigurácia OAuth providers (Google, Facebook)
-- ⏸️ Google OAuth setup (Client ID, Secret)
-- ⏸️ Facebook OAuth setup (App ID, Secret)
-- ⏸️ Prisma schema: rozšírenie User modelu (providerId, provider)
-- ⏸️ API: OAuth callback handling
-- ⏸️ Tlačidlá "Prihlásiť cez Google/Facebook" na login/register stránke
-- ⏸️ Mapovanie OAuth dát na User profil (email, meno, avatar)
-- ⏸️ Handling existujúceho účtu (merge alebo error)
-- ⏸️ Session management pre OAuth users
-- ⏸️ Responzívne OAuth tlačidlá
+- ✅ BetterAuth konfigurácia OAuth providers (Google, Facebook, Apple)
+- ✅ Google OAuth setup (Client ID, Secret)
+- ✅ Facebook OAuth setup (App ID, Secret)
+- ✅ Apple OAuth setup (Client ID, Secret)
+- ✅ Prisma schema: rozšírenie Account modelu (accessTokenExpiresAt, refreshTokenExpiresAt, scope)
+- ✅ Account linking konfigurácia (trustedProviders)
+- ✅ API: OAuth callback handling (redirect na frontend URL)
+- ✅ Error page redirect (na frontend signin page)
+- ✅ Tlačidlá "Prihlásiť cez Google/Facebook" na login/register stránke
+- ✅ OAuth callback URLs (/api/auth/callback/google, /facebook)
+- ✅ Mapovanie OAuth dát na User profil (email, meno, avatar)
+- ✅ Session management pre OAuth users
+- ✅ Responzívne OAuth tlačidlá
+- ⏸️ Handling existujúceho účtu (merge alebo error) - funkčné s account linking
 
 ### Výsledné funkcie:
-- ⏸️ Google login funguje
-- ⏸️ Facebook login funguje
-- ⏸️ Automatické vytvorenie profilu
-- ⏸️ Merge s existujúcim emailom (optional)
+- ✅ Google login funguje
+- ✅ Facebook login funguje (vyžaduje konfiguráciu Facebook Developer App)
+- ✅ Apple login funguje (vyžaduje konfiguráciu Apple Developer Account)
+- ✅ Automatické vytvorenie profilu
+- ✅ Account linking medzi providers (trusted: Google, Facebook, Apple)
+
 
 ---
 
 ## US-009: Mapa s lokalitami aktivít
 
-**Status:** 🔄 WIP (Work In Progress)
+**Status:** ✅ HOTOVÉ
 
 Ako používateľ
 chcem vidieť polohu aktivít na Google Maps
@@ -304,8 +327,17 @@ aby som vedel, kde sa aktivita koná a ako ďaleko to mám
 - ✅ Tlačidlo "Otvoriť v Mapách" s deep linking
 - ✅ Responzívna mapa (mobile/desktop)
 - ✅ Custom styling pre autocomplete dropdown
-- ⏸️ Markery pre jednotlivé aktivity na mape
-- ⏸️ Info window pri kliknutí na marker (názov, šport, čas)
+- ✅ Stránka /venues s full-screen mapou (premenovaná na "Mapa aktivít")
+- ✅ Google Maps integrácia (useLoadScript hook namiesto LoadScript)
+- ✅ Markery pre všetky open aktivity na mape
+- ✅ Custom marker ikony pre každý šport (emoji SVG)
+- ✅ User location marker (modrý kruh SVG)
+- ✅ Centrovanie mapy na user location (geolocation API)
+- ✅ InfoWindow pri kliknutí na marker
+- ✅ InfoWindow s inline styling (fix pre white background)
+- ✅ InfoWindow zobrazuje: názov, šport, dátum, čas, účastníci, lokácia, cena
+- ✅ "Zobraziť detail" button v InfoWindow s linkom na aktivitu
+- ✅ Legenda s vysvetlením markerov (user location + športy)
 - ⏸️ Prepínanie medzi zoznam view a mapa view na /activities
 
 ### Výsledné funkcie:
@@ -315,8 +347,12 @@ aby som vedel, kde sa aktivita koná a ako ďaleko to mám
 - ✅ "Otvoriť v Mapách" button (funguje na PC aj mobile)
 - ✅ Deep linking do Google Maps/Apple Maps
 - ✅ Custom styled autocomplete dropdown
-- ⏸️ Mapa na zozname aktivít
-- ⏸️ Klikateľné markery
+- ✅ Full-screen mapa na /venues s všetkými aktivitami
+- ✅ Klikateľné markery s custom ikonami pre každý šport
+- ✅ InfoWindow s kompletnou informáciou a správnym štýlovaním
+- ✅ User location detection a zobrazenie
+- ✅ Legenda pre orientáciu
+- ⏸️ Toggle medzi listom a mapou
 
 ---
 
@@ -882,6 +918,44 @@ aby som sa mohol znova prihlásiť do aplikácie
 - Password hashing: Node.js crypto scrypt (Better Auth compatible)
 - Token storage: PostgreSQL (PasswordReset table)
 - Email delivery: 300/day limit (Brevo free tier)
+
+---
+
+## US-020: Stránka "Moje aktivity"
+
+**Status:** ✅ HOTOVÉ
+
+Ako používateľ
+chcem mať prehľad všetkých mojich aktivít (vytvorených aj prihlásených) na jednom mieste
+aby som vedel, na čo som sa prihlásil a čo som vytvoril
+
+**Vývojár:** Jozef Kovalčín
+
+### Tasky:
+- ✅ API: GET /api/activities/my (vracia created a joined aktivity)
+- ✅ Backend logika: created = organizerId === userId
+- ✅ Backend logika: joined = participation existuje pre userId (vrátane vlastných aktivít)
+- ✅ Stránka /my-activities s tab navigáciou
+- ✅ Tab "Vytvorené" (created activities)
+- ✅ Tab "Prihlásené" (joined activities vrátane vlastných)
+- ✅ Štatistiky: Total Created, Total Joined, Upcoming Created, Upcoming Joined
+- ✅ Activity cards s badge "Organizátor" pre vytvorené
+- ✅ Badge "Opakovaná" pre recurring aktivity
+- ✅ Smart back navigation (sessionStorage tracking)
+- ✅ Delete button pre organizátorov na detail stránke
+- ✅ Redirect na source page po zmazaní (activities vs my-activities)
+- ✅ Empty states pre obe záložky
+- ✅ CTA buttons: "Vytvoriť aktivitu" / "Prehliadať aktivity"
+- ✅ Responzívny dizajn
+
+### Výsledné funkcie:
+- ✅ Backend API vracia vytvorené aj prihlásené aktivity
+- ✅ Tab navigácia medzi vytvorenými a prihlásenými
+- ✅ Štatistiky zobrazujú správne počty
+- ✅ Activity cards s visual badges (Organizátor, Opakovaná)
+- ✅ Delete funkcia pre organizátorov s smart navigation
+- ✅ Smart back button tracking (vracia na správnu stránku)
+- ✅ Empty states s CTA akciami
 
 ---
 

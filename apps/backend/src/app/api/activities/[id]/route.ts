@@ -148,6 +148,61 @@ export async function DELETE(
       );
     }
 
+    // If this is a parent activity, handle child activities
+    if (activity.isRecurring && activity.recurrenceFrequency !== "NONE") {
+      const childActivities = await prisma.activity.findMany({
+        where: { parentActivityId: id },
+        orderBy: { date: 'asc' },
+      });
+
+      if (childActivities.length === 1) {
+        // Only 1 child remains - make it standalone
+        await prisma.activity.update({
+          where: { id: childActivities[0].id },
+          data: { parentActivityId: null },
+        });
+      } else if (childActivities.length > 1) {
+        // Multiple children remain - promote first child to new parent
+        const newParent = childActivities[0];
+        await prisma.activity.update({
+          where: { id: newParent.id },
+          data: {
+            isRecurring: true,
+            recurrenceFrequency: activity.recurrenceFrequency,
+            recurrenceDays: activity.recurrenceDays,
+            recurrenceEndDate: activity.recurrenceEndDate,
+            parentActivityId: null,
+          },
+        });
+
+        // Update remaining children to point to new parent
+        for (let i = 1; i < childActivities.length; i++) {
+          await prisma.activity.update({
+            where: { id: childActivities[i].id },
+            data: { parentActivityId: newParent.id },
+          });
+        }
+      }
+    }
+
+    // If this is a child activity, check remaining siblings
+    if (activity.parentActivityId) {
+      const siblings = await prisma.activity.findMany({
+        where: { 
+          parentActivityId: activity.parentActivityId,
+          id: { not: id }, // Exclude current activity being deleted
+        },
+      });
+
+      // If only one sibling remains after deletion, remove its parentActivityId
+      if (siblings.length === 1) {
+        await prisma.activity.update({
+          where: { id: siblings[0].id },
+          data: { parentActivityId: null },
+        });
+      }
+    }
+
     await prisma.activity.delete({
       where: { id: id },
     });

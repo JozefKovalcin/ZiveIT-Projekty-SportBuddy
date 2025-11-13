@@ -34,9 +34,24 @@ const activitySchema = z.object({
   maxAge: z.number().min(6).max(99).default(99),
   price: z.number().min(0).default(0),
   isPublic: z.boolean().default(true),
+  // Recurrence fields
+  isRecurring: z.boolean().default(false),
+  recurrenceFrequency: z.enum(["NONE", "DAILY", "WEEKLY", "MONTHLY"]).default("NONE"),
+  recurrenceDays: z.array(z.number().min(0).max(6)).default([]), // 0=Sunday, 1=Monday, etc.
+  recurrenceEndDate: z.string().datetime().optional(),
+  autoJoinAll: z.boolean().default(false),
+  autoJoinGuestCount: z.number().min(0).max(10).default(0),
 }).refine((data) => data.minAge <= data.maxAge, {
   message: "Minimálny vek musí byť menší alebo rovný maximálnemu veku",
   path: ["minAge"],
+}).refine((data) => {
+  if (data.isRecurring && data.recurrenceFrequency === "WEEKLY" && data.recurrenceDays.length === 0) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Pre týždenné opakovanie musíte vybrať aspoň jeden deň v týždni",
+  path: ["recurrenceDays"],
 });
 
 // GET /api/activities - Get all activities
@@ -63,6 +78,7 @@ export async function GET(request: NextRequest) {
         ...(maxPrice && { price: { lte: parseFloat(maxPrice) } }),
         ...(minAge && { maxAge: { gte: parseInt(minAge) } }), // User age >= activity minAge
         ...(maxAge && { minAge: { lte: parseInt(maxAge) } }), // User age <= activity maxAge
+        parentActivityId: null, // Only show parent activities, not recurring instances
         ...(city && {
           venue: {
             city: city,
@@ -123,13 +139,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = activitySchema.parse(body);
 
+    // Extract auto-join settings before creating activity
+    const { autoJoinAll, autoJoinGuestCount, ...activityFields } = validatedData;
+
+    // Create base activity data
+    const activityData: any = {
+      ...activityFields,
+      date: new Date(validatedData.date),
+      organizerId: session.user.id,
+      currentParticipants: 1 + (autoJoinGuestCount || 0), // 1 for organizer + guests
+      recurrenceEndDate: validatedData.recurrenceEndDate 
+        ? new Date(validatedData.recurrenceEndDate) 
+        : undefined,
+    };
+
     const activity = await prisma.activity.create({
-      data: {
-        ...validatedData,
-        date: new Date(validatedData.date),
-        organizerId: session.user.id,
-        currentParticipants: 1,
-      },
+      data: activityData,
       include: {
         venue: true,
         organizer: {
@@ -148,8 +173,14 @@ export async function POST(request: NextRequest) {
         userId: session.user.id,
         activityId: activity.id,
         status: "CONFIRMED",
+        guestCount: validatedData.autoJoinAll ? validatedData.autoJoinGuestCount : 0,
       },
     });
+
+    // If recurring, create future instances
+    if (activity.isRecurring && activity.recurrenceFrequency !== "NONE") {
+      await createRecurringActivities(activity, session.user.id, validatedData.autoJoinAll, validatedData.autoJoinGuestCount);
+    }
 
     return NextResponse.json(activity, { status: 201 });
   } catch (error) {
@@ -166,4 +197,87 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// Helper function to create recurring activities
+async function createRecurringActivities(parentActivity: any, userId: string, autoJoinAll: boolean, guestCount: number) {
+  const maxInstances = 20; // Maximum 20 instances
+  let instancesCreated = 0;
+  const endDate = parentActivity.recurrenceEndDate || new Date(Date.now() + 60 * 24 * 60 * 60 * 1000); // 2 months default
+  
+  let currentDate = new Date(parentActivity.date);
+  
+  while (instancesCreated < maxInstances && currentDate < endDate) {
+    // Calculate next occurrence based on frequency
+    if (parentActivity.recurrenceFrequency === "DAILY") {
+      currentDate.setDate(currentDate.getDate() + 1);
+    } else if (parentActivity.recurrenceFrequency === "WEEKLY") {
+      // Find next matching day of week
+      let daysToAdd = 1;
+      let nextDate = new Date(currentDate);
+      nextDate.setDate(nextDate.getDate() + daysToAdd);
+      
+      while (!parentActivity.recurrenceDays.includes(nextDate.getDay()) && daysToAdd < 8) {
+        daysToAdd++;
+        nextDate = new Date(currentDate);
+        nextDate.setDate(nextDate.getDate() + daysToAdd);
+      }
+      
+      currentDate = nextDate;
+    } else if (parentActivity.recurrenceFrequency === "MONTHLY") {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+    }
+    
+    // Stop if we've passed the end date
+    if (currentDate >= endDate) break;
+    
+    // Create child activity
+    try {
+      const childActivity = await prisma.activity.create({
+        data: {
+          title: parentActivity.title,
+          description: parentActivity.description,
+          sportType: parentActivity.sportType,
+          skillLevel: parentActivity.skillLevel,
+          date: new Date(currentDate),
+          duration: parentActivity.duration,
+          maxParticipants: parentActivity.maxParticipants,
+          gender: parentActivity.gender,
+          minAge: parentActivity.minAge,
+          maxAge: parentActivity.maxAge,
+          price: parentActivity.price,
+          location: parentActivity.location,
+          locationName: parentActivity.locationName,
+          latitude: parentActivity.latitude,
+          longitude: parentActivity.longitude,
+          venueId: parentActivity.venueId,
+          organizerId: parentActivity.organizerId,
+          isPublic: parentActivity.isPublic,
+          isRecurring: false, // Child activities are not recurring
+          recurrenceFrequency: "NONE",
+          parentActivityId: parentActivity.id,
+          currentParticipants: autoJoinAll ? 1 + guestCount : 0, // 1 for organizer + guests
+        },
+      });
+      
+      // Auto-join organizer if requested
+      if (autoJoinAll) {
+        await prisma.participation.create({
+          data: {
+            userId: userId,
+            activityId: childActivity.id,
+            status: "CONFIRMED",
+            guestCount: guestCount,
+          },
+        });
+      }
+      
+      instancesCreated++;
+    } catch (error) {
+      console.error("Error creating recurring instance:", error);
+      break;
+    }
+  }
+  
+  console.log(`Created ${instancesCreated} recurring activity instances`);
 }

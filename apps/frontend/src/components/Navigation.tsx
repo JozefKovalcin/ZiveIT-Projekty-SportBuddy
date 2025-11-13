@@ -16,7 +16,7 @@ export default function Navigation() {
   const navLinks = [
     { href: '/', label: 'Domov' },
     { href: '/activities', label: 'Aktivity' },
-    { href: '/venues', label: 'Športoviská' },
+    { href: '/venues', label: 'Mapa aktivít' },
     { href: '/my-activities', label: 'Moje aktivity' },
   ];
 
@@ -89,7 +89,7 @@ export default function Navigation() {
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-3 px-4 py-2 rounded-lg hover-glow reveal-effect transition-all duration-200"
+                  className="flex items-center space-x-3 px-4 py-2 rounded-lg hover-glow reveal-effect transition-all duration-200 cursor-pointer"
                   style={{ boxShadow: 'var(--shadow-sm)' }}
                 >
                   <div className="w-10 h-10 gradient-primary rounded-full flex items-center justify-center">
@@ -138,7 +138,7 @@ export default function Navigation() {
                       </Link>
                       <button
                         onClick={handleSignOut}
-                        className="w-full text-left px-4 py-3 text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/20 transition-all"
+                        className="w-full text-left px-4 py-3 text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/20 transition-all cursor-pointer"
                       >
                         <div className="flex items-center space-x-3">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,7 +184,7 @@ export default function Navigation() {
             <ThemeToggle />
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-md hover:bg-[color:var(--fluent-surface-secondary)] transition-all duration-200"
+              className="p-2 rounded-md hover:bg-[color:var(--fluent-surface-secondary)] transition-all duration-200 cursor-pointer"
             >
               <div className="w-6 h-6 flex flex-col justify-center items-center space-y-1.5">
                 <span
@@ -283,7 +283,7 @@ export default function Navigation() {
                   </Link>
                   <button
                     onClick={handleSignOut}
-                    className="w-full block px-4 py-3 text-base text-left font-semibold text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/20 rounded-lg hover-glow reveal-effect transition-all duration-200"
+                    className="w-full block px-4 py-3 text-base text-left font-semibold text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/20 rounded-lg hover-glow reveal-effect transition-all duration-200 cursor-pointer"
                     style={{
                       boxShadow: 'var(--shadow-sm)',
                       backdropFilter: 'blur(20px)',

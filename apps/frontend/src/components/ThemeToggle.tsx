@@ -21,7 +21,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-lg acrylic hover-glow reveal-effect transition-all"
+      className="p-2 rounded-lg acrylic hover-glow reveal-effect transition-all cursor-pointer"
       aria-label="Prepnúť tému"
     >
       {theme === 'light' ? (

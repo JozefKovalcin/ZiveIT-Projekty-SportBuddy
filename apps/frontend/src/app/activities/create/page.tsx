@@ -53,6 +53,12 @@ export default function CreateActivityPage() {
     maxAge: 99,
     price: 0,
     isPublic: true,
+    isRecurring: false,
+    recurrenceFrequency: "NONE" as "NONE" | "DAILY" | "WEEKLY" | "MONTHLY",
+    recurrenceDays: [] as number[],
+    recurrenceEndDate: "",
+    autoJoinAll: false,
+    autoJoinGuestCount: 0,
   });
 
   const [location, setLocation] = useState({
@@ -72,6 +78,11 @@ export default function CreateActivityPage() {
 
     if (formData.minAge > formData.maxAge) {
       setError("Minimálny vek nemôže byť väčší ako maximálny vek");
+      return;
+    }
+
+    if (formData.isRecurring && formData.recurrenceFrequency === "WEEKLY" && formData.recurrenceDays.length === 0) {
+      setError("Pre týždenné opakovanie musíte vybrať aspoň jeden deň v týždni");
       return;
     }
     
@@ -101,6 +112,12 @@ export default function CreateActivityPage() {
             minAge: formData.minAge,
             maxAge: formData.maxAge,
             price: formData.price,
+            isRecurring: formData.isRecurring,
+            recurrenceFrequency: formData.isRecurring ? formData.recurrenceFrequency : "NONE",
+            recurrenceDays: formData.isRecurring && formData.recurrenceFrequency === "WEEKLY" ? formData.recurrenceDays : [],
+            recurrenceEndDate: formData.isRecurring && formData.recurrenceEndDate ? new Date(formData.recurrenceEndDate).toISOString() : undefined,
+            autoJoinAll: formData.isRecurring ? formData.autoJoinAll : false,
+            autoJoinGuestCount: formData.isRecurring && formData.autoJoinAll ? formData.autoJoinGuestCount : 0,
           }),
         }
       );
@@ -541,6 +558,147 @@ export default function CreateActivityPage() {
                     Verejná aktivita (viditeľná pre všetkých)
                   </span>
                 </label>
+              </div>
+
+              {/* Recurring Activity */}
+              <div className="mb-6">
+                <label className="flex items-center space-x-3 cursor-pointer mb-4">
+                  <input
+                    type="checkbox"
+                    name="isRecurring"
+                    checked={formData.isRecurring}
+                    onChange={handleChange}
+                    className="w-5 h-5 rounded border-[color:var(--fluent-border)] text-[color:var(--fluent-accent)] focus:ring-2 focus:ring-[color:var(--fluent-accent)]"
+                  />
+                  <span className="text-sm text-[color:var(--fluent-text)]">
+                    Pravidelne opakovaná aktivita
+                  </span>
+                </label>
+
+                {formData.isRecurring && (
+                  <div className="ml-8 space-y-4 p-4 bg-[color:var(--fluent-surface-secondary)] rounded-lg border border-[color:var(--fluent-border)]">
+                    {/* Frequency */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                        Frekvencia opakovania *
+                      </label>
+                      <select
+                        name="recurrenceFrequency"
+                        value={formData.recurrenceFrequency}
+                        onChange={handleChange}
+                        required={formData.isRecurring}
+                        className="w-full px-4 py-2.5 bg-[color:var(--fluent-surface)] border border-[color:var(--fluent-border)] rounded-lg text-[color:var(--fluent-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--fluent-accent)]"
+                      >
+                        <option value="NONE">Nevybrané</option>
+                        <option value="DAILY">Denne</option>
+                        <option value="WEEKLY">Týždenne</option>
+                        <option value="MONTHLY">Mesačne</option>
+                      </select>
+                    </div>
+
+                    {/* Days of week for WEEKLY */}
+                    {formData.recurrenceFrequency === "WEEKLY" && (
+                      <div>
+                        <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                          Dni v týždni *
+                        </label>
+                        <div className="grid grid-cols-7 gap-2">
+                          {["Ne", "Po", "Ut", "St", "Št", "Pi", "So"].map((day, index) => {
+                            const isSelected = formData.recurrenceDays.includes(index);
+                            return (
+                              <button
+                                key={index}
+                                type="button"
+                                onClick={() => {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    recurrenceDays: isSelected
+                                      ? prev.recurrenceDays.filter(d => d !== index)
+                                      : [...prev.recurrenceDays, index].sort(),
+                                  }));
+                                }}
+                                className={`
+                                  px-3 py-2 rounded-lg text-sm font-medium transition-all
+                                  ${
+                                    isSelected
+                                      ? 'bg-[color:var(--fluent-accent)] text-white'
+                                      : 'bg-[color:var(--fluent-surface)] border border-[color:var(--fluent-border)] text-[color:var(--fluent-text)] hover:border-[color:var(--fluent-border-strong)]'
+                                  }
+                                `}
+                              >
+                                {day}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* End date */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                        Dátum ukončenia opakovania (voliteľné)
+                      </label>
+                      <Input
+                        type="date"
+                        name="recurrenceEndDate"
+                        value={formData.recurrenceEndDate}
+                        onChange={handleChange}
+                        min={formData.date || new Date().toISOString().split("T")[0]}
+                      />
+                      <p className="text-xs text-[color:var(--fluent-text-secondary)] mt-1">
+                        Ak nezadáte, aktivity sa budú generovať na 1 rok dopredu
+                      </p>
+                    </div>
+
+                    {/* Auto-join checkbox */}
+                    <div>
+                      <label className="flex items-center space-x-3 cursor-pointer mb-3">
+                        <input
+                          type="checkbox"
+                          checked={formData.autoJoinAll}
+                          onChange={(e) => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              autoJoinAll: e.target.checked,
+                              autoJoinGuestCount: e.target.checked ? prev.autoJoinGuestCount : 0,
+                            }));
+                          }}
+                          className="w-5 h-5 rounded border-[color:var(--fluent-border)] text-[color:var(--fluent-accent)] focus:ring-2 focus:ring-[color:var(--fluent-accent)]"
+                        />
+                        <span className="text-sm text-[color:var(--fluent-text)]">
+                          Automaticky sa prihlás na všetky vygenerované aktivity
+                        </span>
+                      </label>
+
+                      {formData.autoJoinAll && (
+                        <div className="ml-8">
+                          <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                            Počet hostí (okrem teba)
+                          </label>
+                          <Input
+                            type="number"
+                            min="0"
+                            max={formData.maxParticipants - 1}
+                            value={formData.autoJoinGuestCount}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value) || 0;
+                              const maxGuests = formData.maxParticipants - 1;
+                              setFormData((prev) => ({
+                                ...prev,
+                                autoJoinGuestCount: Math.min(value, maxGuests),
+                              }));
+                            }}
+                            placeholder="0"
+                          />
+                          <p className="text-xs text-[color:var(--fluent-text-secondary)] mt-1">
+                            Počet ľudí, ktorých berieš so sebou (hosťa) - max {formData.maxParticipants - 1}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Buttons */}

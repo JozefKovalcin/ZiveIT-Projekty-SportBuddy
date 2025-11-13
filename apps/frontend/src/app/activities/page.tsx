@@ -20,6 +20,9 @@ interface Activity {
   locationName: string | null;
   latitude: number | null;
   longitude: number | null;
+  isRecurring: boolean;
+  recurrenceFrequency: string;
+  parentActivityId: string | null;
   venue?: {
     id: string;
     name: string;
@@ -77,16 +80,33 @@ function ActivityCard({ activity }: { activity: Activity }) {
   const freeSpots = activity.maxParticipants - activity.currentParticipants;
   const statusInfo = statusLabels[activity.status] || statusLabels.OPEN;
 
+  const handleClick = () => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("activityListSource", "/activities");
+    }
+  };
+
   return (
-    <Link href={`/activities/${activity.id}`}>
+    <Link href={`/activities/${activity.id}`} onClick={handleClick}>
       <Card hover className="h-full">
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
-              <h3 className="text-xl font-bold text-[color:var(--fluent-text)] mb-1">
-                {activity.title}
-              </h3>
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-xl font-bold text-[color:var(--fluent-text)]">
+                  {activity.title}
+                </h3>
+                {((activity.isRecurring && activity.recurrenceFrequency !== "NONE") || activity.parentActivityId) && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 rounded-full">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="23 4 23 10 17 10"></polyline>
+                      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                    Opakovaná
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-[color:var(--fluent-text-secondary)]">
                 {sportTypeLabels[activity.sportType] || activity.sportType}
               </p>

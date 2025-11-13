@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@react-google-maps/api": "latest",
     "@tailwindcss/postcss": "latest",
     "@tailwindcss/typography": "latest",
     "better-auth": "latest",

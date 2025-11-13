@@ -1,0 +1,319 @@
+"use client";
+
+import React, { useState, useEffect, useCallback } from "react";
+import { GoogleMap, useLoadScript, Marker, InfoWindow } from "@react-google-maps/api";
+import Link from "next/link";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+
+interface Activity {
+  id: string;
+  title: string;
+  description: string | null;
+  sportType: string;
+  date: string;
+  duration: number;
+  maxParticipants: number;
+  currentParticipants: number;
+  location: string;
+  locationName: string | null;
+  latitude: number;
+  longitude: number;
+  price: number;
+  organizer: {
+    id: string;
+    name: string;
+    image: string | null;
+  };
+}
+
+const sportTypeLabels: Record<string, string> = {
+  FOOTBALL: "⚽ Futbal",
+  BASKETBALL: "🏀 Basketbal",
+  TENNIS: "🎾 Tenis",
+  VOLLEYBALL: "🏐 Volejbal",
+  BADMINTON: "🏸 Bedminton",
+  TABLE_TENNIS: "🏓 Stolný tenis",
+  RUNNING: "🏃 Beh",
+  CYCLING: "🚴 Cyklistika",
+  SWIMMING: "🏊 Plávanie",
+  GYM: "💪 Posilňovňa",
+  OTHER: "🎯 Iné",
+};
+
+const mapContainerStyle = {
+  width: "100%",
+  height: "calc(100vh - 120px)",
+};
+
+const defaultCenter = {
+  lat: 48.1486, // Bratislava
+  lng: 17.1077,
+};
+
+export default function VenuesPage() {
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+  });
+
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [mapCenter, setMapCenter] = useState(defaultCenter);
+
+  useEffect(() => {
+    fetchActivities();
+    getUserLocation();
+  }, []);
+
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          setUserLocation(location);
+          setMapCenter(location);
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+        }
+      );
+    }
+  };
+
+  const fetchActivities = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/activities?status=OPEN`
+      );
+      if (!response.ok) {
+        throw new Error("Chyba pri načítaní aktivít");
+      }
+      const data = await response.json();
+      // Filter activities that have coordinates
+      const activitiesWithCoords = data.filter(
+        (a: Activity) => a.latitude != null && a.longitude != null
+      );
+      setActivities(activitiesWithCoords);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onMarkerClick = useCallback((activity: Activity) => {
+    setSelectedActivity(activity);
+  }, []);
+
+  const onInfoWindowClose = useCallback(() => {
+    setSelectedActivity(null);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen p-8">
+        <div className="max-w-7xl mx-auto">
+          <p className="text-center text-[color:var(--fluent-text-secondary)]">Načítavam...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen p-8">
+        <div className="max-w-7xl mx-auto">
+          <p className="text-center text-red-500">Chyba pri načítaní mapy</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen p-8">
+        <div className="max-w-7xl mx-auto">
+          <p className="text-center text-[color:var(--fluent-text-secondary)]">Načítavam mapu...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen p-8">
+        <div className="max-w-7xl mx-auto">
+          <p className="text-center text-red-500">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-4xl font-bold text-[color:var(--fluent-text)] mb-2">
+            Mapa aktivít
+          </h1>
+          <p className="text-[color:var(--fluent-text-secondary)]">
+            {activities.length} aktivít v tvojom okolí
+          </p>
+        </div>
+
+        {/* Map */}
+        <Card className="overflow-hidden">
+          <GoogleMap
+            mapContainerStyle={mapContainerStyle}
+            center={mapCenter}
+            zoom={13}
+            options={{
+              zoomControl: true,
+              streetViewControl: false,
+              mapTypeControl: false,
+              fullscreenControl: true,
+            }}
+          >
+              {/* User location marker */}
+              {userLocation && (
+                <Marker
+                  position={userLocation}
+                  icon={{
+                    url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='8' fill='%234285F4' stroke='white' stroke-width='2'/%3E%3C/svg%3E",
+                    scaledSize: { width: 20, height: 20 } as google.maps.Size,
+                    anchor: { x: 10, y: 10 } as google.maps.Point,
+                  }}
+                  title="Tvoja poloha"
+                />
+              )}
+
+              {/* Activity markers */}
+              {activities.map((activity) => (
+                <Marker
+                  key={activity.id}
+                  position={{
+                    lat: activity.latitude,
+                    lng: activity.longitude,
+                  }}
+                  onClick={() => onMarkerClick(activity)}
+                  icon={{
+                    url: getMarkerIcon(activity.sportType),
+                    scaledSize: { width: 40, height: 40 } as google.maps.Size,
+                  }}
+                  title={activity.title}
+                />
+              ))}
+
+              {/* Info Window */}
+              {selectedActivity && (
+                <InfoWindow
+                  position={{
+                    lat: selectedActivity.latitude,
+                    lng: selectedActivity.longitude,
+                  }}
+                  onCloseClick={onInfoWindowClose}
+                >
+                  <div style={{ padding: '8px', maxWidth: '280px' }}>
+                    <h3 style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '8px', color: '#000' }}>
+                      {selectedActivity.title}
+                    </h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '14px', marginBottom: '12px', color: '#333' }}>
+                      <p style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                        {sportTypeLabels[selectedActivity.sportType] || selectedActivity.sportType}
+                      </p>
+                      <p style={{ margin: 0 }}>
+                        {new Date(selectedActivity.date).toLocaleDateString("sk-SK", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}{" "}
+                        o{" "}
+                        {new Date(selectedActivity.date).toLocaleTimeString("sk-SK", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                      <p style={{ margin: 0 }}>
+                        {selectedActivity.currentParticipants}/{selectedActivity.maxParticipants} účastníkov
+                      </p>
+                      <p style={{ color: '#666', margin: 0 }}>
+                        📍 {selectedActivity.locationName || selectedActivity.location}
+                      </p>
+                      {selectedActivity.price > 0 && (
+                        <p style={{ fontWeight: '500', color: '#16a34a', margin: 0 }}>
+                          {selectedActivity.price} €
+                        </p>
+                      )}
+                    </div>
+                    <Link href={`/activities/${selectedActivity.id}`}>
+                      <button style={{ 
+                        width: '100%', 
+                        padding: '8px 16px', 
+                        backgroundColor: '#2563eb', 
+                        color: 'white', 
+                        borderRadius: '8px', 
+                        fontWeight: '500', 
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                      }}>
+                        Zobraziť detail
+                      </button>
+                    </Link>
+                  </div>
+                </InfoWindow>
+              )}
+          </GoogleMap>
+        </Card>
+
+        {/* Legend */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="text-lg">Legenda</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-white"></div>
+                <span className="text-sm">Tvoja poloha</span>
+              </div>
+              {Object.entries(sportTypeLabels).map(([key, label]) => (
+                <div key={key} className="flex items-center gap-2">
+                  <span className="text-2xl">{label.split(" ")[0]}</span>
+                  <span className="text-sm">{label.split(" ").slice(1).join(" ")}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+// Helper function to get marker icon based on sport type
+function getMarkerIcon(sportType: string): string {
+  // Using emoji as markers - you can replace with custom icons
+  const icons: Record<string, string> = {
+    FOOTBALL: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext x='50%25' y='50%25' font-size='30' text-anchor='middle' dominant-baseline='central'%3E⚽%3C/text%3E%3C/svg%3E",
+    BASKETBALL: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext x='50%25' y='50%25' font-size='30' text-anchor='middle' dominant-baseline='central'%3E🏀%3C/text%3E%3C/svg%3E",
+    TENNIS: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext x='50%25' y='50%25' font-size='30' text-anchor='middle' dominant-baseline='central'%3E🎾%3C/text%3E%3C/svg%3E",
+    VOLLEYBALL: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext x='50%25' y='50%25' font-size='30' text-anchor='middle' dominant-baseline='central'%3E🏐%3C/text%3E%3C/svg%3E",
+    BADMINTON: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext x='50%25' y='50%25' font-size='30' text-anchor='middle' dominant-baseline='central'%3E🏸%3C/text%3E%3C/svg%3E",
+    TABLE_TENNIS: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext x='50%25' y='50%25' font-size='30' text-anchor='middle' dominant-baseline='central'%3E🏓%3C/text%3E%3C/svg%3E",
+    RUNNING: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext x='50%25' y='50%25' font-size='30' text-anchor='middle' dominant-baseline='central'%3E🏃%3C/text%3E%3C/svg%3E",
+    CYCLING: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext x='50%25' y='50%25' font-size='30' text-anchor='middle' dominant-baseline='central'%3E🚴%3C/text%3E%3C/svg%3E",
+    SWIMMING: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext x='50%25' y='50%25' font-size='30' text-anchor='middle' dominant-baseline='central'%3E🏊%3C/text%3E%3C/svg%3E",
+    GYM: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext x='50%25' y='50%25' font-size='30' text-anchor='middle' dominant-baseline='central'%3E💪%3C/text%3E%3C/svg%3E",
+    OTHER: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ctext x='50%25' y='50%25' font-size='30' text-anchor='middle' dominant-baseline='central'%3E🎯%3C/text%3E%3C/svg%3E",
+  };
+  
+  return icons[sportType] || icons.OTHER;
+}

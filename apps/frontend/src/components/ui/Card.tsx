@@ -34,14 +34,16 @@ export const Card: React.FC<CardProps> = ({
 interface CardHeaderProps {
   children: React.ReactNode;
   className?: string;
+  onClick?: () => void;
 }
 
 export const CardHeader: React.FC<CardHeaderProps> = ({
   children,
-  className = ''
+  className = '',
+  onClick
 }) => {
   return (
-    <div className={`mb-5 ${className}`}>
+    <div className={`mb-5 ${className}`} onClick={onClick}>
       {children}
     </div>
   );

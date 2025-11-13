@@ -18,6 +18,23 @@ export async function POST(
       );
     }
 
+    // Parse request body for guest count
+    let guestCount = 0;
+    try {
+      const body = await request.json();
+      guestCount = body.guestCount || 0;
+    } catch {
+      // If no body, default to 0
+      guestCount = 0;
+    }
+
+    if (guestCount < 0) {
+      return NextResponse.json(
+        { error: "Počet hostí nemôže byť záporný" },
+        { status: 400 }
+      );
+    }
+
     const activity = await prisma.activity.findUnique({
       where: { id: id },
       include: {
@@ -39,13 +56,6 @@ export async function POST(
       );
     }
 
-    if (activity.currentParticipants >= activity.maxParticipants) {
-      return NextResponse.json(
-        { error: "Aktivita je už naplnená" },
-        { status: 400 }
-      );
-    }
-
     // Check if user is already participating
     const existingParticipation = await prisma.participation.findUnique({
       where: {
@@ -57,36 +67,79 @@ export async function POST(
     });
 
     if (existingParticipation) {
+      // If already participating, update guest count
+      const totalParticipants = 1 + guestCount; // user + guests
+      const currentTotalWithoutThisUser = activity.currentParticipants - (1 + existingParticipation.guestCount);
+      const newTotal = currentTotalWithoutThisUser + totalParticipants;
+      
+      const availableSpots = activity.maxParticipants - currentTotalWithoutThisUser;
+      if (totalParticipants > availableSpots) {
+        return NextResponse.json(
+          { error: `K dispozícii je len ${availableSpots} voľných miest` },
+          { status: 400 }
+        );
+      }
+
+      // Update participation with new guest count
+      await prisma.participation.update({
+        where: {
+          userId_activityId: {
+            userId: session.user.id,
+            activityId: id,
+          },
+        },
+        data: {
+          guestCount: guestCount,
+        },
+      });
+
+      // Update activity participant count
+      await prisma.activity.update({
+        where: { id: id },
+        data: {
+          currentParticipants: newTotal,
+          status: newTotal >= activity.maxParticipants ? "FULL" : "OPEN",
+        },
+      });
+
+      return NextResponse.json({ 
+        message: "Počet hostí aktualizovaný",
+        guestCount: guestCount 
+      });
+    }
+
+    // Check available spots (1 for user + guestCount)
+    const totalNeeded = 1 + guestCount;
+    const availableSpots = activity.maxParticipants - activity.currentParticipants;
+    if (totalNeeded > availableSpots) {
       return NextResponse.json(
-        { error: "Už ste prihlásený na túto aktivitu" },
+        { error: `K dispozícii je len ${availableSpots} voľných miest` },
         { status: 400 }
       );
     }
 
-    // Create participation
-    const participation = await prisma.participation.create({
+    // Create new participation
+    await prisma.participation.create({
       data: {
         userId: session.user.id,
         activityId: id,
         status: "CONFIRMED",
+        guestCount: guestCount,
       },
     });
 
-    // Update activity participant count
+    // Update activity participant count (user + guests)
+    const newParticipantCount = activity.currentParticipants + totalNeeded;
+    
     const updatedActivity = await prisma.activity.update({
       where: { id: id },
       data: {
-        currentParticipants: {
-          increment: 1,
-        },
-        status:
-          activity.currentParticipants + 1 >= activity.maxParticipants
-            ? "FULL"
-            : "OPEN",
+        currentParticipants: newParticipantCount,
+        status: newParticipantCount >= activity.maxParticipants ? "FULL" : "OPEN",
       },
     });
 
-    return NextResponse.json({ participation, activity: updatedActivity });
+    return NextResponse.json({ activity: updatedActivity });
   } catch (error) {
     console.error("Error joining activity:", error);
     return NextResponse.json(
@@ -123,12 +176,25 @@ export async function DELETE(
       );
     }
 
-    if (activity.organizerId === session.user.id) {
+    // Check participation exists
+    const participation = await prisma.participation.findUnique({
+      where: {
+        userId_activityId: {
+          userId: session.user.id,
+          activityId: id,
+        },
+      },
+    });
+
+    if (!participation) {
       return NextResponse.json(
-        { error: "Organizátor nemôže opustiť vlastnú aktivitu" },
+        { error: "Nie ste prihlásený na túto aktivitu" },
         { status: 400 }
       );
     }
+
+    // Calculate total participants to remove (user + guests)
+    const totalToRemove = 1 + participation.guestCount;
 
     // Delete participation
     await prisma.participation.delete({
@@ -145,7 +211,7 @@ export async function DELETE(
       where: { id: id },
       data: {
         currentParticipants: {
-          decrement: 1,
+          decrement: totalToRemove,
         },
         status: "OPEN",
       },
@@ -160,3 +226,4 @@ export async function DELETE(
     );
   }
 }
+

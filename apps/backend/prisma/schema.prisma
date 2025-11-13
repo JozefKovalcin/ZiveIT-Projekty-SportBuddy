@@ -70,7 +70,9 @@ model Account {
   accessToken       String? @db.Text
   refreshToken      String? @db.Text
   idToken           String? @db.Text
-  expiresAt         DateTime?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope             String?
   password          String?
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt         DateTime @default(now())
@@ -176,6 +178,14 @@ model Venue {
   @@index([sportTypes])
 }
 
+// Recurrence frequency enumeration
+enum RecurrenceFrequency {
+  NONE
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
 // Activity (Športová aktivita) model
 model Activity {
   id              String         @id @default(cuid())
@@ -202,6 +212,13 @@ model Activity {
   latitude        Float?
   longitude       Float?
   
+  // Recurrence fields
+  isRecurring     Boolean        @default(false)
+  recurrenceFrequency RecurrenceFrequency @default(NONE)
+  recurrenceDays  Int[]          @default([]) // Days of week: 0=Sunday, 1=Monday, etc.
+  recurrenceEndDate DateTime?    // When to stop creating recurring activities
+  parentActivityId String?       // Reference to the original recurring activity
+  
   // Venue is now optional for backward compatibility
   venueId         String?
   organizerId     String
@@ -212,6 +229,8 @@ model Activity {
   venue          Venue?          @relation(fields: [venueId], references: [id], onDelete: SetNull)
   organizer      User            @relation(fields: [organizerId], references: [id], onDelete: Cascade)
   participations Participation[]
+  parentActivity Activity?       @relation("RecurringActivities", fields: [parentActivityId], references: [id], onDelete: SetNull)
+  childActivities Activity[]     @relation("RecurringActivities")
 
   @@index([sportType])
   @@index([date])
@@ -219,6 +238,8 @@ model Activity {
   @@index([venueId])
   @@index([gender])
   @@index([skillLevel])
+  @@index([parentActivityId])
+  @@index([isRecurring])
 }
 
 // Participation (Účasť na aktivite) model
@@ -227,6 +248,7 @@ model Participation {
   userId     String
   activityId String
   status     ParticipationStatus @default(CONFIRMED)
+  guestCount Int                 @default(0) // Number of additional guests brought by this participant
   joinedAt   DateTime            @default(now())
 
   // Relations
