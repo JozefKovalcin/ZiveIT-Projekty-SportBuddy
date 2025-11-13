@@ -259,7 +259,7 @@ Ako používateľ
 chcem sa prihlásiť pomocou Google, Facebook alebo iných platforiem
 aby som nemusel vytvárať nové heslo a prihlásenie bolo rýchlejšie
 
-**Vývojár:** -
+**Vývojár:** - Jozef Kovalčín
 
 ### Tasky:
 - ⏸️ BetterAuth konfigurácia OAuth providers (Google, Facebook)
@@ -444,7 +444,7 @@ Ako používateľ
 chcem vidieť profily ostatných používateľov s ich predošlými aktivitami
 aby som vedel, s kým budem hrať
 
-**Vývojár:** -
+**Vývojár:** - Jozef Kovalčín
 
 ### Tasky:
 #### Backend
