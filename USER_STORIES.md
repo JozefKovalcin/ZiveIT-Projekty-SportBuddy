@@ -17,20 +17,21 @@ aby som mohol používať aplikáciu
 - ✅ PostgreSQL databáza
 - ✅ Prisma schema: User model
 - ✅ BetterAuth konfigurácia (credentials provider)
-- ✅ Registračný formulár (/register)
-- ✅ Prihlasovací formulár (/login)
-- ✅ Validácia (email formát, heslo min 8 znakov)
+- ✅ Registračný formulár (/auth/signup)
+- ✅ Prihlasovací formulár (/auth/signin)
+- ✅ Validácia (email formát, heslo min 8 znakov s požiadavkami)
 - ✅ Hash hesla (scrypt via Better Auth)
-- ✅ Session management (localStorage)
+- ✅ Session management
 - ✅ Responzívny dizajn formulárov
-- ✅ Podmienené zobrazenie "Vytvoriť účet" button (skrytie pre prihlásených) - Jozef Kovalčín
+- ✅ Podmienené zobrazenie "Vytvoriť účet" button (skrytie pre prihlásených) - Jozef Kovalčín fix
+- ✅ Voliteľné meno pri registrácii (môže sa vyplniť neskôr v profile settings) - Kamil Berecký
 
 ### Výsledné funkcie:
-- ✅ Fungujúca registrácia
+- ✅ Fungujúca registrácia s email/heslo
 - ✅ Fungujúce prihlásenie
 - ✅ Session persistence
 - ✅ Redirect na /dashboard po prihlásení
-- ✅ Homepage nezobrazuje CTA button pre prihlásených používateľov
+- ✅ Meno je voliteľné pri registrácii, môže sa vyplniť v profile
 
 ---
 
@@ -73,8 +74,6 @@ aby som mohol prezentovať svoje športové záujmy a mať prehľad o mojich uda
 - ✅ Dashboard so zoznamom
 - ✅ Filtrovanie funguje
 - ✅ Štatistiky sa zobrazujú
-
-**Poznámka:** Profil model existuje v databáze (User + Profile), ale žiadne UI stránky nie sú implementované. Dashboard stránka existuje s navigáciou a základnou štruktúrou (3 štatistické karty), ale neobsahuje žiadne reálne dáta ani zoznam aktivít.
 
 ---
 
@@ -203,39 +202,86 @@ aby som rezervoval miesto
 
 ---
 
-## US-006: Vyhľadávanie aktivít
+## US-006: Vyhľadávanie a filtrovanie aktivít
 
-**Status:** 🔄 WIP (Work In Progress)
+**Status:** ✅ HOTOVÉ
 
 Ako používateľ
-chcem vyhľadávať aktivity
-aby som rýchlo našiel, čo ma zaujíma
+chcem vyhľadávať a filtrovať aktivity podľa rôznych kritérií
+aby som rýchlo našiel aktivity, ktoré mi vyhovujú
 
 **Vývojár:** Kamil Berecký
 
-### Tasky:
-- ✅ API: GET /api/activities?search=... (full-text cez názov, popis)
-- ✅ Prisma search
-- ⏸️ Search bar
-- ⏸️ Search input na /activities
-- ⏸️ Loading spinner pri searchi
-- ⏸️ Highlighting výsledkov (optional)
-- ⏸️ Clear search button
-- ⏸️ "Žiadne výsledky" state
-- ⏸️ Query params v URL (?search=futbal)
+### Backend - Vyhľadávanie
+- ✅ Prisma full-text search (názov, popis, miesto)
+- ✅ Case-insensitive vyhľadávanie
+- ✅ Search query parsing a validácia
+
+### Backend - Filtrovanie
+- ✅ API: GET /api/activities s rozšíreným filtrovaním
+- ✅ Filtrovanie: sportType (druh športu)
+- ✅ Filtrovanie: skillLevel (úroveň)
+- ✅ Filtrovanie: gender (pohlavie)
+- ✅ Filtrovanie: vekové rozpätie (minAge-maxAge)
+- ✅ Filtrovanie: cena (od-do)
+- ✅ Filtrovanie: dátum (od-do)
+- ✅ Filtrovanie: status (OPEN, FULL, atď.)
+- ✅ Správne kombinovanie filtrov (AND logika)
+
+### Frontend - Search bar
+- ✅ Search input na /activities stránke
+- ✅ Real-time vyhľadávanie s debouncing (500ms)
+- ✅ Loading spinner pri searchi
+- ✅ Clear search button (X icon)
+- ✅ "Žiadne výsledky" empty state s peknou ikonou
+
+### Frontend - Filter panel
+- ✅ Expandable/collapsible filter panel na /activities
+- ✅ Dropdown/Select pre šport
+- ✅ Dropdown/Select pre úroveň
+- ✅ Dropdown/Select pre pohlavie
+- ✅ Number inputs pre vek (od-do)
+- ✅ Number inputs pre cenu (od-do)
+- ✅ Date inputs pre dátumové rozpätie
+- ✅ "Resetovať" tlačidlo
+- ✅ Quick filter badges (zobrazenie aktívnych filtrov)
+- ✅ Možnosť odstrániť jednotlivé filtre z badges
+- ✅ Počet aktívnych filtrov v badge
+- ✅ Počet výsledkov v real-time
+- ✅ Collapse/Expand filter panel
+- ✅ Responzívny dizajn (mobile/tablet/desktop)
+
+### URL & State management
+- ✅ Query params v URL (?search=futbal&sportType=FOOTBALL&skillLevel=BEGINNER)
+- ✅ URL synchronizácia pri zmene filtrov
+- ✅ Browser back/forward support
+- ✅ Deep linking (možnosť zdieľať URL s filtrami)
+- ✅ Automatické načítanie filtrov z URL pri otvorení stránky
+
+### UX vylepšenia
+- ✅ Skeleton loading pre výsledky (6 skeleton cards)
+- ✅ Smooth transitions pri filtrovaní
+- ✅ Real-time počet výsledkov
+- ✅ Počet aktívnych filtrov badge
+- ✅ Responzívny dizajn (mobile/tablet/desktop)
+- ✅ Loading state s animáciou
 
 ### Výsledné funkcie:
-- ✅ Vyhľadávanie funguje (API)
-- ⏸️ Real-time výsledky (UI)
-- ⏸️ URL synchronizácia
+- ✅ Backend API podporuje vyhľadávanie a filtrovanie
+- ✅ Real-time search s debouncing
+- ✅ Kompletný filter panel UI
+- ✅ URL synchronizácia
+- ✅ Mobile-responsive design
+- ✅ Všetky filtre funkčné a testované
+- ✅ Pekný UX s loading states a empty states
 
-**Poznámka:** API podporuje search, ale UI komponenty nie sú implementované.
+**Poznámka:** Spojené US-006 (Vyhľadávanie) a US-012 (Pokročilé filtrovanie) do jednej US.
 
 ---
 
 ## US-007: Základný UI/UX
 
-**Status:** 🔄 WIP (Work In Progress)
+**Status:** ✅ HOTOVÉ
 
 Ako používateľ
 chcem pekné a funkčné rozhranie
@@ -246,22 +292,35 @@ aby som mal dobrý zážitok
 ### Tasky:
 - ✅ Responzívny dizajn (mobile/tablet/desktop)
 - ✅ Header s navigáciou (logo, links, user menu)
-- ✅ Footer (copyright, links)
-- ✅ Dark mode toggle
-- ⏸️ Loading states všade (skeleton, spinner)
-- ⏸️ Notifikácie (react-hot-toast)
-- ⏸️ Error states a error boundaries
-- ⏸️ 404 stránka
-- ✅ Konzistencia písma a farebných schém
-- ✅ Tailwind configurácia
+- ✅ Footer (copyright, links) - acrylic design, zarovnané s navbar
+- ✅ Dark mode toggle (Light/Dark/System)
+- ✅ Fluent Design System (acrylic effects, shadows, borders)
+- ✅ Loading states všade (skeleton, spinner)
+- ✅ Notifikácie implementované
+- ✅ Error states handling
+- ✅ 404 stránka
+- ✅ Konzistencia písma a farebných schém (CSS variables)
+- ✅ Tailwind configurácia s custom variables
 - ✅ Mobilné menu (hamburger)
+- ✅ Animácie a transitions (hover-glow, reveal-effect)
+- ✅ Gradient buttons a cards
+- ✅ Custom SVG logo s animáciami
+- ✅ Sticky navigation bar s acrylic efektom
+- ✅ Lokalizácia do slovenčiny (SK)
+- ✅ PWA support (manifest.json, service worker)
+- ✅ Google Maps integration s custom styling
+- ✅ Centralizovaný Google Maps loading (GoogleMapsContext)
 
 ### Výsledné funkcie:
-- ✅ Responzívny dizajn
-- ✅ Konzistentný UI
-- ⏸️ Loading/Error states
+- ✅ Responzívny dizajn pre všetky zariadenia
+- ✅ Fluent Design System konzistentne aplikovaný
+- ✅ Dark/Light mode s plynulými prechodmi
+- ✅ Loading states a error handling všade
+- ✅ Pekné animácie a visual effects
+- ✅ Slovenská lokalizácia
+- ✅ PWA ready
 
-**Poznámka:** Základný design a theme switching je hotový, ale chýbajú loading states, error handling a notifikácie.
+**Poznámka:** Dizajn v štýle Fluent (Windows 11), UI je plne funkčné.
 
 ---
 ## US-008: OAuth prihlásenie
@@ -272,11 +331,7 @@ Ako používateľ
 chcem sa prihlásiť pomocou Google, Facebook alebo iných platforiem
 aby som nemusel vytvárať nové heslo a prihlásenie bolo rýchlejšie
 
-<<<<<<< HEAD
-**Vývojár:** - Jozef Kovalčín
-=======
 **Vývojár:** Jozef Kovalčín
->>>>>>> ad142ec (feat: recurring activities, my activities page, map view with markers)
 
 ### Tasky:
 - ✅ BetterAuth konfigurácia OAuth providers (Google, Facebook, Apple)
@@ -414,61 +469,6 @@ aby som nezabudol na termín
 - ⏸️ Apple Calendar export
 - ⏸️ Outlook Calendar export
 - ⏸️ .ics download
-
----
-
-## US-012: Pokročilé filtrovanie a preferencie
-
-**Status:** 🔄 WIP (Work In Progress)
-
-Ako používateľ
-chcem filtrovať aktivity podľa skúseností, pohlavia, veku, ceny a ďalších kritérií
-aby som našiel aktivity, ktoré mi vyhovujú
-
-**Vývojár:** Jozef Kovalčín
-
-### Tasky:
-#### Rozšírenie databázového modelu
-- ✅ Prisma schema: rozšírenie Activity (skillLevel, gender, minAge, maxAge, price)
-- ✅ Prisma schema: UserPreferences model (preferredSports, skillLevel, maxDistance, maxPrice)
-- ✅ Migrácia databázy
-
-#### Backend
-- ✅ API: GET /api/activities s rozšíreným filtrovaním
-- ✅ Filtrovanie: skillLevel (začiatočník, stredne pokročilý, pokročilý, expert)
-- ✅ Filtrovanie: gender (muži, ženy, zmiešané)
-- ✅ Filtrovanie: vekové rozpätie (minAge-maxAge)
-- ✅ Filtrovanie: cena (od-do)
-- ⏸️ API: GET/PUT /api/preferences (uloženie používateľských preferencií)
-
-#### Frontend - Filter panel
-- ⏸️ Bočný filter panel na /activities
-- ⏸️ Dropdown/Select pre úroveň (skillLevel)
-- ⏸️ Radio buttons pre pohlavie
-- ⏸️ Slider/Input pre vek (range)
-- ⏸️ Slider/Input pre cenu (range)
-- ⏸️ Checkbox pre športy
-- ⏸️ "Použiť filtre" a "Resetovať" tlačidlá
-- ⏸️ Uložené preferencie v /profile/preferences
-- ⏸️ Quick filter badges (zobrazenie aktívnych filtrov)
-- ⏸️ Mobile-friendly filter (bottom sheet/modal)
-
-#### Formulár na vytvorenie aktivity
-- ✅ Pridať polia: skillLevel, gender, minAge, maxAge, price do create formu
-- ✅ Custom styled number inputs s +/- tlačidlami
-- ✅ Validácia (minAge <= maxAge, price >= 0)
-- ✅ Backend validácia všetkých polí
-- ✅ Zobrazenie nových polí na detail stránke
-
-### Výsledné funkcie:
-- ✅ Databázový model rozšírený
-- ✅ Backend API podporuje filtrovanie
-- ✅ Rozšírený create form s všetkými poliami
-- ✅ Custom UI controls (duration, participants, age, price)
-- ✅ Detail stránka zobrazuje všetky nové polia
-- ⏸️ Filter panel UI na /activities
-- ⏸️ Uloženie preferencií
-- ⏸️ Responzívny filter UI
 
 ---
 
@@ -965,5 +965,3 @@ aby som vedel, na čo som sa prihlásil a čo som vytvoril
 - 🔄 WIP (Work In Progress - rozrobené)
 - ⏸️ Nerealizované (Planned but not started)
 - 📋 PLANNED (Celá user story je len naplánovaná)
-
----

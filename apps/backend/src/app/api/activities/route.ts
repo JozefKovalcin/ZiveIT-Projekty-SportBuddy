@@ -54,10 +54,15 @@ const activitySchema = z.object({
   path: ["recurrenceDays"],
 });
 
-// GET /api/activities - Get all activities
+// GET /api/activities - Get all activities with search and filtering
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+
+    // Search parameter
+    const search = searchParams.get("search");
+
+    // Filter parameters
     const sportType = searchParams.get("sportType");
     const city = searchParams.get("city");
     const status = searchParams.get("status") || "OPEN";
@@ -67,27 +72,52 @@ export async function GET(request: NextRequest) {
     const maxPrice = searchParams.get("maxPrice");
     const minAge = searchParams.get("minAge");
     const maxAge = searchParams.get("maxAge");
+    const dateFrom = searchParams.get("dateFrom");
+    const dateTo = searchParams.get("dateTo");
+
+    // Build where clause
+    const where: any = {
+      status: status as any,
+      parentActivityId: null, // Only show parent activities, not recurring instances
+      date: {
+        gte: dateFrom ? new Date(dateFrom) : new Date(),
+        ...(dateTo && { lte: new Date(dateTo) }),
+      },
+    };
+
+    // Full-text search on title and description
+    if (search && search.trim()) {
+      where.OR = [
+        { title: { contains: search.trim(), mode: "insensitive" } },
+        { description: { contains: search.trim(), mode: "insensitive" } },
+        { location: { contains: search.trim(), mode: "insensitive" } },
+        { locationName: { contains: search.trim(), mode: "insensitive" } },
+      ];
+    }
+
+    // Apply filters
+    if (sportType) where.sportType = sportType as any;
+    if (skillLevel) where.skillLevel = skillLevel as any;
+    if (gender) where.gender = gender as any;
+
+    // Price range
+    if (minPrice || maxPrice) {
+      where.price = {};
+      if (minPrice) where.price.gte = parseFloat(minPrice);
+      if (maxPrice) where.price.lte = parseFloat(maxPrice);
+    }
+
+    // Age range (user age must fit within activity's age range)
+    if (minAge) where.maxAge = { gte: parseInt(minAge) };
+    if (maxAge) where.minAge = { lte: parseInt(maxAge) };
+
+    // City filter (if venue exists)
+    if (city) {
+      where.venue = { city };
+    }
 
     const activities = await prisma.activity.findMany({
-      where: {
-        ...(sportType && { sportType: sportType as any }),
-        status: status as any,
-        ...(skillLevel && { skillLevel: skillLevel as any }),
-        ...(gender && { gender: gender as any }),
-        ...(minPrice && { price: { gte: parseFloat(minPrice) } }),
-        ...(maxPrice && { price: { lte: parseFloat(maxPrice) } }),
-        ...(minAge && { maxAge: { gte: parseInt(minAge) } }), // User age >= activity minAge
-        ...(maxAge && { minAge: { lte: parseInt(maxAge) } }), // User age <= activity maxAge
-        parentActivityId: null, // Only show parent activities, not recurring instances
-        ...(city && {
-          venue: {
-            city: city,
-          },
-        }),
-        date: {
-          gte: new Date(),
-        },
-      },
+      where,
       include: {
         venue: true,
         organizer: {

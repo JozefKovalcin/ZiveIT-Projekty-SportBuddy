@@ -83,10 +83,10 @@ const genderLabels: Record<string, string> = {
 };
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  OPEN: { label: "Otvorená", color: "bg-green-500" },
-  FULL: { label: "Plná", color: "bg-orange-500" },
-  CANCELLED: { label: "Zrušená", color: "bg-red-500" },
-  COMPLETED: { label: "Ukončená", color: "bg-gray-500" },
+  OPEN: { label: "Otvorená", color: "bg-green-600 shadow-sm" },
+  FULL: { label: "Plná", color: "bg-orange-600 shadow-sm" },
+  CANCELLED: { label: "Zrušená", color: "bg-red-600 shadow-sm" },
+  COMPLETED: { label: "Ukončená", color: "bg-gray-600 shadow-sm" },
 };
 
 export default function ActivityDetailPage() {
@@ -410,7 +410,7 @@ export default function ActivityDetailPage() {
                     {sportTypeLabels[activity.sportType] || activity.sportType}
                   </p>
                   {activity.isRecurring && activity.recurrenceFrequency !== "NONE" && (
-                    <span className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium bg-purple-500 text-white rounded-full shadow-sm">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="23 4 23 10 17 10"></polyline>
                         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
@@ -550,7 +550,7 @@ export default function ActivityDetailPage() {
                         }
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 mt-2 px-4 py-2 bg-[color:var(--fluent-accent)] text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
+                        className="inline-flex items-center gap-2 mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-semibold shadow-sm"
                       >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
@@ -705,7 +705,7 @@ export default function ActivityDetailPage() {
                                 </div>
                               </div>
                               {isCurrentActivity && (
-                                <span className="px-2 py-1 text-xs font-medium bg-[color:var(--fluent-accent)] text-white rounded">
+                                <span className="px-2 py-1 text-xs font-semibold bg-blue-600 text-white rounded shadow-sm">
                                   Aktuálny termín
                                 </span>
                               )}

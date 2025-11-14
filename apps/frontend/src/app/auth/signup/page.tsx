@@ -21,10 +21,8 @@ export default function SignUpPage() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    // Name validation
-    if (!formData.name.trim()) {
-      newErrors.name = 'Meno je povinné';
-    } else if (formData.name.length < 2) {
+    // Name validation (optional, but if provided must be valid)
+    if (formData.name.trim() && formData.name.length < 2) {
       newErrors.name = 'Meno musí mať aspoň 2 znaky';
     }
 
@@ -145,7 +143,7 @@ export default function SignUpPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-base font-semibold text-[color:var(--fluent-text)] mb-2">
-                Meno
+                Meno <span className="text-sm font-normal text-[color:var(--fluent-text-secondary)]">(voliteľné)</span>
               </label>
               <Input
                 id="name"
@@ -158,6 +156,11 @@ export default function SignUpPage() {
               />
               {errors.name && (
                 <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">{errors.name}</p>
+              )}
+              {!errors.name && !formData.name && (
+                <p className="mt-2 text-sm text-[color:var(--fluent-text-tertiary)]">
+                  Môžete vyplniť neskôr v nastaveniach profilu
+                </p>
               )}
             </div>
 

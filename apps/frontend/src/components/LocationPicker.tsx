@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Input } from "./ui/Input";
+import { useGoogleMaps } from "@/contexts/GoogleMapsContext";
 
 interface LocationPickerProps {
   value: {
@@ -19,89 +20,55 @@ interface LocationPickerProps {
 }
 
 export function LocationPicker({ value, onChange }: LocationPickerProps) {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const { isLoaded, loadError } = useGoogleMaps();
   const [error, setError] = useState<string | null>(null);
   const autocompleteRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    
-    if (!apiKey) {
-      setError("Google Maps API kľúč nie je nastavený. Pridajte NEXT_PUBLIC_GOOGLE_MAPS_API_KEY do .env");
+    if (loadError) {
+      setError("Nepodarilo sa načítať Google Maps");
       return;
     }
 
-    // Check if already loaded
-    if (window.google?.maps?.places) {
-      setIsLoaded(true);
-      return;
-    }
-
-    // Load Google Maps script
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-    script.async = true;
-    script.defer = true;
-    
-    script.onload = () => {
-      // Wait a bit for libraries to fully load
-      setTimeout(() => {
-        if (window.google?.maps?.places) {
-          setIsLoaded(true);
-        } else {
-          setError("Google Maps sa načítalo, ale Places API nie je k dispozícii");
-        }
-      }, 100);
-    };
-    
-    script.onerror = () => setError("Nepodarilo sa načítať Google Maps");
-    
-    document.head.appendChild(script);
-
-    return () => {
-      if (script.parentNode) {
-        script.parentNode.removeChild(script);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     if (!isLoaded || !autocompleteRef.current) return;
 
     // Double check that google.maps.places is available
     if (!window.google?.maps?.places?.Autocomplete) {
-      console.error('Google Maps Places API not available');
-      setError('Google Maps Places API nie je k dispozícii. Použite manuálny vstup nižšie.');
+      console.error("Google Maps Places API not available");
+      setError(
+        "Google Maps Places API nie je k dispozícii. Použite manuálny vstup nižšie."
+      );
       return;
     }
 
     try {
       // Create simple input element
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = 'Začnite písať adresu...';
-      input.className = 'w-full px-4 py-2.5 bg-[color:var(--fluent-surface-secondary)] border border-[color:var(--fluent-border)] rounded-lg text-[color:var(--fluent-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--fluent-accent)]';
+      const input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = "Začnite písať adresu...";
+      input.className =
+        "w-full px-4 py-2.5 bg-[color:var(--fluent-surface-secondary)] border border-[color:var(--fluent-border)] rounded-lg text-[color:var(--fluent-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--fluent-accent)]";
       input.value = value.address;
 
       // Clear container and add input
-      autocompleteRef.current.innerHTML = '';
+      autocompleteRef.current.innerHTML = "";
       autocompleteRef.current.appendChild(input);
 
       // Use classic Autocomplete (still supported, just deprecated warning)
       const autocomplete = new google.maps.places.Autocomplete(input, {
-        componentRestrictions: { country: 'sk' },
-        fields: ['formatted_address', 'geometry', 'name'],
+        componentRestrictions: { country: "sk" },
+        fields: ["formatted_address", "geometry", "name"],
       });
 
-      autocomplete.addListener('place_changed', () => {
+      autocomplete.addListener("place_changed", () => {
         const place = autocomplete.getPlace();
-        
+
         if (!place.geometry || !place.geometry.location) {
           return;
         }
 
         onChange({
-          address: place.formatted_address || '',
+          address: place.formatted_address || "",
           name: place.name !== place.formatted_address ? place.name : undefined,
           latitude: place.geometry.location.lat(),
           longitude: place.geometry.location.lng(),
@@ -109,7 +76,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
       });
 
       // Add custom styles for the autocomplete dropdown
-      const style = document.createElement('style');
+      const style = document.createElement("style");
       style.textContent = `
         .pac-container {
           background-color: var(--fluent-surface-secondary);
@@ -153,23 +120,31 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
         }
       `;
       document.head.appendChild(style);
-
     } catch (err: any) {
-      console.error('Autocomplete error:', err);
-      setError('Chyba pri inicializácii Google Maps. Použite manuálny vstup nižšie.');
+      console.error("Autocomplete error:", err);
+      setError(
+        "Chyba pri inicializácii Google Maps. Použite manuálny vstup nižšie."
+      );
     }
-  }, [isLoaded, onChange]);
+  }, [isLoaded, loadError, onChange]);
 
   if (error) {
     return (
       <div className="space-y-4">
         <div className="p-4 bg-yellow-500/10 border border-yellow-500/50 rounded-lg text-yellow-600 dark:text-yellow-400">
           <p className="text-sm font-semibold mb-2">{error}</p>
-          <p className="text-xs">
-            Pre aktiváciu Places API:
-          </p>
+          <p className="text-xs">Pre aktiváciu Places API:</p>
           <ol className="text-xs mt-2 ml-4 list-decimal space-y-1">
-            <li>Otvorte <a href="https://console.cloud.google.com/apis/library/places-backend.googleapis.com" target="_blank" className="underline">Google Cloud Console</a></li>
+            <li>
+              Otvorte{" "}
+              <a
+                href="https://console.cloud.google.com/apis/library/places-backend.googleapis.com"
+                target="_blank"
+                className="underline"
+              >
+                Google Cloud Console
+              </a>
+            </li>
             <li>Aktivujte "Places API (New)"</li>
             <li>Obnovte stránku</li>
           </ol>
@@ -182,9 +157,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
           <Input
             type="text"
             value={value.address}
-            onChange={(e) =>
-              onChange({ ...value, address: e.target.value })
-            }
+            onChange={(e) => onChange({ ...value, address: e.target.value })}
             placeholder="napr. Hlavná 1, Bratislava"
             required
           />
@@ -196,9 +169,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
           <Input
             type="text"
             value={value.name || ""}
-            onChange={(e) =>
-              onChange({ ...value, name: e.target.value })
-            }
+            onChange={(e) => onChange({ ...value, name: e.target.value })}
             placeholder="napr. Park na Kolibe"
           />
         </div>

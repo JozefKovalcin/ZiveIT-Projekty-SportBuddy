@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import SearchAndFilter, { FilterState } from "@/components/SearchAndFilter";
 
 interface Activity {
   id: string;
@@ -59,10 +60,10 @@ const skillLevelLabels: Record<string, string> = {
 };
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  OPEN: { label: "Otvorená", color: "text-green-500" },
-  FULL: { label: "Plná", color: "text-orange-500" },
-  CANCELLED: { label: "Zrušená", color: "text-red-500" },
-  COMPLETED: { label: "Ukončená", color: "text-gray-500" },
+  OPEN: { label: "Otvorená", color: "text-green-600 dark:text-green-400" },
+  FULL: { label: "Plná", color: "text-orange-600 dark:text-orange-400" },
+  CANCELLED: { label: "Zrušená", color: "text-red-600 dark:text-red-400" },
+  COMPLETED: { label: "Ukončená", color: "text-gray-600 dark:text-gray-400" },
 };
 
 function ActivityCard({ activity }: { activity: Activity }) {
@@ -93,13 +94,27 @@ function ActivityCard({ activity }: { activity: Activity }) {
           {/* Header */}
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-xl font-bold text-[color:var(--fluent-text)]">
-                  {activity.title}
-                </h3>
-                {((activity.isRecurring && activity.recurrenceFrequency !== "NONE") || activity.parentActivityId) && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 rounded-full">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <h3 className="text-xl font-bold text-[color:var(--fluent-text)] mb-2">
+                {activity.title}
+              </h3>
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-sm text-[color:var(--fluent-text-secondary)]">
+                  {sportTypeLabels[activity.sportType] || activity.sportType}
+                </p>
+                {((activity.isRecurring &&
+                  activity.recurrenceFrequency !== "NONE") ||
+                  activity.parentActivityId) && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-purple-500 text-white rounded-full shadow-sm">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <polyline points="23 4 23 10 17 10"></polyline>
                       <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                     </svg>
@@ -107,9 +122,6 @@ function ActivityCard({ activity }: { activity: Activity }) {
                   </span>
                 )}
               </div>
-              <p className="text-sm text-[color:var(--fluent-text-secondary)]">
-                {sportTypeLabels[activity.sportType] || activity.sportType}
-              </p>
             </div>
             <span className={`text-sm font-medium ${statusInfo.color}`}>
               {statusInfo.label}
@@ -176,15 +188,23 @@ export default function ActivitiesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    fetchActivities();
-  }, []);
-
-  const fetchActivities = async () => {
+  const fetchActivities = useCallback(async (filters: FilterState) => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/activities`
-      );
+      setLoading(true);
+      setError("");
+
+      // Build query params
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) params.set(key, value);
+      });
+
+      const queryString = params.toString();
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/activities${
+        queryString ? `?${queryString}` : ""
+      }`;
+
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Chyba pri načítaní aktivít");
       }
@@ -195,67 +215,109 @@ export default function ActivitiesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Initial load - read URL params
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      fetchActivities({
+        search: params.get("search") || "",
+        sportType: params.get("sportType") || "",
+        skillLevel: params.get("skillLevel") || "",
+        gender: params.get("gender") || "",
+        minPrice: params.get("minPrice") || "",
+        maxPrice: params.get("maxPrice") || "",
+        minAge: params.get("minAge") || "",
+        maxAge: params.get("maxAge") || "",
+        dateFrom: params.get("dateFrom") || "",
+        dateTo: params.get("dateTo") || "",
+      });
+    }
+  }, [fetchActivities]);
+
+  const handleSearch = useCallback(
+    (filters: FilterState) => {
+      fetchActivities(filters);
+    },
+    [fetchActivities]
+  );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-4xl font-bold text-[color:var(--fluent-text)] mb-2">
-            Športové aktivity
-          </h1>
-          <p className="text-[color:var(--fluent-text-secondary)]">
-            Nájdi si aktivitu a pripoj sa k ostatným
-          </p>
-        </div>
-        <Link href="/activities/create">
-          <Button variant="primary">+ Vytvoriť aktivitu</Button>
-        </Link>
-      </div>
-
-      {/* Error */}
-      {error && (
-        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500">
-          {error}
-        </div>
-      )}
-
-      {/* Loading */}
-      {loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <ActivitySkeleton key={i} />
-          ))}
-        </div>
-      )}
-
-      {/* Empty state */}
-      {!loading && activities.length === 0 && (
-        <Card>
-          <div className="text-center py-12">
-            <p className="text-2xl mb-4">🏀</p>
-            <h3 className="text-xl font-semibold text-[color:var(--fluent-text)] mb-2">
-              Žiadne aktivity
-            </h3>
-            <p className="text-[color:var(--fluent-text-secondary)] mb-6">
-              Zatiaľ nie sú vytvorené žiadne aktivity. Buď prvý!
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--fluent-bg)" }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-[color:var(--fluent-text)] mb-2">
+              Športové aktivity
+            </h1>
+            <p className="text-[color:var(--fluent-text-secondary)]">
+              Nájdi si aktivitu a pripoj sa k ostatným
             </p>
-            <Link href="/activities/create">
-              <Button variant="primary">Vytvoriť aktivitu</Button>
-            </Link>
           </div>
-        </Card>
-      )}
-
-      {/* Activities grid */}
-      {!loading && activities.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {activities.map((activity) => (
-            <ActivityCard key={activity.id} activity={activity} />
-          ))}
+          <Link href="/activities/create">
+            <Button variant="primary" className="whitespace-nowrap">
+              + Vytvoriť aktivitu
+            </Button>
+          </Link>
         </div>
-      )}
+
+        {/* Search and Filter */}
+        <SearchAndFilter
+          onSearch={handleSearch}
+          loading={loading}
+          resultCount={activities.length}
+        />
+
+        {/* Error */}
+        {error && (
+          <div className="mt-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500">
+            {error}
+          </div>
+        )}
+
+        {/* Loading */}
+        {loading && (
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <ActivitySkeleton key={i} />
+            ))}
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!loading && activities.length === 0 && !error && (
+          <div className="mt-6">
+            <Card>
+              <div className="text-center py-12">
+                <p className="text-4xl mb-4">🔍</p>
+                <h3 className="text-xl font-semibold text-[color:var(--fluent-text)] mb-2">
+                  Žiadne výsledky
+                </h3>
+                <p className="text-[color:var(--fluent-text-secondary)] mb-6">
+                  Skús zmeniť vyhľadávacie kritériá alebo vytvor novú aktivitu
+                </p>
+                <Link href="/activities/create">
+                  <Button variant="primary">Vytvoriť aktivitu</Button>
+                </Link>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* Activities grid */}
+        {!loading && activities.length > 0 && (
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {activities.map((activity) => (
+              <ActivityCard key={activity.id} activity={activity} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

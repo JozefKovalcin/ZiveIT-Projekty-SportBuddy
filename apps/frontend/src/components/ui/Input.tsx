@@ -39,7 +39,7 @@ export const Input: React.FC<InputProps> = ({
         {...props}
       />
       {error && (
-        <p className="mt-2 text-sm text-red-600">{error}</p>
+        <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">{error}</p>
       )}
     </div>
   );
@@ -88,7 +88,7 @@ export const Textarea: React.FC<TextareaProps> = ({
         {...props}
       />
       {error && (
-        <p className="mt-2 text-sm text-red-600">{error}</p>
+        <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">{error}</p>
       )}
     </div>
   );
@@ -143,7 +143,7 @@ export const Select: React.FC<SelectProps> = ({
         ))}
       </select>
       {error && (
-        <p className="mt-2 text-sm text-red-600">{error}</p>
+        <p className="mt-2 text-sm text-red-600 dark:text-red-400 font-medium">{error}</p>
       )}
     </div>
   );

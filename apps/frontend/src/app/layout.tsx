@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { GoogleMapsProvider } from "@/contexts/GoogleMapsContext";
 import TemplateWrapper from "@/components/TemplateWrapper";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "SportBuddy - Nájdi si spoluhráčov",
-  description: "Aplikácia pre športových nadšencov na hľadanie spoluhráčov a organizáciu športových aktivít",
+  description:
+    "Aplikácia pre športových nadšencov na hľadanie spoluhráčov a organizáciu športových aktivít",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -34,9 +36,9 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
         <ThemeProvider>
-          <TemplateWrapper>
-            {children}
-          </TemplateWrapper>
+          <GoogleMapsProvider>
+            <TemplateWrapper>{children}</TemplateWrapper>
+          </GoogleMapsProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -4,6 +4,9 @@ const nextConfig = {
   experimental: {
     webpackBuildWorker: true,
   },
+  turbopack: {
+    root: "/app",
+  },
 };
 
 export default nextConfig;

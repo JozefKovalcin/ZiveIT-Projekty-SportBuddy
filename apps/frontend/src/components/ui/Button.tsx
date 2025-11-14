@@ -16,7 +16,7 @@ export const Button: React.FC<ButtonProps> = ({
   const baseStyles = 'font-semibold rounded-lg transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
 
   const variantStyles = {
-    primary: 'bg-[color:var(--fluent-accent)] text-[color:var(--fluent-text-secondary)] dark:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-accent-hover)] focus:ring-[color:var(--fluent-accent)] active:scale-[0.98]',
+    primary: 'bg-[color:var(--fluent-accent)] text-white hover:bg-[color:var(--fluent-accent-hover)] focus:ring-[color:var(--fluent-accent)] active:scale-[0.98]',
     secondary: 'bg-[color:var(--fluent-surface-secondary)] border border-[color:var(--fluent-border)] text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-border)] hover:border-[color:var(--fluent-border-strong)] focus:ring-[color:var(--fluent-border-strong)] active:scale-[0.98]',
     outline: 'border-2 border-[color:var(--fluent-accent)] text-[color:var(--fluent-accent)] hover:bg-[color:var(--fluent-accent-light)] focus:ring-[color:var(--fluent-accent)] active:scale-[0.98]',
   };
