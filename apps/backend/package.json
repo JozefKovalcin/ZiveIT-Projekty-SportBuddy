@@ -20,15 +20,19 @@
   },
   "dependencies": {
     "@getbrevo/brevo": "latest",
+    "@prisma/adapter-pg": "latest",
     "@prisma/client": "latest",
     "better-auth": "latest",
     "next": "latest",
+    "openai": "latest",
+    "pg": "latest",
     "react": "latest",
     "react-dom": "latest",
     "zod": "latest"
   },
   "devDependencies": {
     "@types/node": "latest",
+    "@types/pg": "latest",
     "@types/react": "latest",
     "eslint": "latest",
     "eslint-config-next": "latest",

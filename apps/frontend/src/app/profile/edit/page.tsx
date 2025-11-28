@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
+import { SkillSlider } from '@/components/SkillSlider';
 
 interface ProfileData {
   id: string;
@@ -18,6 +19,16 @@ interface ProfileData {
     city: string | null;
     skillLevel: string;
     favoriteSports: string[];
+    footballSkill?: number;
+    basketballSkill?: number;
+    tennisSkill?: number;
+    volleyballSkill?: number;
+    badmintonSkill?: number;
+    tableTennisSkill?: number;
+    runningSkill?: number;
+    cyclingSkill?: number;
+    swimmingSkill?: number;
+    gymSkill?: number;
   } | null;
 }
 
@@ -32,7 +43,6 @@ const SPORT_OPTIONS = [
   { value: 'CYCLING', label: 'Cyklistika' },
   { value: 'SWIMMING', label: 'Plávanie' },
   { value: 'GYM', label: 'Fitnes' },
-  { value: 'OTHER', label: 'Iné' },
 ];
 
 const SKILL_OPTIONS = [
@@ -40,6 +50,7 @@ const SKILL_OPTIONS = [
   { value: 'INTERMEDIATE', label: 'Stredne pokročilý' },
   { value: 'ADVANCED', label: 'Pokročilý' },
   { value: 'EXPERT', label: 'Expert' },
+  { value: 'PROFESSIONAL', label: 'Profesionál' },
 ];
 
 export default function ProfileEditPage() {
@@ -59,6 +70,16 @@ export default function ProfileEditPage() {
     skillLevel: 'BEGINNER',
     favoriteSports: [] as string[],
     image: '',
+    footballSkill: 1,
+    basketballSkill: 1,
+    tennisSkill: 1,
+    volleyballSkill: 1,
+    badmintonSkill: 1,
+    tableTennisSkill: 1,
+    runningSkill: 1,
+    cyclingSkill: 1,
+    swimmingSkill: 1,
+    gymSkill: 1,
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -95,6 +116,16 @@ export default function ProfileEditPage() {
         skillLevel: data.profile?.skillLevel || 'BEGINNER',
         favoriteSports: data.profile?.favoriteSports || [],
         image: data.image || '',
+        footballSkill: data.profile?.footballSkill || 1,
+        basketballSkill: data.profile?.basketballSkill || 1,
+        tennisSkill: data.profile?.tennisSkill || 1,
+        volleyballSkill: data.profile?.volleyballSkill || 1,
+        badmintonSkill: data.profile?.badmintonSkill || 1,
+        tableTennisSkill: data.profile?.tableTennisSkill || 1,
+        runningSkill: data.profile?.runningSkill || 1,
+        cyclingSkill: data.profile?.cyclingSkill || 1,
+        swimmingSkill: data.profile?.swimmingSkill || 1,
+        gymSkill: data.profile?.gymSkill || 1,
       });
       setImagePreview(data.image);
     } catch (err) {
@@ -317,24 +348,6 @@ export default function ProfileEditPage() {
               </div>
 
               <div>
-                <label htmlFor="skillLevel" className="block text-sm font-medium text-[color:var(--fluent-text)] mb-2">
-                  Športová úroveň
-                </label>
-                <select
-                  id="skillLevel"
-                  value={formData.skillLevel}
-                  onChange={(e) => setFormData({ ...formData, skillLevel: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-[color:var(--fluent-border)] bg-[color:var(--fluent-surface)] text-[color:var(--fluent-text)] focus:border-blue-500 focus:outline-none transition-colors"
-                >
-                  {SKILL_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
                 <label className="block text-sm font-medium text-[color:var(--fluent-text)] mb-3">
                   Obľúbené športy
                 </label>
@@ -353,6 +366,113 @@ export default function ProfileEditPage() {
                       {sport.label}
                     </button>
                   ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[color:var(--fluent-text)] mb-4">
+                  Úroveň zručností v jednotlivých športoch
+                </label>
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                      Futbal
+                    </label>
+                    <SkillSlider
+                      value={formData.footballSkill}
+                      onChange={(value) => setFormData({ ...formData, footballSkill: value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                      Basketbal
+                    </label>
+                    <SkillSlider
+                      value={formData.basketballSkill}
+                      onChange={(value) => setFormData({ ...formData, basketballSkill: value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                      Tenis
+                    </label>
+                    <SkillSlider
+                      value={formData.tennisSkill}
+                      onChange={(value) => setFormData({ ...formData, tennisSkill: value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                      Volejbal
+                    </label>
+                    <SkillSlider
+                      value={formData.volleyballSkill}
+                      onChange={(value) => setFormData({ ...formData, volleyballSkill: value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                      Bedminton
+                    </label>
+                    <SkillSlider
+                      value={formData.badmintonSkill}
+                      onChange={(value) => setFormData({ ...formData, badmintonSkill: value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                      Stolný tenis
+                    </label>
+                    <SkillSlider
+                      value={formData.tableTennisSkill}
+                      onChange={(value) => setFormData({ ...formData, tableTennisSkill: value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                      Beh
+                    </label>
+                    <SkillSlider
+                      value={formData.runningSkill}
+                      onChange={(value) => setFormData({ ...formData, runningSkill: value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                      Cyklistika
+                    </label>
+                    <SkillSlider
+                      value={formData.cyclingSkill}
+                      onChange={(value) => setFormData({ ...formData, cyclingSkill: value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                      Plávanie
+                    </label>
+                    <SkillSlider
+                      value={formData.swimmingSkill}
+                      onChange={(value) => setFormData({ ...formData, swimmingSkill: value })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                      Fitnes
+                    </label>
+                    <SkillSlider
+                      value={formData.gymSkill}
+                      onChange={(value) => setFormData({ ...formData, gymSkill: value })}
+                    />
+                  </div>
                 </div>
               </div>
 

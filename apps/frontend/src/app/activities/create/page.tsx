@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { LocationPicker } from "@/components/LocationPicker";
+import { useSession } from "@/lib/auth-client";
+import AIActivityAssistant from "@/components/AIActivityAssistant";
 
 const sportTypes = [
   { value: "FOOTBALL", label: "Futbal" },
@@ -26,6 +29,7 @@ const skillLevels = [
   { value: "INTERMEDIATE", label: "Mierne pokročilý" },
   { value: "ADVANCED", label: "Pokročilý" },
   { value: "EXPERT", label: "Expert" },
+  { value: "PROFESSIONAL", label: "Profesionál" },
 ];
 
 const genderOptions = [
@@ -36,8 +40,44 @@ const genderOptions = [
 
 export default function CreateActivityPage() {
   const router = useRouter();
+  const { data: session, isPending } = useSession();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  if (isPending) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-center text-[color:var(--fluent-text-secondary)]">
+            Načítavam...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <Card>
+            <div className="text-center py-12">
+              <p className="text-4xl mb-4">🔒</p>
+              <h3 className="text-xl font-semibold text-[color:var(--fluent-text)] mb-2">
+                Prihlásenie potrebné
+              </h3>
+              <p className="text-[color:var(--fluent-text-secondary)] mb-6">
+                Pre vytvorenie aktivity sa musíte prihlásiť
+              </p>
+              <Link href="/auth/signin?redirect=/activities/create">
+                <Button variant="primary">Prihlásiť sa</Button>
+              </Link>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   const [formData, setFormData] = useState({
     title: "",
@@ -153,6 +193,51 @@ export default function CreateActivityPage() {
     }));
   };
 
+  const handleAIData = async (aiData: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      ...(aiData.title && { title: aiData.title }),
+      ...(aiData.description && { description: aiData.description }),
+      ...(aiData.sportType && { sportType: aiData.sportType }),
+      ...(aiData.skillLevel && { skillLevel: aiData.skillLevel }),
+      ...(aiData.maxParticipants && { maxParticipants: aiData.maxParticipants }),
+      ...(aiData.price !== undefined && { price: aiData.price }),
+      ...(aiData.gender && { gender: aiData.gender }),
+      ...(aiData.minAge && { minAge: aiData.minAge }),
+      ...(aiData.maxAge && { maxAge: aiData.maxAge }),
+      ...(aiData.date && { date: aiData.date }),
+      ...(aiData.time && { time: aiData.time }),
+      ...(aiData.duration && { duration: aiData.duration }),
+    }));
+
+    // If location is provided, geocode it to get coordinates for map display
+    if (aiData.location) {
+      setLocation((prev) => ({
+        ...prev,
+        address: aiData.location,
+      }));
+
+      // Geocode the address to get coordinates
+      if (window.google?.maps) {
+        const geocoder = new window.google.maps.Geocoder();
+        try {
+          const result = await geocoder.geocode({ address: aiData.location });
+          if (result.results && result.results[0]) {
+            const { lat, lng } = result.results[0].geometry.location;
+            setLocation((prev) => ({
+              ...prev,
+              address: aiData.location,
+              lat: lat(),
+              lng: lng(),
+            }));
+          }
+        } catch (error) {
+          console.error("Geocoding error:", error);
+        }
+      }
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-3xl mx-auto">
@@ -165,6 +250,11 @@ export default function CreateActivityPage() {
             {error}
           </div>
         )}
+
+        {/* AI Assistant */}
+        <div className="mb-6">
+          <AIActivityAssistant onActivityDataReceived={handleAIData} />
+        </div>
 
         <Card>
           <form onSubmit={handleSubmit}>
@@ -647,7 +737,7 @@ export default function CreateActivityPage() {
                         min={formData.date || new Date().toISOString().split("T")[0]}
                       />
                       <p className="text-xs text-[color:var(--fluent-text-secondary)] mt-1">
-                        Ak nezadáte, aktivity sa budú generovať na 1 rok dopredu
+                        Ak nezadáte, aktivity sa budú generovať na 2 mesiace dopredu (max 20 aktivít)
                       </p>
                     </div>
 

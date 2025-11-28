@@ -7,7 +7,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 // User model for authentication and profile
@@ -31,6 +30,7 @@ model User {
   reviews       Review[]
   favoriteVenues VenueFavorite[]
   passwordResets PasswordReset[]
+  messages      Message[]
 }
 
 // Profile model for user details (separate from auth)
@@ -42,6 +42,20 @@ model Profile {
   city          String?
   skillLevel    SkillLevel @default(BEGINNER)
   favoriteSports SportType[]
+  
+  // Sport-specific skill levels (1-5 scale)
+  footballSkill     Int? @default(1)
+  basketballSkill   Int? @default(1)
+  tennisSkill       Int? @default(1)
+  volleyballSkill   Int? @default(1)
+  badmintonSkill    Int? @default(1)
+  tableTennisSkill  Int? @default(1)
+  runningSkill      Int? @default(1)
+  cyclingSkill      Int? @default(1)
+  swimmingSkill     Int? @default(1)
+  gymSkill          Int? @default(1)
+  otherSkill        Int? @default(1)
+  
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 
@@ -127,6 +141,7 @@ enum SkillLevel {
   INTERMEDIATE
   ADVANCED
   EXPERT
+  PROFESSIONAL
 }
 
 // Activity status
@@ -231,6 +246,7 @@ model Activity {
   participations Participation[]
   parentActivity Activity?       @relation("RecurringActivities", fields: [parentActivityId], references: [id], onDelete: SetNull)
   childActivities Activity[]     @relation("RecurringActivities")
+  messages       Message[]
 
   @@index([sportType])
   @@index([date])
@@ -290,4 +306,22 @@ model VenueFavorite {
 
   @@unique([userId, venueId])
   @@index([userId])
+}
+
+// Message (Správy v chate aktivity) model
+model Message {
+  id         String   @id @default(cuid())
+  content    String   @db.VarChar(500)
+  activityId String
+  userId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([activityId])
+  @@index([userId])
+  @@index([createdAt])
 }

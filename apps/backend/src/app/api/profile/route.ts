@@ -71,6 +71,16 @@ export async function PUT(req: NextRequest) {
       skillLevel,
       favoriteSports,
       image,
+      footballSkill,
+      basketballSkill,
+      tennisSkill,
+      volleyballSkill,
+      badmintonSkill,
+      tableTennisSkill,
+      runningSkill,
+      cyclingSkill,
+      swimmingSkill,
+      gymSkill,
     } = body;
 
     // Validate skillLevel if provided
@@ -121,6 +131,16 @@ export async function PUT(req: NextRequest) {
     if (city !== undefined) updateProfileData.city = city;
     if (skillLevel !== undefined) updateProfileData.skillLevel = skillLevel;
     if (favoriteSports !== undefined) updateProfileData.favoriteSports = favoriteSports;
+    if (footballSkill !== undefined) updateProfileData.footballSkill = footballSkill;
+    if (basketballSkill !== undefined) updateProfileData.basketballSkill = basketballSkill;
+    if (tennisSkill !== undefined) updateProfileData.tennisSkill = tennisSkill;
+    if (volleyballSkill !== undefined) updateProfileData.volleyballSkill = volleyballSkill;
+    if (badmintonSkill !== undefined) updateProfileData.badmintonSkill = badmintonSkill;
+    if (tableTennisSkill !== undefined) updateProfileData.tableTennisSkill = tableTennisSkill;
+    if (runningSkill !== undefined) updateProfileData.runningSkill = runningSkill;
+    if (cyclingSkill !== undefined) updateProfileData.cyclingSkill = cyclingSkill;
+    if (swimmingSkill !== undefined) updateProfileData.swimmingSkill = swimmingSkill;
+    if (gymSkill !== undefined) updateProfileData.gymSkill = gymSkill;
 
     const profile = await prisma.profile.upsert({
       where: { userId: session.user.id },

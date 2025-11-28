@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import AISearchBar from "@/components/AISearchBar";
 
 interface SearchAndFilterProps {
   onSearch: (filters: FilterState) => void;
@@ -45,6 +46,7 @@ const skillLevelOptions = [
   { value: "INTERMEDIATE", label: "Mierne pokročilý" },
   { value: "ADVANCED", label: "Pokročilý" },
   { value: "EXPERT", label: "Expert" },
+  { value: "PROFESSIONAL", label: "Profesionál" },
 ];
 
 const genderOptions = [
@@ -80,12 +82,17 @@ export default function SearchAndFilter({
 
   // Update URL with filters
   const updateURL = useCallback((newFilters: FilterState) => {
+    if (typeof window === "undefined") return;
+    
     const params = new URLSearchParams();
     Object.entries(newFilters).forEach(([key, value]) => {
       if (value) params.set(key, value);
     });
     const queryString = params.toString();
-    router.push(`/activities${queryString ? `?${queryString}` : ""}`, {
+    
+    // Determine the current page from pathname
+    const currentPath = window.location.pathname;
+    router.push(`${currentPath}${queryString ? `?${queryString}` : ""}`, {
       scroll: false,
     });
   }, [router]);
@@ -142,8 +149,19 @@ export default function SearchAndFilter({
     handleFilterChange("search", "");
   }, [handleFilterChange]);
 
+  const handleAIFilters = useCallback((aiFilters: any) => {
+    const newFilters = { ...filters, ...aiFilters };
+    setFilters(newFilters);
+    updateURL(newFilters);
+    onSearch(newFilters);
+    setShowFilters(false); // Close filters panel after AI search
+  }, [filters, updateURL, onSearch]);
+
   return (
     <div className="space-y-4">
+      {/* AI Search Bar */}
+      <AISearchBar onFiltersApplied={handleAIFilters} />
+
       {/* Search Bar */}
       <Card>
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">

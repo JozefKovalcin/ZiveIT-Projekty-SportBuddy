@@ -65,6 +65,7 @@ export async function GET(request: NextRequest) {
     // Filter parameters
     const sportType = searchParams.get("sportType");
     const city = searchParams.get("city");
+    const location = searchParams.get("location"); // General location search
     const status = searchParams.get("status") || "OPEN";
     const skillLevel = searchParams.get("skillLevel");
     const gender = searchParams.get("gender");
@@ -93,6 +94,25 @@ export async function GET(request: NextRequest) {
         { location: { contains: search.trim(), mode: "insensitive" } },
         { locationName: { contains: search.trim(), mode: "insensitive" } },
       ];
+    }
+
+    // Location filter (separate from search)
+    if (location && location.trim()) {
+      // Create OR condition for location if search doesn't exist, otherwise add to existing OR
+      const locationCondition = [
+        { location: { contains: location.trim(), mode: "insensitive" } },
+        { locationName: { contains: location.trim(), mode: "insensitive" } },
+      ];
+      
+      if (where.OR) {
+        where.AND = [
+          { OR: where.OR },
+          { OR: locationCondition }
+        ];
+        delete where.OR;
+      } else {
+        where.OR = locationCondition;
+      }
     }
 
     // Apply filters
@@ -233,7 +253,14 @@ export async function POST(request: NextRequest) {
 async function createRecurringActivities(parentActivity: any, userId: string, autoJoinAll: boolean, guestCount: number) {
   const maxInstances = 20; // Maximum 20 instances
   let instancesCreated = 0;
-  const endDate = parentActivity.recurrenceEndDate || new Date(Date.now() + 60 * 24 * 60 * 60 * 1000); // 2 months default
+  // Calculate end date from the activity's start date, not from today
+  const parentDate = new Date(parentActivity.date);
+  // Default to 2 months from activity date (not 60 days, but actual 2 months)
+  let defaultEndDate = new Date(parentDate);
+  defaultEndDate.setMonth(defaultEndDate.getMonth() + 2);
+  const endDate = parentActivity.recurrenceEndDate || defaultEndDate;
+  
+  console.log(`Creating recurring activities from ${parentDate.toISOString()} until ${endDate.toISOString()}`);
   
   let currentDate = new Date(parentActivity.date);
   
@@ -255,8 +282,14 @@ async function createRecurringActivities(parentActivity: any, userId: string, au
       
       currentDate = nextDate;
     } else if (parentActivity.recurrenceFrequency === "MONTHLY") {
-      currentDate.setMonth(currentDate.getMonth() + 1);
+      // Safe month addition that handles year boundaries
+      const targetMonth = currentDate.getMonth() + 1;
+      const targetYear = currentDate.getFullYear() + Math.floor(targetMonth / 12);
+      const actualMonth = targetMonth % 12;
+      currentDate = new Date(targetYear, actualMonth, currentDate.getDate(), currentDate.getHours(), currentDate.getMinutes());
     }
+    
+    console.log(`Next occurrence: ${currentDate.toISOString()}, end date: ${endDate.toISOString()}, passed: ${currentDate >= endDate}`);
     
     // Stop if we've passed the end date
     if (currentDate >= endDate) break;
