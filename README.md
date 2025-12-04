@@ -215,6 +215,8 @@ NEXT_PUBLIC_API_URL="http://localhost:3001"
 # Google Maps API (pre výber lokácie aktivít)
 # Pozri GOOGLE_MAPS_SETUP.md pre inštrukcie
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=""
+# Gemini AI
+GEMINI_API_KEY=
 
 # OAuth (voliteľné)
 GOOGLE_CLIENT_ID=""
