@@ -429,7 +429,7 @@ Ako používateľ
 chcem zdieľať aktivitu na sociálnych sieťach
 aby som mohol pozvať priateľov
 
-**Vývojár:** -
+**Vývojár:** Ján Malinovský
 
 ### Tasky:
 - ⏸️ Share API implementácia (Web Share API)
@@ -541,7 +541,7 @@ Ako používateľ
 chcem dostávať notifikácie o nových aktivitách v mojom okolí podľa mojich preferencií
 aby som nezmeškal zaujímavé aktivity
 
-**Vývojár:** -
+**Vývojár:** Ján Malinovský
 
 ### Tasky:
 #### Backend - Notifikačný systém
