@@ -6,6 +6,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
+import { DatePicker } from "@/components/ui/DatePicker";
+import { TimePicker } from "@/components/ui/TimePicker";
 import { LocationPicker } from "@/components/LocationPicker";
 import { useSession } from "@/lib/auth-client";
 import AIActivityAssistant from "@/components/AIActivityAssistant";
@@ -44,41 +47,6 @@ export default function CreateActivityPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  if (isPending) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-center text-[color:var(--fluent-text-secondary)]">
-            Načítavam...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <Card>
-            <div className="text-center py-12">
-              <p className="text-4xl mb-4">🔒</p>
-              <h3 className="text-xl font-semibold text-[color:var(--fluent-text)] mb-2">
-                Prihlásenie potrebné
-              </h3>
-              <p className="text-[color:var(--fluent-text-secondary)] mb-6">
-                Pre vytvorenie aktivity sa musíte prihlásiť
-              </p>
-              <Link href="/auth/signin?redirect=/activities/create">
-                <Button variant="primary">Prihlásiť sa</Button>
-              </Link>
-            </div>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -108,9 +76,42 @@ export default function CreateActivityPage() {
     longitude: undefined as number | undefined,
   });
 
+  if (isPending) {
+    return (
+      <div className="container mx-auto px-4 py-8 pt-36">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-center text-gray-300">Načítavam...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="container mx-auto px-4 py-8 pt-36">
+        <div className="max-w-4xl mx-auto">
+          <Card>
+            <div className="text-center py-12">
+              <p className="text-4xl mb-4">🔒</p>
+              <h3 className="text-xl font-semibold text-white mb-2">
+                Prihlásenie potrebné
+              </h3>
+              <p className="text-gray-300 mb-6">
+                Pre vytvorenie aktivity sa musíte prihlásiť
+              </p>
+              <Link href="/auth/signin?redirect=/activities/create">
+                <Button variant="primary">Prihlásiť sa</Button>
+              </Link>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!location.address) {
       setError("Prosím zadajte adresu aktivity");
       return;
@@ -121,11 +122,17 @@ export default function CreateActivityPage() {
       return;
     }
 
-    if (formData.isRecurring && formData.recurrenceFrequency === "WEEKLY" && formData.recurrenceDays.length === 0) {
-      setError("Pre týždenné opakovanie musíte vybrať aspoň jeden deň v týždni");
+    if (
+      formData.isRecurring &&
+      formData.recurrenceFrequency === "WEEKLY" &&
+      formData.recurrenceDays.length === 0
+    ) {
+      setError(
+        "Pre týždenné opakovanie musíte vybrať aspoň jeden deň v týždni"
+      );
       return;
     }
-    
+
     setLoading(true);
     setError("");
 
@@ -153,11 +160,22 @@ export default function CreateActivityPage() {
             maxAge: formData.maxAge,
             price: formData.price,
             isRecurring: formData.isRecurring,
-            recurrenceFrequency: formData.isRecurring ? formData.recurrenceFrequency : "NONE",
-            recurrenceDays: formData.isRecurring && formData.recurrenceFrequency === "WEEKLY" ? formData.recurrenceDays : [],
-            recurrenceEndDate: formData.isRecurring && formData.recurrenceEndDate ? new Date(formData.recurrenceEndDate).toISOString() : undefined,
+            recurrenceFrequency: formData.isRecurring
+              ? formData.recurrenceFrequency
+              : "NONE",
+            recurrenceDays:
+              formData.isRecurring && formData.recurrenceFrequency === "WEEKLY"
+                ? formData.recurrenceDays
+                : [],
+            recurrenceEndDate:
+              formData.isRecurring && formData.recurrenceEndDate
+                ? new Date(formData.recurrenceEndDate).toISOString()
+                : undefined,
             autoJoinAll: formData.isRecurring ? formData.autoJoinAll : false,
-            autoJoinGuestCount: formData.isRecurring && formData.autoJoinAll ? formData.autoJoinGuestCount : 0,
+            autoJoinGuestCount:
+              formData.isRecurring && formData.autoJoinAll
+                ? formData.autoJoinGuestCount
+                : 0,
           }),
         }
       );
@@ -194,29 +212,70 @@ export default function CreateActivityPage() {
   };
 
   const handleAIData = async (aiData: any) => {
+    console.log("AI Data received:", aiData);
+
+    // Update form data with AI generated values
+    const updates: any = {};
+
+    if (aiData.title) updates.title = aiData.title;
+    if (aiData.description) updates.description = aiData.description;
+    if (aiData.sportType) updates.sportType = aiData.sportType;
+    if (aiData.skillLevel) updates.skillLevel = aiData.skillLevel;
+    if (aiData.maxParticipants)
+      updates.maxParticipants = aiData.maxParticipants;
+    if (aiData.price !== undefined) updates.price = aiData.price;
+    if (aiData.gender) updates.gender = aiData.gender;
+    if (aiData.minAge) updates.minAge = aiData.minAge;
+    if (aiData.maxAge) updates.maxAge = aiData.maxAge;
+    if (aiData.date) updates.date = aiData.date;
+    if (aiData.time) updates.time = aiData.time;
+    if (aiData.duration) updates.duration = aiData.duration;
+
+    // Recurring activity fields
+    if (aiData.isRecurring !== undefined)
+      updates.isRecurring = aiData.isRecurring;
+    if (aiData.recurrenceFrequency)
+      updates.recurrenceFrequency = aiData.recurrenceFrequency;
+    if (aiData.recurrenceDays && Array.isArray(aiData.recurrenceDays)) {
+      updates.recurrenceDays = aiData.recurrenceDays;
+    }
+
+    // For recurring activities without a specific date, set to next occurrence
+    if (
+      aiData.isRecurring &&
+      !aiData.date &&
+      aiData.recurrenceDays?.length > 0
+    ) {
+      const today = new Date();
+      const currentDay = today.getDay(); // 0 = Sunday
+      const targetDays = aiData.recurrenceDays.sort(
+        (a: number, b: number) => a - b
+      );
+
+      // Find the next occurrence day
+      let daysUntilNext = 7;
+      for (const day of targetDays) {
+        const diff = (day - currentDay + 7) % 7;
+        if (diff > 0 && diff < daysUntilNext) {
+          daysUntilNext = diff;
+        }
+      }
+      if (daysUntilNext === 7) daysUntilNext = targetDays[0] - currentDay + 7;
+
+      const nextDate = new Date(today);
+      nextDate.setDate(today.getDate() + daysUntilNext);
+      updates.date = nextDate.toISOString().split("T")[0];
+    }
+
+    console.log("Applying updates:", updates);
+
     setFormData((prev) => ({
       ...prev,
-      ...(aiData.title && { title: aiData.title }),
-      ...(aiData.description && { description: aiData.description }),
-      ...(aiData.sportType && { sportType: aiData.sportType }),
-      ...(aiData.skillLevel && { skillLevel: aiData.skillLevel }),
-      ...(aiData.maxParticipants && { maxParticipants: aiData.maxParticipants }),
-      ...(aiData.price !== undefined && { price: aiData.price }),
-      ...(aiData.gender && { gender: aiData.gender }),
-      ...(aiData.minAge && { minAge: aiData.minAge }),
-      ...(aiData.maxAge && { maxAge: aiData.maxAge }),
-      ...(aiData.date && { date: aiData.date }),
-      ...(aiData.time && { time: aiData.time }),
-      ...(aiData.duration && { duration: aiData.duration }),
+      ...updates,
     }));
 
     // If location is provided, geocode it to get coordinates for map display
     if (aiData.location) {
-      setLocation((prev) => ({
-        ...prev,
-        address: aiData.location,
-      }));
-
       // Geocode the address to get coordinates
       if (window.google?.maps) {
         const geocoder = new window.google.maps.Geocoder();
@@ -224,24 +283,40 @@ export default function CreateActivityPage() {
           const result = await geocoder.geocode({ address: aiData.location });
           if (result.results && result.results[0]) {
             const { lat, lng } = result.results[0].geometry.location;
+            const formattedAddress = result.results[0].formatted_address;
+            setLocation({
+              address: formattedAddress || aiData.location,
+              name: aiData.location,
+              latitude: lat(),
+              longitude: lng(),
+            });
+          } else {
+            // No geocoding result, just set the address
             setLocation((prev) => ({
               ...prev,
               address: aiData.location,
-              lat: lat(),
-              lng: lng(),
             }));
           }
         } catch (error) {
           console.error("Geocoding error:", error);
+          setLocation((prev) => ({
+            ...prev,
+            address: aiData.location,
+          }));
         }
+      } else {
+        setLocation((prev) => ({
+          ...prev,
+          address: aiData.location,
+        }));
       }
     }
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 pt-36">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-[color:var(--fluent-text)]">
+        <h1 className="text-4xl font-bold mb-8 text-white">
           Vytvoriť novú aktivitu
         </h1>
 
@@ -261,7 +336,7 @@ export default function CreateActivityPage() {
             <CardContent>
               {/* Názov */}
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                <label className="block text-sm font-medium mb-2 text-white">
                   Názov aktivity *
                 </label>
                 <Input
@@ -278,48 +353,46 @@ export default function CreateActivityPage() {
 
               {/* Šport */}
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                <label className="block text-sm font-medium mb-2 text-white">
                   Typ športu *
                 </label>
-                <select
+                <Select
                   name="sportType"
                   value={formData.sportType}
-                  onChange={handleChange}
+                  onChange={(value) =>
+                    setFormData((prev) => ({ ...prev, sportType: value }))
+                  }
+                  options={sportTypes}
                   required
-                  className="w-full px-4 py-2.5 bg-[color:var(--fluent-surface-secondary)] border border-[color:var(--fluent-border)] rounded-lg text-[color:var(--fluent-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--fluent-accent)]"
-                >
-                  {sportTypes.map((sport) => (
-                    <option key={sport.value} value={sport.value}>
-                      {sport.label}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               {/* Dátum a čas */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                  <label className="block text-sm font-medium mb-2 text-white">
                     Dátum *
                   </label>
-                  <Input
-                    type="date"
+                  <DatePicker
                     name="date"
                     value={formData.date}
-                    onChange={handleChange}
+                    onChange={(value) =>
+                      setFormData((prev) => ({ ...prev, date: value }))
+                    }
                     required
                     min={new Date().toISOString().split("T")[0]}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                  <label className="block text-sm font-medium mb-2 text-white">
                     Čas *
                   </label>
-                  <Input
-                    type="time"
+                  <TimePicker
                     name="time"
                     value={formData.time}
-                    onChange={handleChange}
+                    onChange={(value) =>
+                      setFormData((prev) => ({ ...prev, time: value }))
+                    }
                     required
                   />
                 </div>
@@ -328,7 +401,7 @@ export default function CreateActivityPage() {
               {/* Dĺžka trvania a max účastníci */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                  <label className="block text-sm font-medium mb-2 text-white">
                     Dĺžka trvania (minúty) *
                   </label>
                   <div className="relative flex items-center">
@@ -340,10 +413,20 @@ export default function CreateActivityPage() {
                           duration: Math.max(15, prev.duration - 15),
                         }))
                       }
-                      className="absolute left-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-l-lg transition-colors z-10"
+                      className="absolute left-0 h-full px-3 text-gray-400 hover:text-white hover:bg-white/[0.05] rounded-l-lg transition-colors z-10"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M20 12H4"
+                        />
                       </svg>
                     </button>
                     <Input
@@ -365,16 +448,26 @@ export default function CreateActivityPage() {
                           duration: Math.min(480, prev.duration + 15),
                         }))
                       }
-                      className="absolute right-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-r-lg transition-colors z-10"
+                      className="absolute right-0 h-full px-3 text-gray-400 hover:text-white hover:bg-white/[0.05] rounded-r-lg transition-colors z-10"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
                       </svg>
                     </button>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                  <label className="block text-sm font-medium mb-2 text-white">
                     Max počet hráčov *
                   </label>
                   <div className="relative flex items-center">
@@ -383,13 +476,26 @@ export default function CreateActivityPage() {
                       onClick={() =>
                         setFormData((prev) => ({
                           ...prev,
-                          maxParticipants: Math.max(2, prev.maxParticipants - 1),
+                          maxParticipants: Math.max(
+                            2,
+                            prev.maxParticipants - 1
+                          ),
                         }))
                       }
-                      className="absolute left-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-l-lg transition-colors z-10"
+                      className="absolute left-0 h-full px-3 text-gray-400 hover:text-white hover:bg-white/[0.05] rounded-l-lg transition-colors z-10"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M20 12H4"
+                        />
                       </svg>
                     </button>
                     <Input
@@ -407,13 +513,26 @@ export default function CreateActivityPage() {
                       onClick={() =>
                         setFormData((prev) => ({
                           ...prev,
-                          maxParticipants: Math.min(50, prev.maxParticipants + 1),
+                          maxParticipants: Math.min(
+                            50,
+                            prev.maxParticipants + 1
+                          ),
                         }))
                       }
-                      className="absolute right-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-r-lg transition-colors z-10"
+                      className="absolute right-0 h-full px-3 text-gray-400 hover:text-white hover:bg-white/[0.05] rounded-r-lg transition-colors z-10"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -422,15 +541,12 @@ export default function CreateActivityPage() {
 
               {/* Miesto konania */}
               <div className="mb-6">
-                <LocationPicker
-                  value={location}
-                  onChange={setLocation}
-                />
+                <LocationPicker value={location} onChange={setLocation} />
               </div>
 
               {/* Pohlavie */}
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                <label className="block text-sm font-medium mb-2 text-white">
                   Pohlavie *
                 </label>
                 <div className="grid grid-cols-3 gap-3">
@@ -441,8 +557,8 @@ export default function CreateActivityPage() {
                         flex items-center justify-center px-4 py-3 rounded-lg border-2 cursor-pointer transition-all
                         ${
                           formData.gender === option.value
-                            ? 'border-[color:var(--fluent-accent)] bg-[color:var(--fluent-accent)]/10 text-[color:var(--fluent-accent)] font-semibold'
-                            : 'border-[color:var(--fluent-border)] bg-[color:var(--fluent-surface-secondary)] text-[color:var(--fluent-text)] hover:border-[color:var(--fluent-border-strong)]'
+                            ? "border-emerald-500 bg-emerald-500/10 text-emerald-400 font-semibold"
+                            : "border-white/10 bg-white/[0.03] text-white hover:border-white/20"
                         }
                       `}
                     >
@@ -463,7 +579,7 @@ export default function CreateActivityPage() {
               {/* Vekové rozpätie a cena */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                  <label className="block text-sm font-medium mb-2 text-white">
                     Min. vek *
                   </label>
                   <div className="relative flex items-center">
@@ -475,10 +591,20 @@ export default function CreateActivityPage() {
                           minAge: Math.max(6, prev.minAge - 1),
                         }))
                       }
-                      className="absolute left-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-l-lg transition-colors z-10"
+                      className="absolute left-0 h-full px-3 text-gray-400 hover:text-white hover:bg-white/[0.05] rounded-l-lg transition-colors z-10"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M20 12H4"
+                        />
                       </svg>
                     </button>
                     <Input
@@ -499,16 +625,26 @@ export default function CreateActivityPage() {
                           minAge: Math.min(99, prev.minAge + 1),
                         }))
                       }
-                      className="absolute right-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-r-lg transition-colors z-10"
+                      className="absolute right-0 h-full px-3 text-gray-400 hover:text-white hover:bg-white/[0.05] rounded-r-lg transition-colors z-10"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
                       </svg>
                     </button>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                  <label className="block text-sm font-medium mb-2 text-white">
                     Max. vek *
                   </label>
                   <div className="relative flex items-center">
@@ -520,10 +656,20 @@ export default function CreateActivityPage() {
                           maxAge: Math.max(6, prev.maxAge - 1),
                         }))
                       }
-                      className="absolute left-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-l-lg transition-colors z-10"
+                      className="absolute left-0 h-full px-3 text-gray-400 hover:text-white hover:bg-white/[0.05] rounded-l-lg transition-colors z-10"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M20 12H4"
+                        />
                       </svg>
                     </button>
                     <Input
@@ -544,16 +690,26 @@ export default function CreateActivityPage() {
                           maxAge: Math.min(99, prev.maxAge + 1),
                         }))
                       }
-                      className="absolute right-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-r-lg transition-colors z-10"
+                      className="absolute right-0 h-full px-3 text-gray-400 hover:text-white hover:bg-white/[0.05] rounded-r-lg transition-colors z-10"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
                       </svg>
                     </button>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                  <label className="block text-sm font-medium mb-2 text-white">
                     Cena (€)
                   </label>
                   <div className="relative flex items-center">
@@ -565,10 +721,20 @@ export default function CreateActivityPage() {
                           price: Math.max(0, prev.price - 0.5),
                         }))
                       }
-                      className="absolute left-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-l-lg transition-colors z-10"
+                      className="absolute left-0 h-full px-3 text-gray-400 hover:text-white hover:bg-white/[0.05] rounded-l-lg transition-colors z-10"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M20 12H4"
+                        />
                       </svg>
                     </button>
                     <Input
@@ -589,10 +755,20 @@ export default function CreateActivityPage() {
                           price: Math.round((prev.price + 0.5) * 10) / 10,
                         }))
                       }
-                      className="absolute right-0 h-full px-3 text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)] hover:bg-[color:var(--fluent-surface)] rounded-r-lg transition-colors z-10"
+                      className="absolute right-0 h-full px-3 text-gray-400 hover:text-white hover:bg-white/[0.05] rounded-r-lg transition-colors z-10"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -601,27 +777,23 @@ export default function CreateActivityPage() {
 
               {/* Úroveň */}
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                <label className="block text-sm font-medium mb-2 text-white">
                   Úroveň hráčov *
                 </label>
-                <select
+                <Select
                   name="skillLevel"
                   value={formData.skillLevel}
-                  onChange={handleChange}
+                  onChange={(value) =>
+                    setFormData((prev) => ({ ...prev, skillLevel: value }))
+                  }
+                  options={skillLevels}
                   required
-                  className="w-full px-4 py-2.5 bg-[color:var(--fluent-surface-secondary)] border border-[color:var(--fluent-border)] rounded-lg text-[color:var(--fluent-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--fluent-accent)]"
-                >
-                  {skillLevels.map((level) => (
-                    <option key={level.value} value={level.value}>
-                      {level.label}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               {/* Popis */}
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                <label className="block text-sm font-medium mb-2 text-white">
                   Popis (voliteľné)
                 </label>
                 <textarea
@@ -630,7 +802,7 @@ export default function CreateActivityPage() {
                   onChange={handleChange}
                   rows={4}
                   placeholder="Pridajte podrobnosti o aktivite..."
-                  className="w-full px-4 py-2.5 bg-[color:var(--fluent-surface-secondary)] border border-[color:var(--fluent-border)] rounded-lg text-[color:var(--fluent-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--fluent-accent)] resize-none"
+                  className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none placeholder-gray-500"
                 />
               </div>
 
@@ -642,9 +814,9 @@ export default function CreateActivityPage() {
                     name="isPublic"
                     checked={formData.isPublic}
                     onChange={handleChange}
-                    className="w-5 h-5 rounded border-[color:var(--fluent-border)] text-[color:var(--fluent-accent)] focus:ring-2 focus:ring-[color:var(--fluent-accent)]"
+                    className="w-5 h-5 rounded border-white/10 text-emerald-500 focus:ring-2 focus:ring-emerald-500 bg-white/[0.03]"
                   />
-                  <span className="text-sm text-[color:var(--fluent-text)]">
+                  <span className="text-sm text-white">
                     Verejná aktivita (viditeľná pre všetkých)
                   </span>
                 </label>
@@ -658,86 +830,111 @@ export default function CreateActivityPage() {
                     name="isRecurring"
                     checked={formData.isRecurring}
                     onChange={handleChange}
-                    className="w-5 h-5 rounded border-[color:var(--fluent-border)] text-[color:var(--fluent-accent)] focus:ring-2 focus:ring-[color:var(--fluent-accent)]"
+                    className="w-5 h-5 rounded border-white/10 text-emerald-500 focus:ring-2 focus:ring-emerald-500 bg-white/[0.03]"
                   />
-                  <span className="text-sm text-[color:var(--fluent-text)]">
+                  <span className="text-sm text-white">
                     Pravidelne opakovaná aktivita
                   </span>
                 </label>
 
                 {formData.isRecurring && (
-                  <div className="ml-8 space-y-4 p-4 bg-[color:var(--fluent-surface-secondary)] rounded-lg border border-[color:var(--fluent-border)]">
+                  <div className="ml-8 space-y-4 p-4 bg-white/[0.03] rounded-lg border border-white/10">
                     {/* Frequency */}
                     <div>
-                      <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                      <label className="block text-sm font-medium mb-2 text-white">
                         Frekvencia opakovania *
                       </label>
-                      <select
+                      <Select
                         name="recurrenceFrequency"
                         value={formData.recurrenceFrequency}
-                        onChange={handleChange}
+                        onChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            recurrenceFrequency: value as
+                              | "NONE"
+                              | "DAILY"
+                              | "WEEKLY"
+                              | "MONTHLY",
+                          }))
+                        }
+                        options={[
+                          { value: "NONE", label: "Nevybrané" },
+                          { value: "DAILY", label: "Denne" },
+                          { value: "WEEKLY", label: "Týždenne" },
+                          { value: "MONTHLY", label: "Mesačne" },
+                        ]}
                         required={formData.isRecurring}
-                        className="w-full px-4 py-2.5 bg-[color:var(--fluent-surface)] border border-[color:var(--fluent-border)] rounded-lg text-[color:var(--fluent-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--fluent-accent)]"
-                      >
-                        <option value="NONE">Nevybrané</option>
-                        <option value="DAILY">Denne</option>
-                        <option value="WEEKLY">Týždenne</option>
-                        <option value="MONTHLY">Mesačne</option>
-                      </select>
+                      />
                     </div>
 
                     {/* Days of week for WEEKLY */}
                     {formData.recurrenceFrequency === "WEEKLY" && (
                       <div>
-                        <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                        <label className="block text-sm font-medium mb-2 text-white">
                           Dni v týždni *
                         </label>
                         <div className="grid grid-cols-7 gap-2">
-                          {["Ne", "Po", "Ut", "St", "Št", "Pi", "So"].map((day, index) => {
-                            const isSelected = formData.recurrenceDays.includes(index);
-                            return (
-                              <button
-                                key={index}
-                                type="button"
-                                onClick={() => {
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    recurrenceDays: isSelected
-                                      ? prev.recurrenceDays.filter(d => d !== index)
-                                      : [...prev.recurrenceDays, index].sort(),
-                                  }));
-                                }}
-                                className={`
+                          {["Ne", "Po", "Ut", "St", "Št", "Pi", "So"].map(
+                            (day, index) => {
+                              const isSelected =
+                                formData.recurrenceDays.includes(index);
+                              return (
+                                <button
+                                  key={index}
+                                  type="button"
+                                  onClick={() => {
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      recurrenceDays: isSelected
+                                        ? prev.recurrenceDays.filter(
+                                            (d) => d !== index
+                                          )
+                                        : [
+                                            ...prev.recurrenceDays,
+                                            index,
+                                          ].sort(),
+                                    }));
+                                  }}
+                                  className={`
                                   px-3 py-2 rounded-lg text-sm font-medium transition-all
                                   ${
                                     isSelected
-                                      ? 'bg-[color:var(--fluent-accent)] text-white'
-                                      : 'bg-[color:var(--fluent-surface)] border border-[color:var(--fluent-border)] text-[color:var(--fluent-text)] hover:border-[color:var(--fluent-border-strong)]'
+                                      ? "bg-emerald-500 text-white"
+                                      : "bg-white/[0.03] border border-white/10 text-white hover:border-white/20"
                                   }
                                 `}
-                              >
-                                {day}
-                              </button>
-                            );
-                          })}
+                                >
+                                  {day}
+                                </button>
+                              );
+                            }
+                          )}
                         </div>
                       </div>
                     )}
 
                     {/* End date */}
                     <div>
-                      <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                      <label className="block text-sm font-medium mb-2 text-white">
                         Dátum ukončenia opakovania (voliteľné)
                       </label>
-                      <Input
-                        type="date"
+                      <DatePicker
                         name="recurrenceEndDate"
                         value={formData.recurrenceEndDate}
-                        onChange={handleChange}
-                        min={formData.date || new Date().toISOString().split("T")[0]}
+                        onChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            recurrenceEndDate: value,
+                          }))
+                        }
+                        min={
+                          formData.date ||
+                          new Date().toISOString().split("T")[0]
+                        }
                       />
-                      <p className="text-xs text-[color:var(--fluent-text-secondary)] mt-1">
-                        Ak nezadáte, aktivity sa budú generovať na 2 mesiace dopredu (max 20 aktivít)
+                      <p className="text-xs text-gray-400 mt-1">
+                        Ak nezadáte, aktivity sa budú generovať na 2 mesiace
+                        dopredu (max 20 aktivít)
                       </p>
                     </div>
 
@@ -751,19 +948,21 @@ export default function CreateActivityPage() {
                             setFormData((prev) => ({
                               ...prev,
                               autoJoinAll: e.target.checked,
-                              autoJoinGuestCount: e.target.checked ? prev.autoJoinGuestCount : 0,
+                              autoJoinGuestCount: e.target.checked
+                                ? prev.autoJoinGuestCount
+                                : 0,
                             }));
                           }}
-                          className="w-5 h-5 rounded border-[color:var(--fluent-border)] text-[color:var(--fluent-accent)] focus:ring-2 focus:ring-[color:var(--fluent-accent)]"
+                          className="w-5 h-5 rounded border-white/10 text-emerald-500 focus:ring-2 focus:ring-emerald-500 bg-white/[0.03]"
                         />
-                        <span className="text-sm text-[color:var(--fluent-text)]">
+                        <span className="text-sm text-white">
                           Automaticky sa prihlás na všetky vygenerované aktivity
                         </span>
                       </label>
 
                       {formData.autoJoinAll && (
                         <div className="ml-8">
-                          <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                          <label className="block text-sm font-medium mb-2 text-white">
                             Počet hostí (okrem teba)
                           </label>
                           <Input
@@ -781,8 +980,9 @@ export default function CreateActivityPage() {
                             }}
                             placeholder="0"
                           />
-                          <p className="text-xs text-[color:var(--fluent-text-secondary)] mt-1">
-                            Počet ľudí, ktorých berieš so sebou (hosťa) - max {formData.maxParticipants - 1}
+                          <p className="text-xs text-gray-400 mt-1">
+                            Počet ľudí, ktorých berieš so sebou (hosťa) - max{" "}
+                            {formData.maxParticipants - 1}
                           </p>
                         </div>
                       )}

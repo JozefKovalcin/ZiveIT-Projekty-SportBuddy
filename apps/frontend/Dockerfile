@@ -10,12 +10,12 @@ WORKDIR /app
 # Stage 1: Install dependencies
 FROM base AS deps
 COPY package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Stage 2: Development (hot reload with volume mounts)
 FROM base AS development
 COPY package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 EXPOSE 3000
 CMD ["npm", "run", "dev"]
 

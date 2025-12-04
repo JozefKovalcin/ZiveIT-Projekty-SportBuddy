@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 
@@ -32,8 +32,29 @@ export default function ActivityChat({
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{
+    text: string;
+    type: "success" | "error";
+  } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageListRef = useRef<HTMLDivElement>(null);
+  const shouldScrollRef = useRef(true);
+  const prevMessageCountRef = useRef(0);
+
+  // Check if user is near the bottom of chat
+  const isNearBottom = useCallback(() => {
+    if (!messageListRef.current) return true;
+    const { scrollTop, scrollHeight, clientHeight } = messageListRef.current;
+    return scrollHeight - scrollTop - clientHeight < 100;
+  }, []);
+
+  // Scroll to bottom within chat container only
+  const scrollToBottom = useCallback(() => {
+    if (messageListRef.current) {
+      messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
+    }
+  }, []);
 
   // Fetch messages
   const fetchMessages = async () => {
@@ -58,12 +79,24 @@ export default function ActivityChat({
     return () => clearInterval(interval);
   }, [activityId]);
 
-  // Auto-scroll to bottom on new messages
+  // Auto-scroll only when user is near bottom or new message was sent
   useEffect(() => {
-    if (messagesEndRef.current && isOpen) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (isOpen && messages.length > prevMessageCountRef.current) {
+      // Only auto-scroll if user is near bottom or sent a new message
+      if (shouldScrollRef.current || isNearBottom()) {
+        scrollToBottom();
+      }
     }
-  }, [messages, isOpen]);
+    prevMessageCountRef.current = messages.length;
+    shouldScrollRef.current = false;
+  }, [messages, isOpen, isNearBottom, scrollToBottom]);
+
+  // Scroll to bottom when chat is opened
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(scrollToBottom, 100);
+    }
+  }, [isOpen, scrollToBottom]);
 
   // Send message
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -72,6 +105,7 @@ export default function ActivityChat({
 
     setSending(true);
     setError("");
+    shouldScrollRef.current = true; // Enable auto-scroll when user sends a message
 
     try {
       const response = await fetch(
@@ -101,8 +135,6 @@ export default function ActivityChat({
 
   // Delete message
   const handleDeleteMessage = async (messageId: string) => {
-    if (!confirm("Naozaj chcete vymazať túto správu?")) return;
-
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/messages/${messageId}`,
@@ -118,8 +150,12 @@ export default function ActivityChat({
       }
 
       setMessages((prev) => prev.filter((m) => m.id !== messageId));
+      setDeleteConfirm(null);
+      setStatusMessage({ text: "Správa bola vymazaná", type: "success" });
+      setTimeout(() => setStatusMessage(null), 3000);
     } catch (err: any) {
       setError(err.message);
+      setDeleteConfirm(null);
     }
   };
 
@@ -192,12 +228,10 @@ export default function ActivityChat({
         <Card className="mt-4">
           <div className="flex flex-col h-[500px]">
             {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-[color:var(--fluent-border)]">
-              <h3 className="text-lg font-semibold text-[color:var(--fluent-text)]">
-                Diskusia
-              </h3>
+            <div className="flex items-center justify-between pb-4 border-b border-white/10">
+              <h3 className="text-lg font-semibold text-white">Diskusia</h3>
               {!isLoggedIn && (
-                <span className="text-sm text-[color:var(--fluent-text-secondary)]">
+                <span className="text-sm text-gray-400">
                   Prihláste sa pre písanie správ
                 </span>
               )}
@@ -210,15 +244,13 @@ export default function ActivityChat({
             >
               {loading ? (
                 <div className="flex justify-center py-8">
-                  <div className="w-8 h-8 border-4 border-[color:var(--fluent-accent)] border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
               ) : messages.length === 0 ? (
                 <div className="text-center py-12">
                   <p className="text-4xl mb-4">💬</p>
-                  <p className="text-[color:var(--fluent-text-secondary)]">
-                    Zatiaľ žiadne správy
-                  </p>
-                  <p className="text-sm text-[color:var(--fluent-text-secondary)] mt-2">
+                  <p className="text-gray-400">Zatiaľ žiadne správy</p>
+                  <p className="text-sm text-gray-400 mt-2">
                     Buďte prvý, kto začne konverzáciu
                   </p>
                 </div>
@@ -241,8 +273,8 @@ export default function ActivityChat({
                             className="w-10 h-10 rounded-full"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-[color:var(--fluent-accent)]/20 flex items-center justify-center">
-                            <span className="text-lg font-semibold text-[color:var(--fluent-accent)]">
+                          <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                            <span className="text-lg font-semibold text-emerald-400">
                               {message.user.name.charAt(0).toUpperCase()}
                             </span>
                           </div>
@@ -258,40 +290,58 @@ export default function ActivityChat({
                         >
                           <div className="flex items-center gap-2 mb-1">
                             {!isOwn && (
-                              <span className="text-sm font-medium text-[color:var(--fluent-text)]">
+                              <span className="text-sm font-medium text-white">
                                 {message.user.name}
                               </span>
                             )}
-                            <span className="text-xs text-[color:var(--fluent-text-secondary)]">
+                            <span className="text-xs text-gray-400">
                               {formatTime(message.createdAt)}
                             </span>
-                            {isOwn && (
-                              <button
-                                onClick={() => handleDeleteMessage(message.id)}
-                                className="text-red-500 hover:text-red-600 transition-colors"
-                                title="Vymazať správu"
-                              >
-                                <svg
-                                  className="w-4 h-4"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
+                            {isOwn &&
+                              (deleteConfirm === message.id ? (
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() =>
+                                      handleDeleteMessage(message.id)
+                                    }
+                                    className="text-xs px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+                                  >
+                                    Vymazať
+                                  </button>
+                                  <button
+                                    onClick={() => setDeleteConfirm(null)}
+                                    className="text-xs px-2 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded transition-colors"
+                                  >
+                                    Zrušiť
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => setDeleteConfirm(message.id)}
+                                  className="text-red-500 hover:text-red-600 transition-colors"
+                                  title="Vymazať správu"
                                 >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                  />
-                                </svg>
-                              </button>
-                            )}
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                    />
+                                  </svg>
+                                </button>
+                              ))}
                           </div>
                           <div
                             className={`inline-block px-4 py-2 rounded-2xl ${
                               isOwn
-                                ? "bg-[color:var(--fluent-accent)] text-white"
-                                : "bg-[color:var(--fluent-bg-secondary)] text-[color:var(--fluent-text)]"
+                                ? "bg-emerald-600 text-white"
+                                : "bg-white/[0.05] text-white"
                             }`}
                           >
                             <p className="text-sm whitespace-pre-wrap break-words">
@@ -307,6 +357,19 @@ export default function ActivityChat({
               <div ref={messagesEndRef} />
             </div>
 
+            {/* Status message */}
+            {statusMessage && (
+              <div
+                className={`px-4 py-2 rounded-lg text-sm mb-2 ${
+                  statusMessage.type === "success"
+                    ? "bg-emerald-500/10 border border-emerald-500/50 text-emerald-400"
+                    : "bg-red-500/10 border border-red-500/50 text-red-400"
+                }`}
+              >
+                {statusMessage.text}
+              </div>
+            )}
+
             {/* Error message */}
             {error && (
               <div className="px-4 py-2 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500 text-sm">
@@ -316,7 +379,10 @@ export default function ActivityChat({
 
             {/* Message input */}
             {isLoggedIn ? (
-              <form onSubmit={handleSendMessage} className="pt-4 border-t border-[color:var(--fluent-border)]">
+              <form
+                onSubmit={handleSendMessage}
+                className="pt-4 border-t border-white/10"
+              >
                 <div className="flex gap-3">
                   <div className="flex-1 flex flex-col">
                     <textarea
@@ -326,14 +392,14 @@ export default function ActivityChat({
                       rows={2}
                       maxLength={maxChars}
                       disabled={sending}
-                      className="w-full px-4 py-3 bg-[color:var(--fluent-bg)] border border-[color:var(--fluent-border)] rounded-xl text-[color:var(--fluent-text)] placeholder-[color:var(--fluent-text-secondary)] focus:outline-none focus:ring-2 focus:ring-[color:var(--fluent-accent)] resize-none transition-all"
+                      className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 resize-none transition-all"
                     />
                     <div className="flex justify-between items-center mt-2 px-1">
                       <span
                         className={`text-xs font-medium ${
                           charCount > maxChars * 0.9
                             ? "text-orange-500"
-                            : "text-[color:var(--fluent-text-secondary)]"
+                            : "text-gray-400"
                         }`}
                       >
                         {charCount}/{maxChars}
@@ -367,8 +433,8 @@ export default function ActivityChat({
                 </div>
               </form>
             ) : (
-              <div className="pt-4 border-t border-[color:var(--fluent-border)] text-center">
-                <p className="text-sm text-[color:var(--fluent-text-secondary)] mb-3">
+              <div className="pt-4 border-t border-white/10 text-center">
+                <p className="text-sm text-gray-400 mb-3">
                   Pre odosielanie správ sa musíte prihlásiť
                 </p>
                 <a href="/auth/signin">

@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useSession } from '@/lib/auth-client';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/Button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { SkillSlider } from '@/components/SkillSlider';
+import { useSession } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { SkillSlider } from "@/components/SkillSlider";
 
 interface ProfileData {
   id: string;
@@ -33,24 +33,24 @@ interface ProfileData {
 }
 
 const SPORT_OPTIONS = [
-  { value: 'FOOTBALL', label: 'Futbal' },
-  { value: 'BASKETBALL', label: 'Basketbal' },
-  { value: 'TENNIS', label: 'Tenis' },
-  { value: 'VOLLEYBALL', label: 'Volejbal' },
-  { value: 'BADMINTON', label: 'Bedminton' },
-  { value: 'TABLE_TENNIS', label: 'Stolný tenis' },
-  { value: 'RUNNING', label: 'Beh' },
-  { value: 'CYCLING', label: 'Cyklistika' },
-  { value: 'SWIMMING', label: 'Plávanie' },
-  { value: 'GYM', label: 'Fitnes' },
+  { value: "FOOTBALL", label: "Futbal" },
+  { value: "BASKETBALL", label: "Basketbal" },
+  { value: "TENNIS", label: "Tenis" },
+  { value: "VOLLEYBALL", label: "Volejbal" },
+  { value: "BADMINTON", label: "Bedminton" },
+  { value: "TABLE_TENNIS", label: "Stolný tenis" },
+  { value: "RUNNING", label: "Beh" },
+  { value: "CYCLING", label: "Cyklistika" },
+  { value: "SWIMMING", label: "Plávanie" },
+  { value: "GYM", label: "Fitnes" },
 ];
 
 const SKILL_OPTIONS = [
-  { value: 'BEGINNER', label: 'Začiatočník' },
-  { value: 'INTERMEDIATE', label: 'Stredne pokročilý' },
-  { value: 'ADVANCED', label: 'Pokročilý' },
-  { value: 'EXPERT', label: 'Expert' },
-  { value: 'PROFESSIONAL', label: 'Profesionál' },
+  { value: "BEGINNER", label: "Začiatočník" },
+  { value: "INTERMEDIATE", label: "Stredne pokročilý" },
+  { value: "ADVANCED", label: "Pokročilý" },
+  { value: "EXPERT", label: "Expert" },
+  { value: "PROFESSIONAL", label: "Profesionál" },
 ];
 
 export default function ProfileEditPage() {
@@ -63,13 +63,13 @@ export default function ProfileEditPage() {
   const [success, setSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: '',
-    bio: '',
-    phone: '',
-    city: '',
-    skillLevel: 'BEGINNER',
+    name: "",
+    bio: "",
+    phone: "",
+    city: "",
+    skillLevel: "BEGINNER",
     favoriteSports: [] as string[],
-    image: '',
+    image: "",
     footballSkill: 1,
     basketballSkill: 1,
     tennisSkill: 1,
@@ -85,7 +85,7 @@ export default function ProfileEditPage() {
 
   useEffect(() => {
     if (!isPending && !session) {
-      router.push('/auth/signin');
+      router.push("/auth/signin");
     }
   }, [session, isPending, router]);
 
@@ -98,24 +98,27 @@ export default function ProfileEditPage() {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, {
-        credentials: 'include',
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/profile`,
+        {
+          credentials: "include",
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch profile');
+        throw new Error("Failed to fetch profile");
       }
 
       const data = await response.json();
       setProfile(data);
       setFormData({
-        name: data.name || '',
-        bio: data.profile?.bio || '',
-        phone: data.profile?.phone || '',
-        city: data.profile?.city || '',
-        skillLevel: data.profile?.skillLevel || 'BEGINNER',
+        name: data.name || "",
+        bio: data.profile?.bio || "",
+        phone: data.profile?.phone || "",
+        city: data.profile?.city || "",
+        skillLevel: data.profile?.skillLevel || "BEGINNER",
         favoriteSports: data.profile?.favoriteSports || [],
-        image: data.image || '',
+        image: data.image || "",
         footballSkill: data.profile?.footballSkill || 1,
         basketballSkill: data.profile?.basketballSkill || 1,
         tennisSkill: data.profile?.tennisSkill || 1,
@@ -129,8 +132,8 @@ export default function ProfileEditPage() {
       });
       setImagePreview(data.image);
     } catch (err) {
-      console.error('Error fetching profile:', err);
-      setError('Nepodarilo sa načítať profil');
+      console.error("Error fetching profile:", err);
+      setError("Nepodarilo sa načítať profil");
     } finally {
       setLoading(false);
     }
@@ -143,27 +146,30 @@ export default function ProfileEditPage() {
     setSaving(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/profile`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update profile');
+        throw new Error(errorData.error || "Failed to update profile");
       }
 
       setSuccess(true);
       setTimeout(() => {
-        router.push('/profile');
+        router.push("/profile");
       }, 1500);
     } catch (err: any) {
-      console.error('Error updating profile:', err);
-      setError(err.message || 'Nepodarilo sa aktualizovať profil');
+      console.error("Error updating profile:", err);
+      setError(err.message || "Nepodarilo sa aktualizovať profil");
     } finally {
       setSaving(false);
     }
@@ -183,12 +189,12 @@ export default function ProfileEditPage() {
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      setError('Obrázok je príliš veľký. Maximum je 2MB.');
+      setError("Obrázok je príliš veľký. Maximum je 2MB.");
       return;
     }
 
-    if (!file.type.startsWith('image/')) {
-      setError('Môžete nahrať iba obrázky.');
+    if (!file.type.startsWith("image/")) {
+      setError("Môžete nahrať iba obrázky.");
       return;
     }
 
@@ -202,7 +208,7 @@ export default function ProfileEditPage() {
   };
 
   const handleRemoveImage = () => {
-    setFormData((prev) => ({ ...prev, image: '' }));
+    setFormData((prev) => ({ ...prev, image: "" }));
     setImagePreview(null);
   };
 
@@ -210,8 +216,8 @@ export default function ProfileEditPage() {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[color:var(--fluent-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[color:var(--fluent-text-secondary)]">Načítavam profil...</p>
+          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-300">Načítavam profil...</p>
         </div>
       </main>
     );
@@ -222,13 +228,11 @@ export default function ProfileEditPage() {
   }
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: 'var(--fluent-bg)' }}>
+    <main className="min-h-screen bg-gradient-radial from-emerald-900/40 via-[#022c22] to-black pt-36">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[color:var(--fluent-text)] mb-2">
-            Upraviť profil
-          </h1>
-          <p className="text-[color:var(--fluent-text-secondary)]">
+          <h1 className="text-3xl font-bold text-white mb-2">Upraviť profil</h1>
+          <p className="text-gray-300">
             Aktualizujte svoje informácie a športové preferencie
           </p>
         </div>
@@ -237,7 +241,7 @@ export default function ProfileEditPage() {
           <CardContent className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-[color:var(--fluent-text)] mb-3">
+                <label className="block text-sm font-medium text-white mb-3">
                   Profilová fotka
                 </label>
                 <div className="flex items-center gap-6">
@@ -246,14 +250,10 @@ export default function ProfileEditPage() {
                       <img
                         src={imagePreview}
                         alt="Náhľad"
-                        className="w-24 h-24 rounded-full object-cover"
-                        style={{ boxShadow: 'var(--shadow-lg)' }}
+                        className="w-24 h-24 rounded-full object-cover shadow-lg shadow-black/30"
                       />
                     ) : (
-                      <div 
-                        className="w-24 h-24 rounded-full gradient-primary flex items-center justify-center"
-                        style={{ boxShadow: 'var(--shadow-lg)' }}
-                      >
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg shadow-black/30">
                         <span className="text-3xl font-bold text-white">
                           {formData.name.charAt(0).toUpperCase()}
                         </span>
@@ -272,7 +272,7 @@ export default function ProfileEditPage() {
                     <div className="flex gap-3">
                       <label
                         htmlFor="imageUpload"
-                        className="px-4 py-2 bg-[color:var(--fluent-accent)] text-white rounded-lg font-medium cursor-pointer hover:bg-[color:var(--fluent-accent-hover)] transition-colors shadow-sm"
+                        className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium cursor-pointer hover:bg-emerald-500 transition-colors shadow-sm"
                       >
                         Nahrať obrázok
                       </label>
@@ -286,7 +286,7 @@ export default function ProfileEditPage() {
                         </button>
                       )}
                     </div>
-                    <p className="text-xs text-[color:var(--fluent-text-secondary)] mt-2">
+                    <p className="text-xs text-gray-400 mt-2">
                       JPG, PNG alebo GIF. Maximum 2MB.
                     </p>
                   </div>
@@ -294,61 +294,81 @@ export default function ProfileEditPage() {
               </div>
 
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-[color:var(--fluent-text)] mb-2">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-white mb-2"
+                >
                   Meno <span className="text-red-500">*</span>
                 </label>
                 <Input
                   id="name"
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   required
                   placeholder="Vaše meno"
                 />
               </div>
 
               <div>
-                <label htmlFor="bio" className="block text-sm font-medium text-[color:var(--fluent-text)] mb-2">
+                <label
+                  htmlFor="bio"
+                  className="block text-sm font-medium text-white mb-2"
+                >
                   O mne
                 </label>
                 <textarea
                   id="bio"
                   value={formData.bio}
-                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, bio: e.target.value })
+                  }
                   placeholder="Niečo o vás..."
                   rows={4}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-[color:var(--fluent-border)] bg-[color:var(--fluent-surface)] text-[color:var(--fluent-text)] focus:border-blue-500 focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 rounded-lg border-2 border-white/10 bg-white/[0.03] text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none transition-colors backdrop-blur-xl"
                 />
               </div>
 
               <div>
-                <label htmlFor="city" className="block text-sm font-medium text-[color:var(--fluent-text)] mb-2">
+                <label
+                  htmlFor="city"
+                  className="block text-sm font-medium text-white mb-2"
+                >
                   Mesto
                 </label>
                 <Input
                   id="city"
                   type="text"
                   value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, city: e.target.value })
+                  }
                   placeholder="Bratislava"
                 />
               </div>
 
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-[color:var(--fluent-text)] mb-2">
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-medium text-white mb-2"
+                >
                   Telefón
                 </label>
                 <Input
                   id="phone"
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, phone: e.target.value })
+                  }
                   placeholder="+421 XXX XXX XXX"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[color:var(--fluent-text)] mb-3">
+                <label className="block text-sm font-medium text-white mb-3">
                   Obľúbené športy
                 </label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -359,8 +379,8 @@ export default function ProfileEditPage() {
                       onClick={() => handleSportToggle(sport.value)}
                       className={`px-4 py-3 rounded-lg border-2 transition-all ${
                         formData.favoriteSports.includes(sport.value)
-                          ? 'border-[color:var(--fluent-accent)] bg-[color:var(--fluent-accent)] text-white font-medium shadow-sm'
-                          : 'border-[color:var(--fluent-border)] bg-[color:var(--fluent-surface)] text-[color:var(--fluent-text)] hover:border-[color:var(--fluent-accent)]/50'
+                          ? "border-emerald-500 bg-emerald-600 text-white font-medium shadow-sm"
+                          : "border-white/10 bg-white/[0.03] text-white hover:border-emerald-500/50"
                       }`}
                     >
                       {sport.label}
@@ -370,138 +390,154 @@ export default function ProfileEditPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-[color:var(--fluent-text)] mb-4">
+                <label className="block text-sm font-medium text-white mb-4">
                   Úroveň zručností v jednotlivých športoch
                 </label>
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                    <label className="block text-sm text-gray-300 mb-2">
                       Futbal
                     </label>
                     <SkillSlider
                       value={formData.footballSkill}
-                      onChange={(value) => setFormData({ ...formData, footballSkill: value })}
+                      onChange={(value) =>
+                        setFormData({ ...formData, footballSkill: value })
+                      }
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                    <label className="block text-sm text-gray-300 mb-2">
                       Basketbal
                     </label>
                     <SkillSlider
                       value={formData.basketballSkill}
-                      onChange={(value) => setFormData({ ...formData, basketballSkill: value })}
+                      onChange={(value) =>
+                        setFormData({ ...formData, basketballSkill: value })
+                      }
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                    <label className="block text-sm text-gray-300 mb-2">
                       Tenis
                     </label>
                     <SkillSlider
                       value={formData.tennisSkill}
-                      onChange={(value) => setFormData({ ...formData, tennisSkill: value })}
+                      onChange={(value) =>
+                        setFormData({ ...formData, tennisSkill: value })
+                      }
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                    <label className="block text-sm text-gray-300 mb-2">
                       Volejbal
                     </label>
                     <SkillSlider
                       value={formData.volleyballSkill}
-                      onChange={(value) => setFormData({ ...formData, volleyballSkill: value })}
+                      onChange={(value) =>
+                        setFormData({ ...formData, volleyballSkill: value })
+                      }
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                    <label className="block text-sm text-gray-300 mb-2">
                       Bedminton
                     </label>
                     <SkillSlider
                       value={formData.badmintonSkill}
-                      onChange={(value) => setFormData({ ...formData, badmintonSkill: value })}
+                      onChange={(value) =>
+                        setFormData({ ...formData, badmintonSkill: value })
+                      }
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                    <label className="block text-sm text-gray-300 mb-2">
                       Stolný tenis
                     </label>
                     <SkillSlider
                       value={formData.tableTennisSkill}
-                      onChange={(value) => setFormData({ ...formData, tableTennisSkill: value })}
+                      onChange={(value) =>
+                        setFormData({ ...formData, tableTennisSkill: value })
+                      }
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                    <label className="block text-sm text-gray-300 mb-2">
                       Beh
                     </label>
                     <SkillSlider
                       value={formData.runningSkill}
-                      onChange={(value) => setFormData({ ...formData, runningSkill: value })}
+                      onChange={(value) =>
+                        setFormData({ ...formData, runningSkill: value })
+                      }
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                    <label className="block text-sm text-gray-300 mb-2">
                       Cyklistika
                     </label>
                     <SkillSlider
                       value={formData.cyclingSkill}
-                      onChange={(value) => setFormData({ ...formData, cyclingSkill: value })}
+                      onChange={(value) =>
+                        setFormData({ ...formData, cyclingSkill: value })
+                      }
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                    <label className="block text-sm text-gray-300 mb-2">
                       Plávanie
                     </label>
                     <SkillSlider
                       value={formData.swimmingSkill}
-                      onChange={(value) => setFormData({ ...formData, swimmingSkill: value })}
+                      onChange={(value) =>
+                        setFormData({ ...formData, swimmingSkill: value })
+                      }
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm text-[color:var(--fluent-text-secondary)] mb-2">
+                    <label className="block text-sm text-gray-300 mb-2">
                       Fitnes
                     </label>
                     <SkillSlider
                       value={formData.gymSkill}
-                      onChange={(value) => setFormData({ ...formData, gymSkill: value })}
+                      onChange={(value) =>
+                        setFormData({ ...formData, gymSkill: value })
+                      }
                     />
                   </div>
                 </div>
               </div>
 
               {error && (
-                <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800">
-                  <p className="text-red-600 dark:text-red-400">{error}</p>
+                <div className="p-4 rounded-lg bg-red-500/10 border-2 border-red-500/30">
+                  <p className="text-red-400">{error}</p>
                 </div>
               )}
 
               {success && (
-                <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-800">
-                  <p className="text-green-600 dark:text-green-400">
+                <div className="p-4 rounded-lg bg-emerald-500/10 border-2 border-emerald-500/30">
+                  <p className="text-emerald-400">
                     Profil bol úspešne aktualizovaný! Presmerovávam...
                   </p>
                 </div>
               )}
 
               <div className="flex gap-4 pt-4">
-                <Button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1"
-                >
-                  {saving ? 'Ukladám...' : 'Uložiť zmeny'}
+                <Button type="submit" disabled={saving} className="flex-1">
+                  {saving ? "Ukladám..." : "Uložiť zmeny"}
                 </Button>
                 <Button
                   type="button"
                   variant="secondary"
-                  onClick={() => router.push('/profile')}
+                  onClick={() => router.push("/profile")}
                   disabled={saving}
                 >
                   Zrušiť

@@ -199,6 +199,16 @@ aby som rezervoval miesto
 - ✅ UI komponenty implementované
 - ✅ Automatický refresh dát po akcii
 - ✅ Vizuálna indikácia stavu (organizátor/účastník)
+- ✅ Hromadné prihlásenie na všetky termíny opakovanej aktivity - Kamil Berecký
+- ✅ Hromadné odhlásenie zo všetkých termínov opakovanej aktivity - Kamil Berecký
+- ✅ API: POST /api/activities/[id]/join-recurring (hromadné prihlásenie) - Kamil Berecký
+- ✅ API: POST /api/activities/[id]/leave-recurring (hromadné odhlásenie) - Kamil Berecký
+- ✅ Podpora režimov: "all" (všetky termíny) a "specific-days" (konkrétne dni v týždni) - Kamil Berecký
+- ✅ Možnosť pridať hostí pri hromadnom prihlásení - Kamil Berecký
+- ✅ UI tlačidlá "Prihlásiť na všetky" a "Odhlásiť zo všetkých" v sekcii Nadchádzajúce termíny - Kamil Berecký
+- ✅ Tlačidlá pre prihlásenie/odhlásenie na konkrétne dni (Pondelok, Utorok, atď.) - Kamil Berecký
+- ✅ Konfirmačné dialógy pred hromadnými akciami - Kamil Berecký
+- ✅ Hromadné akcie fungujú rovnako z parent aj child aktivít (automatické rozpoznanie parent ID) - Kamil Berecký
 
 ---
 
@@ -585,53 +595,46 @@ aby som nezmeškal zaujímavé aktivity
 
 ## US-015: Hodnotenie a recenzie
 
-**Status:** 📋 PLANNED
+**Status:** ✅ HOTOVÉ
 
 Ako používateľ
 chcem hodnotiť účastníkov po aktivite
 aby ostatný vedeli, s kým hrajú
 
-**Vývojár:** -
+**Vývojár:** Kamil Berecký
 
 ### Tasky:
 ### Backend
-- ⏸️ Prisma schema: Review model (rating 1-5, comment, reviewer, reviewed user)
-- ⏸️ API: POST /api/users/[id]/reviews
-- ⏸️ API: GET /api/users/[id]/reviews (zoznam recenzií)
-- ⏸️ Validácia: len pre účastníkov aktivity
-- ⏸️ Validácia: len po dátume aktivity
-- ⏸️ Validácia: jeden review na používateľa na aktivitu
-- ⏸️ Validácia: no spam, min 10 znakov pre comment
-- ⏸️ Výpočet priemerného ratingu (agregácia)
-- ⏸️ API: POST /api/reviews/[id]/report (report inappropriate review)
+- ✅ Prisma schema: Rating model (rating 1-5, comment, rater, rated user, activity)
+- ✅ API: POST /api/activities/[id]/rate - hodnotenie účastníkov aktivity
+- ✅ API: GET /api/activities/[id]/rate - získanie hodnotení pre aktivitu
+- ✅ Validácia: len pre účastníkov aktivity
+- ✅ Validácia: keď som prihlásený na aktivitu
+- ✅ Validácia: jeden rating na používateľa na aktivitu
+- ✅ Výpočet priemerného ratingu používateľa
 
-### Frontend - Review komponenty
-- ⏸️ Review modal po skončení aktivity
-- ⏸️ Star rating komponenta (1-5 hviezd, interactive)
-- ⏸️ Text area pre komentár (optional, max 500 znakov)
-- ⏸️ Character counter (500/500)
-- ⏸️ Anonymous option checkbox (meno skryté)
-- ⏸️ Submit a Cancel tlačidlá
-- ⏸️ Loading state pri odosielaní
+### Frontend - Rating komponenty
+- ✅ Rating modal po skončení aktivity
+- ✅ Star rating komponenta (1-5 hviezd, interactive)
+- ✅ Text area pre komentár (optional)
+- ✅ Submit a Cancel tlačidlá
+- ✅ Loading state pri odosielaní
 
-### Frontend - Zobrazenie recenzií
-- ⏸️ Zobrazenie priemerného ratingu na profile (stars + číslo)
-- ⏸️ Zoznam recenzií na profile stránke
-- ⏸️ Review card komponenta (avatar, meno/anonymous, rating, komentár, dátum)
-- ⏸️ Pagination pre recenzie (10 per page)
-- ⏸️ Report inappropriate review button
-- ⏸️ "Žiadne recenzie" empty state
-- ⏸️ Responzívny dizajn
-
-### Notifikácie
-- ⏸️ Notifikácia pre používateľa pri novej recenzii
-- ⏸️ Email notifikácia o novom hodnotení (optional)
+### Frontend - Zobrazenie hodnotení
+- ✅ Zobrazenie priemerného ratingu na profile (stars + číslo)
+- ✅ Zoznam hodnotení na profile stránke
+- ✅ Rating card komponenta (avatar, meno, rating, komentár, dátum, aktivita)
+- ✅ Zobrazenie hodnotení na detail stránke aktivity
+- ✅ "Žiadne hodnotenia" empty state
+- ✅ Responzívny dizajn
 
 ### Výsledné funkcie:
-- ⏸️ Rating systém funguje
-- ⏸️ Reviews na profile
-- ⏸️ Priemerný rating sa zobrazuje
-- ⏸️ Report function
+- ✅ Rating systém funguje (1-5 hviezd)
+- ✅ Hodnotenia na profile používateľa
+- ✅ Priemerný rating sa zobrazuje na profile
+- ✅ Hodnotenia viditeľné na detail stránke aktivity
+- ✅ Možnosť hodnotiť len po skončení aktivity
+- ✅ Jeden rating na používateľa na aktivitu
 
 ---
 
@@ -694,94 +697,6 @@ aby sme mohli medzi sebou komunikovať
 - ✅ Character limit 500 znakov
 - ✅ Auto-scroll a relatívny čas
 - ✅ Collapsible panel s badge počtu správ
-
----
-
-## US-017: AI Chatbot pre support
-
-**Status:** 📋 PLANNED
-
-Ako používateľ
-chcem sa opýtať AI na otázky o platforme
-aby som rýchlo našiel odpovede na moje otázky o platforme
-
-**Vývojár:** -
-
-### Tasky:
-### Backend - AI Infrastructure
-- ⏸️ API: POST /api/ai/support-chat
-- ⏸️ OpenAI Assistants API integration
-- ⏸️ API rate limiting (10 requests/day pre free users)
-- ⏸️ Token usage tracking a cost monitoring
-- ⏸️ Error handling a fallback responses
-- ⏸️ API: GET /api/ai/chat-history (pre daného používateľa)
-- ⏸️ API: DELETE /api/ai/chat-history (vymazanie histórie)
-
-### RAG Setup (Retrieval Augmented Generation)
-- ⏸️ Pinecone/Supabase Vector database setup
-- ⏸️ Knowledge base creation (FAQ dokumenty)
-- ⏸️ Platform guide embeddings (ako používať features)
-- ⏸️ FAQ dokumenty embeddings
-- ⏸️ Vector search implementation
-- ⏸️ Context injection do AI promptu
-- ⏸️ Relevance scoring a filtering
-
-### Context-Aware Features
-- ⏸️ Current page detection (URL tracking)
-- ⏸️ User profile info injection (ak prihlásený)
-- ⏸️ Recent user actions tracking (last 5 actions)
-- ⏸️ Dynamic prompt construction based on context
-- ⏸️ Session-based conversation memory
-
-### Frontend - Chat Widget
-- ⏸️ Floating chat button (bottom right, sticky)
-- ⏸️ Badge notification (nová odpoveď)
-- ⏸️ Chat window komponenta (minimize/maximize/close)
-- ⏸️ Chat header s titulom a actions
-- ⏸️ Message list (user + AI bubbles)
-- ⏸️ Message input field
-- ⏸️ Send button
-- ⏸️ Loading indicator (typing dots)
-- ⏸️ Scroll to bottom button
-
-### Quick Actions
-- ⏸️ Quick action buttons: "Ako vytvoriť aktivitu?"
-- ⏸️ Quick action buttons: "Ako sa prihlásiť?"
-- ⏸️ Quick action buttons: "Ako nájsť aktivity?"
-- ⏸️ Quick action buttons: "Ako upraviť profil?"
-- ⏸️ Dynamic suggestions based on page
-
-### Advanced Features
-- ⏸️ Chat history persistence (conversation_id v localStorage)
-- ⏸️ "Nová konverzácia" button (reset context)
-- ⏸️ Escalation to human support button
-- ⏸️ Human support form (meno, email, správa)
-- ⏸️ Multilingual support (SK/EN auto-detection)
-- ⏸️ Copy response button
-- ⏸️ Thumbs up/down feedback
-- ⏸️ "Bolo to užitočné?" feedback
-
-### Analytics
-- ⏸️ Common questions tracking (analytics dashboard)
-- ⏸️ User satisfaction metrics (feedback aggregation)
-- ⏸️ Response time monitoring
-- ⏸️ Escalation rate tracking
-- ⏸️ Most helpful answers identification
-
-### UX Polish
-- ⏸️ Smooth animations (open/close, messages)
-- ⏸️ Typing indicator when AI is responding
-- ⏸️ Error states ("Niečo sa pokazilo, skúste znova")
-- ⏸️ Offline detection a warning
-- ⏸️ Mobile responsive design
-- ⏸️ Keyboard shortcuts (ESC to close)
-- ⏸️ Welcome message on first open
-
-### Výsledné funkcie:
-- ⏸️ AI chatbot funguje
-- ⏸️ RAG s knowledge base
-- ⏸️ Context-aware answers
-- ⏸️ Chat history
 
 
 ## US-018: AI Matchmaking pre hráčov
@@ -968,6 +883,93 @@ aby som vedel, na čo som sa prihlásil a čo som vytvoril
 - ✅ Delete funkcia pre organizátorov s smart navigation
 - ✅ Smart back button tracking (vracia na správnu stránku)
 - ✅ Empty states s CTA akciami
+
+---
+
+## US-021: AI Asistent na tvorbu aktivít
+
+**Status:** ✅ HOTOVÉ
+
+Ako používateľ
+chcem pomocou prirodzeného jazyka (slovenčina) vytvoriť aktivitu
+aby som nemusel manuálne vypĺňať všetky polia formulára
+
+**Vývojár:** Jozef Kovalčín, Kamil Berecký
+
+### Tasky:
+- ✅ Integrácia Google Gemini API (gemini-2.5-flash-lite model)
+- ✅ API: POST /api/activities/parse - spracovanie prirodzeného jazyka
+- ✅ Rozpoznávanie športov a mapovanie na podporované typy
+- ✅ Rozpoznávanie úrovní (začiatočník, stredne pokročilý, pokročilý, profesionál)
+- ✅ Rozpoznávanie dátumov a časov vrátane relatívnych výrazov ("zajtra", "tento víkend", "o týždeň")
+- ✅ Dynamické generovanie aktuálneho dátumu pre AI kontext
+- ✅ Rozpoznávanie lokácií s Google Maps geocodingom
+- ✅ Podpora opakovaných aktivít ("každý utorok a štvrtok")
+- ✅ Rozpoznávanie frekvencie opakovania (DAILY, WEEKLY, MONTHLY)
+- ✅ Rozpoznávanie dní v týždni pre týždenné opakovanie
+- ✅ Formulár so vstupom pre AI a náhľadom výsledku
+- ✅ Automatické vyplnenie formulára po spracovaní
+- ✅ Možnosť upraviť AI výsledok pred odoslaním
+- ✅ Fallback na manuálne vyplnenie
+
+### Výsledné funkcie:
+- ✅ AI rozpoznáva slovenské príkazy ako "basketbal pre pokročilých zajtra o 18:00 na ihrisku ZŠ Sekčov"
+- ✅ AI rozpoznáva opakované aktivity "jóga každý utorok a štvrtok o 19:00"
+- ✅ Automatické mapovanie na správne polia formulára
+- ✅ Geocoding adresy na GPS súradnice
+- ✅ Dynamický aktuálny dátum pre relatívne výrazy
+- ✅ Náhľad parsovaných dát pred vyplnením
+- ✅ Rate limiting pre Gemini API (15 RPM)
+
+**Technické detaily:**
+- Model: Google Gemini 2.5 Flash-Lite
+- SDK: @google/generative-ai
+- Response formát: JSON
+- Geocoding: Google Maps Geocoder API
+- Rate limit: 15 requests per minute
+
+---
+
+## US-022: AI Vyhľadávanie aktivít
+
+**Status:** ✅ HOTOVÉ
+
+Ako používateľ
+chcem vyhľadávať aktivity pomocou prirodzeného jazyka (slovenčina)
+aby som nemusel manuálne nastavovať všetky filtre
+
+**Vývojár:** Jozef Kovalčín, Kamil Berecký
+
+### Tasky:
+- ✅ API: POST /api/ai/search - spracovanie vyhľadávacieho dotazu
+- ✅ Rozpoznávanie športov a mapovanie na podporované typy
+- ✅ Rozpoznávanie úrovní (začiatočník, stredne pokročilý, pokročilý, profesionál)
+- ✅ Rozpoznávanie lokácií (mestá, adresy, konkrétne miesta)
+- ✅ Rozpoznávanie dátumov vrátane relatívnych výrazov ("dnes", "zajtra", "tento víkend")
+- ✅ Dynamické generovanie aktuálneho dátumu pre AI kontext
+- ✅ Rozpoznávanie pohlavia (muži, ženy, zmiešané)
+- ✅ Rozpoznávanie vekového rozpätia
+- ✅ Rozpoznávanie ceny (zadarmo, cenové rozpätie)
+- ✅ AISearchBar komponent s vizuálnym AI badge
+- ✅ Náhľad rozpoznaných filtrov s slovenskými názvami
+- ✅ Automatická aplikácia filtrov na zoznam aktivít
+- ✅ Príklady vyhľadávaní pre používateľov
+
+### Výsledné funkcie:
+- ✅ AI rozpoznáva slovenské dotazy ako "futbal v Bratislave zajtra"
+- ✅ AI rozpoznáva viacero športov "basketbal alebo volejbal dnes"
+- ✅ AI rozpoznáva špeciálne požiadavky "joga zadarmo pre ženy"
+- ✅ Automatické mapovanie na URL filtre
+- ✅ Zobrazenie rozpoznaných filtrov v slovenčine (Futbal namiesto FOOTBALL)
+- ✅ Dynamický aktuálny dátum pre relatívne výrazy
+- ✅ Fallback na textové vyhľadávanie pri chybe
+- ✅ Oprava filtra dátumu pre konkrétny deň (end of day)
+
+**Technické detaily:**
+- Model: Google Gemini 2.5 Flash-Lite
+- SDK: @google/generative-ai
+- Response formát: JSON
+- Podpora filtrov: sportType, skillLevel, location, dateFrom, dateTo, gender, minAge, maxAge, priceFrom, priceTo
 
 ---
 

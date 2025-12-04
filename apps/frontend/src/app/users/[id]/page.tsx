@@ -38,6 +38,8 @@ interface UserProfile {
     completedActivities: number;
     upcomingActivities: number;
     mostPlayedSports: string[];
+    averageRating: number | null;
+    totalRatings: number;
   };
 }
 
@@ -94,7 +96,7 @@ interface RecentActivity {
   title: string;
   sportType: string;
   date: string;
-  type: 'created' | 'joined';
+  type: "created" | "joined";
 }
 
 export default function UserProfilePage() {
@@ -103,11 +105,15 @@ export default function UserProfilePage() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [ownStats, setOwnStats] = useState<OwnProfileStats | null>(null);
-  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [loadingActivities, setLoadingActivities] = useState(true);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<"upcoming" | "completed">("upcoming");
+  const [activeTab, setActiveTab] = useState<"upcoming" | "completed">(
+    "upcoming"
+  );
 
   const isOwnProfile = session?.user?.id === params.id;
 
@@ -128,8 +134,9 @@ export default function UserProfilePage() {
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [isOwnProfile]);
 
   const fetchUserProfile = async () => {
@@ -170,7 +177,7 @@ export default function UserProfilePage() {
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/profile/stats`,
-        { credentials: 'include' }
+        { credentials: "include" }
       );
       if (response.ok) {
         const data = await response.json();
@@ -185,7 +192,7 @@ export default function UserProfilePage() {
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/profile/recent-activities`,
-        { credentials: 'include' }
+        { credentials: "include" }
       );
       if (response.ok) {
         const data = await response.json();
@@ -198,20 +205,18 @@ export default function UserProfilePage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('sk-SK', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
+    return date.toLocaleDateString("sk-SK", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
     });
   };
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pt-36">
         <div className="max-w-6xl mx-auto">
-          <p className="text-center text-[color:var(--fluent-text-secondary)]">
-            Načítavam...
-          </p>
+          <p className="text-center text-gray-300">Načítavam...</p>
         </div>
       </div>
     );
@@ -219,12 +224,12 @@ export default function UserProfilePage() {
 
   if (error || !user) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 pt-36">
         <div className="max-w-6xl mx-auto">
           <Card>
             <div className="text-center py-12">
               <p className="text-2xl mb-4">❌</p>
-              <h3 className="text-xl font-semibold text-[color:var(--fluent-text)] mb-2">
+              <h3 className="text-xl font-semibold text-white mb-2">
                 {error || "Používateľ nenájdený"}
               </h3>
               <Link href="/activities">
@@ -245,17 +250,17 @@ export default function UserProfilePage() {
   });
 
   const upcomingActivities = activities.filter((a) => a.status === "OPEN");
-  const completedActivities = activities.filter((a) => a.status === "COMPLETED");
+  const completedActivities = activities.filter(
+    (a) => a.status === "COMPLETED"
+  );
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 pt-36">
       <div className="max-w-6xl mx-auto">
         {/* Header with Back button and Edit button for own profile */}
         <div className="flex justify-between items-center mb-6">
           <Link href="/activities">
-            <Button variant="secondary">
-              ← Späť
-            </Button>
+            <Button variant="secondary">← Späť</Button>
           </Link>
           {isOwnProfile && (
             <Link href="/profile/edit">
@@ -274,11 +279,11 @@ export default function UserProfilePage() {
                   <img
                     src={user.image}
                     alt={user.name}
-                    className="w-32 h-32 rounded-full object-cover border-4 border-[color:var(--fluent-border)]"
+                    className="w-32 h-32 rounded-full object-cover border-4 border-white/10"
                   />
                 ) : (
-                  <div className="w-32 h-32 rounded-full bg-[color:var(--fluent-accent)]/20 flex items-center justify-center border-4 border-[color:var(--fluent-border)]">
-                    <span className="text-5xl font-bold text-[color:var(--fluent-accent)]">
+                  <div className="w-32 h-32 rounded-full bg-emerald-600/20 flex items-center justify-center border-4 border-white/10">
+                    <span className="text-5xl font-bold text-emerald-500">
                       {user.name.charAt(0).toUpperCase()}
                     </span>
                   </div>
@@ -287,50 +292,45 @@ export default function UserProfilePage() {
 
               {/* Info */}
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-[color:var(--fluent-text)] mb-2">
+                <h1 className="text-3xl font-bold text-white mb-2">
                   {user.name}
                 </h1>
-                
+
                 {user.profile?.city && (
-                  <p className="text-[color:var(--fluent-text-secondary)] mb-2">
-                    📍 {user.profile.city}
-                  </p>
+                  <p className="text-gray-300 mb-2">📍 {user.profile.city}</p>
                 )}
 
                 {isOwnProfile && user.profile?.phone && (
-                  <p className="text-[color:var(--fluent-text-secondary)] mb-2">
-                    📞 {user.profile.phone}
-                  </p>
+                  <p className="text-gray-300 mb-2">📞 {user.profile.phone}</p>
                 )}
 
-                <p className="text-sm text-[color:var(--fluent-text-secondary)] mb-4">
+                <p className="text-sm text-gray-300 mb-4">
                   Člen od {memberSince}
                 </p>
 
                 {user.profile?.bio && (
-                  <p className="text-[color:var(--fluent-text)] mb-4">
-                    {user.profile.bio}
-                  </p>
+                  <p className="text-white mb-4">{user.profile.bio}</p>
                 )}
 
                 {/* Favorite Sports */}
-                {user.profile?.favoriteSports && user.profile.favoriteSports.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium text-[color:var(--fluent-text-secondary)] mb-2">
-                      Obľúbené športy:
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {user.profile.favoriteSports.map((sport) => (
-                        <span
-                          key={sport}
-                          className="px-3 py-1 text-sm bg-[color:var(--fluent-surface-secondary)] text-[color:var(--fluent-text)] rounded-full"
-                        >
-                          {sportTypeLabels[sport] || sport}
-                        </span>
-                      ))}
+                {user.profile?.favoriteSports &&
+                  user.profile.favoriteSports.length > 0 && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-300 mb-2">
+                        Obľúbené športy:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {user.profile.favoriteSports.map((sport) => (
+                          <span
+                            key={sport}
+                            className="px-3 py-1 text-sm bg-white/[0.03] text-white rounded-full border border-white/10"
+                          >
+                            {sportTypeLabels[sport] || sport}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             </div>
           </CardContent>
@@ -343,7 +343,7 @@ export default function UserProfilePage() {
               <CardTitle>Zručnosti v športoch</CardTitle>
             </CardHeader>
             <CardContent>
-              <SkillRadarChart 
+              <SkillRadarChart
                 skills={{
                   footballSkill: user.profile.footballSkill || 1,
                   basketballSkill: user.profile.basketballSkill || 1,
@@ -362,59 +362,72 @@ export default function UserProfilePage() {
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-6">
           <Card>
             <CardContent className="text-center py-4">
-              <p className="text-3xl font-bold text-[color:var(--fluent-accent)]">
+              <p className="text-3xl font-bold text-emerald-500">
                 {user.stats.totalActivities}
               </p>
-              <p className="text-sm text-[color:var(--fluent-text-secondary)] mt-1">
-                Celkom aktivít
-              </p>
+              <p className="text-sm text-gray-300 mt-1">Celkom aktivít</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="text-center py-4">
-              <p className="text-3xl font-bold text-[color:var(--fluent-accent)]">
+              <p className="text-3xl font-bold text-emerald-500">
                 {user.stats.createdActivities}
               </p>
-              <p className="text-sm text-[color:var(--fluent-text-secondary)] mt-1">
-                Vytvorených
-              </p>
+              <p className="text-sm text-gray-300 mt-1">Vytvorených</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="text-center py-4">
-              <p className="text-3xl font-bold text-[color:var(--fluent-accent)]">
+              <p className="text-3xl font-bold text-emerald-500">
                 {user.stats.joinedActivities}
               </p>
-              <p className="text-sm text-[color:var(--fluent-text-secondary)] mt-1">
-                Prihlásených
-              </p>
+              <p className="text-sm text-gray-300 mt-1">Prihlásených</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="text-center py-4">
-              <p className="text-3xl font-bold text-green-600">
+              <p className="text-3xl font-bold text-emerald-400">
                 {user.stats.completedActivities}
               </p>
-              <p className="text-sm text-[color:var(--fluent-text-secondary)] mt-1">
-                Dokončených
-              </p>
+              <p className="text-sm text-gray-300 mt-1">Dokončených</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="text-center py-4">
-              <p className="text-3xl font-bold text-blue-600">
+              <p className="text-3xl font-bold text-emerald-300">
                 {user.stats.upcomingActivities}
               </p>
-              <p className="text-sm text-[color:var(--fluent-text-secondary)] mt-1">
-                Nadchádzajúcich
-              </p>
+              <p className="text-sm text-gray-300 mt-1">Nadchádzajúcich</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="text-center py-4">
+              {user.stats.averageRating ? (
+                <>
+                  <p className="text-3xl font-bold text-yellow-400 flex items-center justify-center gap-1">
+                    {user.stats.averageRating}{" "}
+                    <span className="text-2xl">★</span>
+                  </p>
+                  <p className="text-sm text-gray-300 mt-1">
+                    z {user.stats.totalRatings} hodnotení
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-3xl font-bold text-gray-500">-</p>
+                  <p className="text-sm text-gray-300 mt-1">
+                    Žiadne hodnotenia
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -430,7 +443,7 @@ export default function UserProfilePage() {
                 {user.stats.mostPlayedSports.map((sport) => (
                   <span
                     key={sport}
-                    className="px-4 py-2 text-lg bg-[color:var(--fluent-accent)]/10 text-[color:var(--fluent-accent)] rounded-lg font-medium"
+                    className="px-4 py-2 text-lg bg-emerald-600/10 text-emerald-500 rounded-lg font-medium border border-emerald-500/20"
                   >
                     {sportTypeLabels[sport] || sport}
                   </span>
@@ -450,8 +463,8 @@ export default function UserProfilePage() {
                 onClick={() => setActiveTab("upcoming")}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   activeTab === "upcoming"
-                    ? "bg-[color:var(--fluent-accent)] text-white"
-                    : "bg-[color:var(--fluent-surface-secondary)] text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)]"
+                    ? "bg-emerald-600 text-white"
+                    : "bg-white/[0.03] text-gray-300 hover:text-white border border-white/10"
                 }`}
               >
                 Nadchádzajúce ({upcomingActivities.length})
@@ -460,8 +473,8 @@ export default function UserProfilePage() {
                 onClick={() => setActiveTab("completed")}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   activeTab === "completed"
-                    ? "bg-[color:var(--fluent-accent)] text-white"
-                    : "bg-[color:var(--fluent-surface-secondary)] text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)]"
+                    ? "bg-emerald-600 text-white"
+                    : "bg-white/[0.03] text-gray-300 hover:text-white border border-white/10"
                 }`}
               >
                 Dokončené ({completedActivities.length})
@@ -470,22 +483,31 @@ export default function UserProfilePage() {
           </CardHeader>
           <CardContent>
             {loadingActivities ? (
-              <p className="text-center text-[color:var(--fluent-text-secondary)] py-8">
+              <p className="text-center text-gray-300 py-8">
                 Načítavam aktivity...
               </p>
             ) : (
               <div className="space-y-3">
-                {(activeTab === "upcoming" ? upcomingActivities : completedActivities).length === 0 ? (
+                {(activeTab === "upcoming"
+                  ? upcomingActivities
+                  : completedActivities
+                ).length === 0 ? (
                   <div className="text-center py-12">
                     <p className="text-4xl mb-4">📋</p>
-                    <p className="text-[color:var(--fluent-text-secondary)]">
-                      {activeTab === "upcoming" ? "Žiadne nadchádzajúce aktivity" : "Žiadne dokončené aktivity"}
+                    <p className="text-gray-300">
+                      {activeTab === "upcoming"
+                        ? "Žiadne nadchádzajúce aktivity"
+                        : "Žiadne dokončené aktivity"}
                     </p>
                   </div>
                 ) : (
-                  (activeTab === "upcoming" ? upcomingActivities : completedActivities).map((activity) => {
+                  (activeTab === "upcoming"
+                    ? upcomingActivities
+                    : completedActivities
+                  ).map((activity) => {
                     const date = new Date(activity.date);
-                    const statusInfo = statusLabels[activity.status] || statusLabels.OPEN;
+                    const statusInfo =
+                      statusLabels[activity.status] || statusLabels.OPEN;
 
                     return (
                       <Link
@@ -493,17 +515,22 @@ export default function UserProfilePage() {
                         href={`/activities/${activity.id}`}
                         className="block"
                       >
-                        <div className="p-4 rounded-lg bg-[color:var(--fluent-surface-secondary)] hover:bg-[color:var(--fluent-surface-tertiary)] transition-colors border border-[color:var(--fluent-border)]">
+                        <div className="p-4 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] transition-colors border border-white/10">
                           <div className="flex justify-between items-start mb-2">
-                            <h3 className="text-lg font-semibold text-[color:var(--fluent-text)]">
+                            <h3 className="text-lg font-semibold text-white">
                               {activity.title}
                             </h3>
-                            <span className={`px-2 py-1 text-xs font-medium text-white rounded ${statusInfo.color}`}>
+                            <span
+                              className={`px-2 py-1 text-xs font-medium text-white rounded ${statusInfo.color}`}
+                            >
                               {statusInfo.label}
                             </span>
                           </div>
-                          <div className="flex flex-wrap gap-2 text-sm text-[color:var(--fluent-text-secondary)]">
-                            <span>{sportTypeLabels[activity.sportType] || activity.sportType}</span>
+                          <div className="flex flex-wrap gap-2 text-sm text-gray-300">
+                            <span>
+                              {sportTypeLabels[activity.sportType] ||
+                                activity.sportType}
+                            </span>
                             <span>•</span>
                             <span>
                               {date.toLocaleDateString("sk-SK", {
@@ -514,12 +541,13 @@ export default function UserProfilePage() {
                             </span>
                             <span>•</span>
                             <span>
-                              {activity.currentParticipants}/{activity.maxParticipants} účastníkov
+                              {activity.currentParticipants}/
+                              {activity.maxParticipants} účastníkov
                             </span>
                             {activity.isOrganizer && (
                               <>
                                 <span>•</span>
-                                <span className="text-[color:var(--fluent-accent)] font-medium">
+                                <span className="text-emerald-500 font-medium">
                                   Organizátor
                                 </span>
                               </>

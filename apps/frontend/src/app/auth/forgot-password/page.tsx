@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
             <div className="text-center mb-6">
               <div className="text-5xl mb-4">🔒</div>
               <CardTitle className="text-3xl">Zabudnuté heslo?</CardTitle>
-              <p className="text-[color:var(--fluent-text-secondary)] mt-2">
+              <p className="text-gray-300 mt-2">
                 Žiadny problém! Zadaj svoj email a pošleme ti link na reset
                 hesla.
               </p>
@@ -70,7 +70,7 @@ export default function ForgotPasswordPage() {
                       <h3 className="font-semibold text-green-600 mb-1">
                         Email odoslaný!
                       </h3>
-                      <p className="text-sm text-[color:var(--fluent-text-secondary)]">
+                      <p className="text-sm text-gray-300">
                         Ak email existuje v našej databáze, poslali sme ti
                         inštrukcie na reset hesla. Skontroluj si emailovú
                         schránku.
@@ -79,8 +79,8 @@ export default function ForgotPasswordPage() {
                   </div>
                 </div>
 
-                <div className="p-4 bg-[color:var(--fluent-surface-secondary)] rounded-lg">
-                  <p className="text-sm text-[color:var(--fluent-text-secondary)]">
+                <div className="p-4 bg-white/[0.03] border border-white/10 rounded-lg">
+                  <p className="text-sm text-gray-300">
                     <strong>💡 Tip:</strong> Nezabudni skontrolovať aj SPAM
                     priečinok. Link je platný iba 1 hodinu.
                   </p>
@@ -103,7 +103,7 @@ export default function ForgotPasswordPage() {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                  <label className="block text-sm font-medium mb-2 text-white">
                     Email *
                   </label>
                   <Input
@@ -113,7 +113,7 @@ export default function ForgotPasswordPage() {
                     placeholder="tvoj@email.sk"
                     required
                   />
-                  <p className="text-xs text-[color:var(--fluent-text-secondary)] mt-2">
+                  <p className="text-xs text-gray-400 mt-2">
                     Zadaj email, ktorý si použil pri registrácii
                   </p>
                 </div>
@@ -140,11 +140,11 @@ export default function ForgotPasswordPage() {
         </Card>
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-[color:var(--fluent-text-secondary)]">
+          <p className="text-sm text-gray-300">
             Nemáš ešte účet?{" "}
             <Link
               href="/auth/signup"
-              className="text-[color:var(--fluent-accent)] hover:underline font-medium"
+              className="text-emerald-400 hover:text-emerald-300 hover:underline font-medium"
             >
               Zaregistruj sa
             </Link>

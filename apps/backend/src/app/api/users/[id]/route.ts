@@ -117,6 +117,27 @@ export async function GET(
       .slice(0, 3)
       .map(([sport]) => sport);
 
+    // Get average rating for activities organized by this user
+    const userActivities = await prisma.activity.findMany({
+      where: { organizerId: userId },
+      select: { id: true },
+    });
+
+    const activityIds = userActivities.map((a) => a.id);
+
+    const ratingsAggregate = await prisma.activityRating.aggregate({
+      where: {
+        activityId: { in: activityIds },
+      },
+      _avg: { rating: true },
+      _count: { rating: true },
+    });
+
+    const averageRating = ratingsAggregate._avg.rating
+      ? Math.round(ratingsAggregate._avg.rating * 10) / 10
+      : null;
+    const totalRatings = ratingsAggregate._count.rating;
+
     return NextResponse.json({
       ...user,
       stats: {
@@ -126,6 +147,8 @@ export async function GET(
         completedActivities,
         upcomingActivities,
         mostPlayedSports,
+        averageRating,
+        totalRatings,
       },
     });
   } catch (error) {

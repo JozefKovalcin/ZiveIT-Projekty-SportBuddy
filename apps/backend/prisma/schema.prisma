@@ -27,6 +27,7 @@ model User {
   profile        Profile?
   activities    Activity[]
   participations Participation[]
+  activityRatings ActivityRating[]
   reviews       Review[]
   favoriteVenues VenueFavorite[]
   passwordResets PasswordReset[]
@@ -246,6 +247,7 @@ model Activity {
   participations Participation[]
   parentActivity Activity?       @relation("RecurringActivities", fields: [parentActivityId], references: [id], onDelete: SetNull)
   childActivities Activity[]     @relation("RecurringActivities")
+  ratings         ActivityRating[]
   messages       Message[]
 
   @@index([sportType])
@@ -324,4 +326,22 @@ model Message {
   @@index([activityId])
   @@index([userId])
   @@index([createdAt])
+}
+
+// Activity Rating (Hodnotenie aktivity) model
+model ActivityRating {
+  id         String   @id @default(cuid())
+  rating     Int      // 1-5 stars
+  comment    String?
+  activityId String
+  userId     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  activity Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, activityId])
+  @@index([activityId])
 }

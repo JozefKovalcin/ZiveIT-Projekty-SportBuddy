@@ -47,35 +47,38 @@ const SPORT_ICONS: Record<string, string> = {
   GYM: "💪",
 };
 
-export function SkillRadarChart({ skills, favoriteSports = [], size = 500 }: SkillRadarChartProps) {
+export function SkillRadarChart({
+  skills,
+  favoriteSports = [],
+  size = 500,
+}: SkillRadarChartProps) {
   const center = size / 2;
   const maxRadius = size / 2 - 100; // Leave more space for labels and icons
   const levels = 5; // 1-5 skill levels
 
   // Map sport types to skill values
   const sportSkillMap: Record<string, keyof SportSkills> = {
-    FOOTBALL: 'footballSkill',
-    BASKETBALL: 'basketballSkill',
-    TENNIS: 'tennisSkill',
-    VOLLEYBALL: 'volleyballSkill',
-    BADMINTON: 'badmintonSkill',
-    TABLE_TENNIS: 'tableTennisSkill',
-    RUNNING: 'runningSkill',
-    CYCLING: 'cyclingSkill',
-    SWIMMING: 'swimmingSkill',
-    GYM: 'gymSkill',
+    FOOTBALL: "footballSkill",
+    BASKETBALL: "basketballSkill",
+    TENNIS: "tennisSkill",
+    VOLLEYBALL: "volleyballSkill",
+    BADMINTON: "badmintonSkill",
+    TABLE_TENNIS: "tableTennisSkill",
+    RUNNING: "runningSkill",
+    CYCLING: "cyclingSkill",
+    SWIMMING: "swimmingSkill",
+    GYM: "gymSkill",
   };
 
   // Filter to only show favorite sports, or show all if no favorites
-  const displaySports = favoriteSports.length > 0 
-    ? favoriteSports 
-    : Object.keys(SPORT_LABELS);
+  const displaySports =
+    favoriteSports.length > 0 ? favoriteSports : Object.keys(SPORT_LABELS);
 
   const numSports = displaySports.length;
-  
+
   if (numSports === 0) {
     return (
-      <div className="flex items-center justify-center h-full text-[color:var(--fluent-text-secondary)]">
+      <div className="flex items-center justify-center h-full text-gray-400">
         Pridajte obľúbené športy do profilu
       </div>
     );
@@ -83,13 +86,13 @@ export function SkillRadarChart({ skills, favoriteSports = [], size = 500 }: Ski
 
   // Calculate points for each sport
   const angleStep = (2 * Math.PI) / numSports;
-  
+
   const sportPoints = displaySports.map((sport, index) => {
     const angle = angleStep * index - Math.PI / 2; // Start from top
     const skillKey = sportSkillMap[sport];
     const skillValue = (skills[skillKey] || 1) / 5; // Normalize to 0-1
     const radius = maxRadius * skillValue;
-    
+
     return {
       sport,
       angle,
@@ -102,16 +105,27 @@ export function SkillRadarChart({ skills, favoriteSports = [], size = 500 }: Ski
   });
 
   // Create path for the skill polygon
-  const pathData = sportPoints.map((point, index) => 
-    `${index === 0 ? 'M' : 'L'} ${point.x} ${point.y}`
-  ).join(' ') + ' Z';
+  const pathData =
+    sportPoints
+      .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
+      .join(" ") + " Z";
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="mx-auto" style={{ overflow: 'visible' }}>
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      className="mx-auto"
+      style={{ overflow: "visible" }}
+    >
       <defs>
         <radialGradient id="radarGradient" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="rgb(16, 185, 129)" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="rgb(16, 185, 129)" stopOpacity="0.05" />
+          <stop
+            offset="100%"
+            stopColor="rgb(16, 185, 129)"
+            stopOpacity="0.05"
+          />
         </radialGradient>
       </defs>
 
@@ -121,11 +135,11 @@ export function SkillRadarChart({ skills, favoriteSports = [], size = 500 }: Ski
         const level = i + 1;
         // Color gradient from red (low) to green (high)
         const colors = [
-          'rgba(239, 68, 68, 0.15)',   // Level 1 - Red
-          'rgba(251, 146, 60, 0.15)',  // Level 2 - Orange
-          'rgba(250, 204, 21, 0.15)',  // Level 3 - Yellow
-          'rgba(132, 204, 22, 0.15)',  // Level 4 - Light green
-          'rgba(16, 185, 129, 0.15)',  // Level 5 - Green
+          "rgba(239, 68, 68, 0.15)", // Level 1 - Red
+          "rgba(251, 146, 60, 0.15)", // Level 2 - Orange
+          "rgba(250, 204, 21, 0.15)", // Level 3 - Yellow
+          "rgba(132, 204, 22, 0.15)", // Level 4 - Light green
+          "rgba(16, 185, 129, 0.15)", // Level 5 - Green
         ];
         return (
           <g key={i}>
@@ -143,7 +157,7 @@ export function SkillRadarChart({ skills, favoriteSports = [], size = 500 }: Ski
               cy={center}
               r={radius}
               fill="none"
-              stroke={colors[i].replace('0.15', '0.4')}
+              stroke={colors[i].replace("0.15", "0.4")}
               strokeWidth="1.5"
             />
           </g>
@@ -175,7 +189,7 @@ export function SkillRadarChart({ skills, favoriteSports = [], size = 500 }: Ski
 
       {/* Data points with hover effects */}
       {sportPoints.map((point, index) => (
-        <g key={`point-${index}`} style={{ cursor: 'pointer' }}>
+        <g key={`point-${index}`} style={{ cursor: "pointer" }}>
           {/* Glow effect */}
           <circle
             cx={point.x}
@@ -195,7 +209,9 @@ export function SkillRadarChart({ skills, favoriteSports = [], size = 500 }: Ski
             strokeWidth="3"
             className="transition-all duration-200 hover:r-8"
           >
-            <title>{SPORT_LABELS[point.sport]}: {point.skillValue}/5</title>
+            <title>
+              {SPORT_LABELS[point.sport]}: {point.skillValue}/5
+            </title>
           </circle>
         </g>
       ))}
@@ -204,14 +220,18 @@ export function SkillRadarChart({ skills, favoriteSports = [], size = 500 }: Ski
       {sportPoints.map((point, index) => {
         const labelX = point.labelX;
         const labelY = point.labelY;
-        
+
         // Determine text anchor based on position
-        let textAnchor: 'start' | 'middle' | 'end' = 'middle';
-        if (labelX < center - 5) textAnchor = 'end';
-        else if (labelX > center + 5) textAnchor = 'start';
-        
+        let textAnchor: "start" | "middle" | "end" = "middle";
+        if (labelX < center - 5) textAnchor = "end";
+        else if (labelX > center + 5) textAnchor = "start";
+
         return (
-          <g key={`label-${index}`} className="transition-opacity duration-200 hover:opacity-100" style={{ opacity: 0.95 }}>
+          <g
+            key={`label-${index}`}
+            className="transition-opacity duration-200 hover:opacity-100"
+            style={{ opacity: 0.95 }}
+          >
             {/* Icon background stroke for visibility */}
             <text
               x={labelX}
@@ -230,11 +250,11 @@ export function SkillRadarChart({ skills, favoriteSports = [], size = 500 }: Ski
               y={labelY - 12}
               textAnchor={textAnchor}
               fontSize="26"
-              style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.4))' }}
+              style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.4))" }}
             >
               {SPORT_ICONS[point.sport]}
             </text>
-            
+
             {/* Sport name background stroke */}
             <text
               x={labelX}
@@ -242,7 +262,7 @@ export function SkillRadarChart({ skills, favoriteSports = [], size = 500 }: Ski
               textAnchor={textAnchor}
               fontSize="11"
               fontWeight="700"
-              stroke="var(--fluent-bg)"
+              stroke="#022c22"
               strokeWidth="4"
               opacity="0.95"
             >
@@ -259,7 +279,7 @@ export function SkillRadarChart({ skills, favoriteSports = [], size = 500 }: Ski
             >
               {SPORT_LABELS[point.sport]}
             </text>
-            
+
             {/* Skill level background stroke */}
             <text
               x={labelX}
@@ -267,7 +287,7 @@ export function SkillRadarChart({ skills, favoriteSports = [], size = 500 }: Ski
               textAnchor={textAnchor}
               fontSize="11"
               fontWeight="700"
-              stroke="var(--fluent-bg)"
+              stroke="#022c22"
               strokeWidth="4"
               opacity="0.95"
             >
@@ -289,12 +309,7 @@ export function SkillRadarChart({ skills, favoriteSports = [], size = 500 }: Ski
       })}
 
       {/* Center point */}
-      <circle
-        cx={center}
-        cy={center}
-        r="3"
-        fill="rgba(255, 255, 255, 0.5)"
-      />
+      <circle cx={center} cy={center} r="3" fill="rgba(255, 255, 255, 0.5)" />
     </svg>
   );
 }

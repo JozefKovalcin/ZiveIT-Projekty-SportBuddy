@@ -3,6 +3,37 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/Button";
 
+// Mapovanie anglických názvov športov na slovenské
+const sportTypeLabels: Record<string, string> = {
+  FOOTBALL: "Futbal",
+  BASKETBALL: "Basketbal",
+  TENNIS: "Tenis",
+  VOLLEYBALL: "Volejbal",
+  BADMINTON: "Bedminton",
+  TABLE_TENNIS: "Stolný tenis",
+  RUNNING: "Beh",
+  CYCLING: "Cyklistika",
+  SWIMMING: "Plávanie",
+  GYM: "Posilňovňa",
+  OTHER: "Iné",
+};
+
+// Mapovanie anglických názvov úrovní na slovenské
+const skillLevelLabels: Record<string, string> = {
+  BEGINNER: "Začiatočník",
+  INTERMEDIATE: "Mierne pokročilý",
+  ADVANCED: "Pokročilý",
+  EXPERT: "Expert",
+  PROFESSIONAL: "Profesionál",
+};
+
+// Mapovanie anglických názvov pohlavia na slovenské
+const genderLabels: Record<string, string> = {
+  MALE: "Muži",
+  FEMALE: "Ženy",
+  MIXED: "Zmiešané",
+};
+
 interface AISearchBarProps {
   onFiltersApplied: (filters: any) => void;
 }
@@ -84,12 +115,12 @@ export default function AISearchBar({ onFiltersApplied }: AISearchBarProps) {
           <div className="relative flex-1">
             <input
               type="text"
-              placeholder='Skús napríklad: "futbal v Košiciach zajtra" alebo "tenis pre začiatočníkov zadarmo"'
+              placeholder='Skús napríklad: "futbal v Košiciach zajtra"'
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyPress={handleKeyPress}
               disabled={loading}
-              className="w-full h-[50px] px-4 pl-11 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-2 border-purple-500/30 rounded-lg text-[color:var(--fluent-text)] placeholder-[color:var(--fluent-text-secondary)] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              className="w-full h-[50px] px-4 pl-12 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border-2 border-emerald-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
             />
             <div className="absolute left-3.5 top-1/2 -translate-y-1/2">
               <svg
@@ -173,20 +204,33 @@ export default function AISearchBar({ onFiltersApplied }: AISearchBarProps) {
               </svg>
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-[color:var(--fluent-text)] mb-2">
+              <p className="text-sm font-medium text-white mb-2">
                 ✨ AI rozpoznalo tvoju požiadavku:
               </p>
               <div className="flex flex-wrap gap-2">
                 {aiResponse.filters.sportType && (
                   <span className="px-3 py-1 bg-purple-500/20 text-purple-400 text-xs font-medium rounded-full">
-                    🏃 {Array.isArray(aiResponse.filters.sportType) 
-                      ? aiResponse.filters.sportType.join(", ") 
-                      : aiResponse.filters.sportType}
+                    🏃{" "}
+                    {Array.isArray(aiResponse.filters.sportType)
+                      ? aiResponse.filters.sportType
+                          .map((s: string) => sportTypeLabels[s] || s)
+                          .join(", ")
+                      : sportTypeLabels[aiResponse.filters.sportType] ||
+                        aiResponse.filters.sportType}
                   </span>
                 )}
                 {aiResponse.filters.skillLevel && (
                   <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-xs font-medium rounded-full">
-                    📊 {aiResponse.filters.skillLevel}
+                    📊{" "}
+                    {skillLevelLabels[aiResponse.filters.skillLevel] ||
+                      aiResponse.filters.skillLevel}
+                  </span>
+                )}
+                {aiResponse.filters.gender && (
+                  <span className="px-3 py-1 bg-pink-500/20 text-pink-400 text-xs font-medium rounded-full">
+                    👥{" "}
+                    {genderLabels[aiResponse.filters.gender] ||
+                      aiResponse.filters.gender}
                   </span>
                 )}
                 {aiResponse.filters.location && (
@@ -196,14 +240,18 @@ export default function AISearchBar({ onFiltersApplied }: AISearchBarProps) {
                 )}
                 {aiResponse.filters.dateFrom && (
                   <span className="px-3 py-1 bg-yellow-500/20 text-yellow-400 text-xs font-medium rounded-full">
-                    📅 {new Date(aiResponse.filters.dateFrom).toLocaleDateString("sk-SK")}
+                    📅{" "}
+                    {new Date(aiResponse.filters.dateFrom).toLocaleDateString(
+                      "sk-SK"
+                    )}
                   </span>
                 )}
-                {(aiResponse.filters.priceFrom === 0 && aiResponse.filters.priceTo === 0) && (
-                  <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-medium rounded-full">
-                    💰 Zadarmo
-                  </span>
-                )}
+                {aiResponse.filters.priceFrom === 0 &&
+                  aiResponse.filters.priceTo === 0 && (
+                    <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-medium rounded-full">
+                      💰 Zadarmo
+                    </span>
+                  )}
               </div>
             </div>
           </div>
@@ -212,9 +260,7 @@ export default function AISearchBar({ onFiltersApplied }: AISearchBarProps) {
 
       {/* Examples */}
       <div className="flex flex-wrap gap-2">
-        <span className="text-xs text-[color:var(--fluent-text-secondary)]">
-          Príklady:
-        </span>
+        <span className="text-xs text-gray-400">Príklady:</span>
         {[
           "futbal v Bratislave zajtra",
           "basketbal pre začiatočníkov",
@@ -225,7 +271,7 @@ export default function AISearchBar({ onFiltersApplied }: AISearchBarProps) {
             key={example}
             onClick={() => setQuery(example)}
             disabled={loading}
-            className="px-2 py-1 text-xs bg-[color:var(--fluent-surface-secondary)] hover:bg-[color:var(--fluent-surface-tertiary)] text-[color:var(--fluent-text-secondary)] rounded border border-[color:var(--fluent-border)] transition-colors"
+            className="px-2 py-1 text-xs bg-white/5 hover:bg-white/10 text-gray-400 rounded border border-white/10 transition-colors"
           >
             {example}
           </button>

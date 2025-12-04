@@ -2,7 +2,7 @@ import { getServerSession } from "@/lib/get-session";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// POST /api/activities/:id/join-recurring - Bulk join recurring activities
+// POST /api/activities/:id/leave-recurring - Bulk leave recurring activities
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -19,7 +19,7 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { mode, selectedDays, guestCount = 0 } = body;
+    const { mode, selectedDays } = body;
 
     // mode: "all" | "specific-days"
     // selectedDays: array of numbers [0-6] (0=Sunday, 1=Monday, etc.)
@@ -34,7 +34,7 @@ export async function POST(
       );
     }
 
-    // Get the parent activity
+    // Get the activity (could be parent or child)
     const activity = await prisma.activity.findUnique({
       where: { id },
     });
@@ -49,7 +49,7 @@ export async function POST(
     // Determine the parent activity ID (either this activity is parent, or we find its parent)
     const parentActivityId = activity.parentActivityId || activity.id;
 
-    // Get all upcoming instances (including parent if it's in future)
+    // Get all upcoming instances (including parent if it's in future) where user is participating
     let whereClause: any = {
       OR: [
         { id: parentActivityId }, // parent activity
@@ -58,10 +58,8 @@ export async function POST(
       date: {
         gte: new Date(), // only upcoming
       },
-      status: "OPEN", // only open activities
     };
 
-    // Filter by specific days if mode is "specific-days"
     const activities = await prisma.activity.findMany({
       where: whereClause,
       include: {
@@ -76,70 +74,61 @@ export async function POST(
       },
     });
 
-    // Filter by day of week if needed
-    let activitiesToJoin = activities;
+    // Filter to only activities user is participating in
+    let activitiesToLeave = activities.filter(
+      (activity) => activity.participations.length > 0
+    );
+
+    // Filter by day of week if mode is "specific-days"
     if (mode === "specific-days") {
-      activitiesToJoin = activities.filter((activity) => {
+      activitiesToLeave = activitiesToLeave.filter((activity) => {
         const dayOfWeek = new Date(activity.date).getDay();
         return selectedDays.includes(dayOfWeek);
       });
     }
 
-    // Filter out activities user already joined
-    activitiesToJoin = activitiesToJoin.filter(
-      (activity) => activity.participations.length === 0
-    );
-
-    // Filter out activities that don't have enough space
-    const totalNeeded = 1 + guestCount;
-    activitiesToJoin = activitiesToJoin.filter((activity) => {
-      const availableSpots =
-        activity.maxParticipants - activity.currentParticipants;
-      return availableSpots >= totalNeeded;
-    });
-
-    if (activitiesToJoin.length === 0) {
+    if (activitiesToLeave.length === 0) {
       return NextResponse.json(
-        { error: "Žiadne vhodné aktivity na prihlásenie" },
+        { error: "Nie ste prihlásený na žiadne z týchto aktivít" },
         { status: 400 }
       );
     }
 
-    // Bulk join activities
-    const participations = activitiesToJoin.map((activity) => ({
-      userId: session.user.id,
-      activityId: activity.id,
-      status: "CONFIRMED" as const,
-      guestCount,
-    }));
+    // Delete participations and update counts for each activity
+    const leavePromises = activitiesToLeave.map(async (activity) => {
+      const participation = activity.participations[0];
+      const totalToRemove = 1 + (participation.guestCount || 0);
 
-    await prisma.participation.createMany({
-      data: participations,
-    });
+      // Delete the participation
+      await prisma.participation.delete({
+        where: { id: participation.id },
+      });
 
-    // Update participant counts for all activities
-    const updatePromises = activitiesToJoin.map(async (activity) => {
-      const newParticipantCount = activity.currentParticipants + totalNeeded;
+      // Update the activity participant count
+      const newParticipantCount = Math.max(
+        0,
+        activity.currentParticipants - totalToRemove
+      );
       return prisma.activity.update({
         where: { id: activity.id },
         data: {
           currentParticipants: newParticipantCount,
           status:
-            newParticipantCount >= activity.maxParticipants ? "FULL" : "OPEN",
+            newParticipantCount < activity.maxParticipants ? "OPEN" : "FULL",
         },
       });
     });
 
-    await Promise.all(updatePromises);
+    await Promise.all(leavePromises);
 
     return NextResponse.json({
-      message: `Prihlásený na ${activitiesToJoin.length} aktivít`,
-      count: activitiesToJoin.length,
+      message: `Odhlásený z ${activitiesToLeave.length} aktivít`,
+      count: activitiesToLeave.length,
     });
   } catch (error) {
-    console.error("Error bulk joining activities:", error);
+    console.error("Error bulk leaving activities:", error);
     return NextResponse.json(
-      { error: "Chyba pri hromadnom prihlásení" },
+      { error: "Chyba pri hromadnom odhlásení" },
       { status: 500 }
     );
   }

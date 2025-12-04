@@ -1,10 +1,22 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { useSession } from "@/lib/auth-client";
+
+// Status message type
+type StatusMessage = {
+  text: string;
+  type: "success" | "error" | "warning";
+} | null;
+
+// Confirm dialog state type
+type ConfirmDialog = {
+  message: string;
+  onConfirm: () => void;
+} | null;
 
 interface Activity {
   id: string;
@@ -88,8 +100,26 @@ export default function MyActivitiesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"created" | "joined">("created");
-  const [selectedActivities, setSelectedActivities] = useState<Set<string>>(new Set());
+  const [selectedActivities, setSelectedActivities] = useState<Set<string>>(
+    new Set()
+  );
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<StatusMessage>(null);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialog>(null);
+
+  // Helper to show status messages
+  const showStatus = useCallback(
+    (text: string, type: "success" | "error" | "warning") => {
+      setStatusMessage({ text, type });
+      setTimeout(() => setStatusMessage(null), 4000);
+    },
+    []
+  );
+
+  // Helper to show confirmation dialog
+  const showConfirm = useCallback((message: string, onConfirm: () => void) => {
+    setConfirmDialog({ message, onConfirm });
+  }, []);
 
   useEffect(() => {
     if (!isPending) {
@@ -123,46 +153,64 @@ export default function MyActivitiesPage() {
 
   const handleBulkDelete = async () => {
     if (selectedActivities.size === 0) return;
-    if (!confirm(`Naozaj chcete zmazať ${selectedActivities.size} ${selectedActivities.size === 1 ? 'aktivitu' : 'aktivít'}?`)) return;
-
-    setBulkActionLoading(true);
-    try {
-      const promises = Array.from(selectedActivities).map(activityId =>
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/activities/${activityId}`, {
-          method: "DELETE",
-          credentials: "include",
-        })
-      );
-      await Promise.all(promises);
-      setSelectedActivities(new Set());
-      await fetchMyActivities();
-    } catch (err) {
-      alert("Chyba pri mazaní aktivít");
-    } finally {
-      setBulkActionLoading(false);
-    }
+    showConfirm(
+      `Naozaj chcete zmazať ${selectedActivities.size} ${
+        selectedActivities.size === 1 ? "aktivitu" : "aktivít"
+      }?`,
+      async () => {
+        setBulkActionLoading(true);
+        try {
+          const promises = Array.from(selectedActivities).map((activityId) =>
+            fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/activities/${activityId}`,
+              {
+                method: "DELETE",
+                credentials: "include",
+              }
+            )
+          );
+          await Promise.all(promises);
+          setSelectedActivities(new Set());
+          await fetchMyActivities();
+          showStatus("Aktivity boli úspešne zmazané", "success");
+        } catch (err) {
+          showStatus("Chyba pri mazaní aktivít", "error");
+        } finally {
+          setBulkActionLoading(false);
+        }
+      }
+    );
   };
 
   const handleBulkLeave = async () => {
     if (selectedActivities.size === 0) return;
-    if (!confirm(`Naozaj sa chcete odhlásiť z ${selectedActivities.size} ${selectedActivities.size === 1 ? 'aktivity' : 'aktivít'}?`)) return;
-
-    setBulkActionLoading(true);
-    try {
-      const promises = Array.from(selectedActivities).map(activityId =>
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/activities/${activityId}/join`, {
-          method: "DELETE",
-          credentials: "include",
-        })
-      );
-      await Promise.all(promises);
-      setSelectedActivities(new Set());
-      await fetchMyActivities();
-    } catch (err) {
-      alert("Chyba pri odhlasovaní z aktivít");
-    } finally {
-      setBulkActionLoading(false);
-    }
+    showConfirm(
+      `Naozaj sa chcete odhlásiť z ${selectedActivities.size} ${
+        selectedActivities.size === 1 ? "aktivity" : "aktivít"
+      }?`,
+      async () => {
+        setBulkActionLoading(true);
+        try {
+          const promises = Array.from(selectedActivities).map((activityId) =>
+            fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/activities/${activityId}/join`,
+              {
+                method: "DELETE",
+                credentials: "include",
+              }
+            )
+          );
+          await Promise.all(promises);
+          setSelectedActivities(new Set());
+          await fetchMyActivities();
+          showStatus("Boli ste odhlásení z aktivít", "success");
+        } catch (err) {
+          showStatus("Chyba pri odhlasovaní z aktivít", "error");
+        } finally {
+          setBulkActionLoading(false);
+        }
+      }
+    );
   };
 
   const toggleSelection = (activityId: string) => {
@@ -176,8 +224,9 @@ export default function MyActivitiesPage() {
   };
 
   const selectAll = () => {
-    const displayActivities = activeTab === "created" ? data?.created || [] : data?.joined || [];
-    setSelectedActivities(new Set(displayActivities.map(a => a.id)));
+    const displayActivities =
+      activeTab === "created" ? data?.created || [] : data?.joined || [];
+    setSelectedActivities(new Set(displayActivities.map((a) => a.id)));
   };
 
   const deselectAll = () => {
@@ -206,12 +255,14 @@ export default function MyActivitiesPage() {
     };
 
     return (
-      <Card 
-        key={activity.id} 
-        hover 
-        className={`relative transition-all ${isSelected ? 'ring-2 ring-[color:var(--fluent-accent)]' : ''}`}
+      <Card
+        key={activity.id}
+        hover
+        className={`relative transition-all ${
+          isSelected ? "ring-2 ring-emerald-500" : ""
+        }`}
       >
-        <div 
+        <div
           className="absolute top-4 left-4 z-10 cursor-pointer"
           onClick={(e) => {
             e.preventDefault();
@@ -223,21 +274,34 @@ export default function MyActivitiesPage() {
             type="checkbox"
             checked={isSelected}
             onChange={() => toggleSelection(activity.id)}
-            className="w-5 h-5 cursor-pointer accent-[color:var(--fluent-accent)]"
+            className="w-5 h-5 cursor-pointer accent-emerald-500"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
         <Link href={`/activities/${activity.id}`} onClick={handleClick}>
           <div className="absolute top-4 right-4 flex gap-2">
-            {((activity.isRecurring && activity.recurrenceFrequency !== "NONE") || activity.parentActivityId) && (
+            {((activity.isRecurring &&
+              activity.recurrenceFrequency !== "NONE") ||
+              activity.parentActivityId) && (
               <span className="px-2 py-1 text-xs font-medium bg-purple-500/20 text-purple-400 rounded flex items-center gap-1">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
                 </svg>
                 Opakovaná
               </span>
             )}
-            <span className={`px-2 py-1 text-xs font-medium text-white rounded ${statusInfo.color}`}>
+            <span
+              className={`px-2 py-1 text-xs font-medium text-white rounded ${statusInfo.color}`}
+            >
               {statusInfo.label}
             </span>
           </div>
@@ -245,16 +309,16 @@ export default function MyActivitiesPage() {
           <CardHeader>
             <div className="flex items-start gap-4">
               <div className="text-center min-w-[60px]">
-                <div className="text-3xl font-bold text-[color:var(--fluent-accent)]">
+                <div className="text-3xl font-bold text-emerald-500">
                   {activityDate.getDate()}
                 </div>
-                <div className="text-sm text-[color:var(--fluent-text-secondary)] uppercase">
+                <div className="text-sm text-gray-300 uppercase">
                   {activityDate.toLocaleDateString("sk-SK", { month: "short" })}
                 </div>
               </div>
               <div className="flex-1">
                 <CardTitle className="text-xl mb-2">{activity.title}</CardTitle>
-                <div className="flex flex-wrap gap-2 text-sm text-[color:var(--fluent-text-secondary)]">
+                <div className="flex flex-wrap gap-2 text-sm text-gray-300">
                   <span className="flex items-center gap-1">
                     {sportTypeLabels[activity.sportType] || activity.sportType}
                   </span>
@@ -265,7 +329,7 @@ export default function MyActivitiesPage() {
                 </div>
                 {isCreator && (
                   <div className="mt-2">
-                    <span className="px-2 py-1 text-xs font-medium bg-blue-500/20 text-blue-400 rounded">
+                    <span className="px-2 py-1 text-xs font-medium bg-emerald-500/20 text-emerald-400 rounded">
                       👤 Organizátor
                     </span>
                   </div>
@@ -277,16 +341,35 @@ export default function MyActivitiesPage() {
           <CardContent>
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                   <circle cx="12" cy="7" r="4"></circle>
                 </svg>
                 <span>
-                  {activity.currentParticipants}/{activity.maxParticipants} účastníkov
+                  {activity.currentParticipants}/{activity.maxParticipants}{" "}
+                  účastníkov
                 </span>
               </div>
               <div className="flex items-center gap-2 text-sm">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                   <circle cx="12" cy="10" r="3"></circle>
                 </svg>
@@ -294,7 +377,16 @@ export default function MyActivitiesPage() {
               </div>
               {activity.price > 0 && (
                 <div className="flex items-center gap-2 text-sm">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <line x1="12" y1="1" x2="12" y2="23"></line>
                     <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                   </svg>
@@ -310,9 +402,9 @@ export default function MyActivitiesPage() {
 
   if (isPending || loading) {
     return (
-      <div className="min-h-screen p-8">
+      <div className="min-h-screen p-8 pt-36">
         <div className="max-w-7xl mx-auto">
-          <p className="text-center text-[color:var(--fluent-text-secondary)]">Načítavam...</p>
+          <p className="text-center text-gray-300">Načítavam...</p>
         </div>
       </div>
     );
@@ -320,16 +412,16 @@ export default function MyActivitiesPage() {
 
   if (!session) {
     return (
-      <div className="min-h-screen p-8 flex items-center justify-center">
+      <div className="min-h-screen p-8 pt-36 flex items-center justify-center">
         <div className="max-w-2xl w-full">
           <Card>
             <CardContent>
               <div className="text-center py-16 px-8">
                 <p className="text-6xl mb-6">🔒</p>
-                <h3 className="text-2xl font-semibold text-[color:var(--fluent-text)] mb-4">
+                <h3 className="text-2xl font-semibold text-white mb-4">
                   Prihlásenie potrebné
                 </h3>
-                <p className="text-lg text-[color:var(--fluent-text-secondary)] mb-8">
+                <p className="text-lg text-gray-300 mb-8">
                   Pre zobrazenie vašich aktivít sa musíte prihlásiť
                 </p>
                 <Link href="/auth/signin?redirect=/my-activities">
@@ -345,7 +437,7 @@ export default function MyActivitiesPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen p-8">
+      <div className="min-h-screen p-8 pt-36">
         <div className="max-w-7xl mx-auto">
           <p className="text-center text-red-500">{error}</p>
         </div>
@@ -357,20 +449,137 @@ export default function MyActivitiesPage() {
     return null;
   }
 
-  const displayActivities = activeTab === "created" ? data.created : data.joined;
-  const upcomingCount = activeTab === "created" ? data.stats.upcomingCreated : data.stats.upcomingJoined;
+  const displayActivities =
+    activeTab === "created" ? data.created : data.joined;
+  const upcomingCount =
+    activeTab === "created"
+      ? data.stats.upcomingCreated
+      : data.stats.upcomingJoined;
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-8 pt-36">
+      {/* Status Message Toast */}
+      {statusMessage && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <div
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg border text-white shadow-lg ${
+              statusMessage.type === "success"
+                ? "bg-emerald-600 border-emerald-500"
+                : statusMessage.type === "error"
+                ? "bg-red-600 border-red-500"
+                : "bg-yellow-600 border-yellow-500"
+            }`}
+          >
+            {statusMessage.type === "success" && (
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            )}
+            {statusMessage.type === "error" && (
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            )}
+            <span className="text-sm font-medium">{statusMessage.text}</span>
+            <button
+              onClick={() => setStatusMessage(null)}
+              className="ml-2 hover:opacity-70"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Confirm Dialog Modal */}
+      {confirmDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setConfirmDialog(null)}
+          />
+          <div className="relative bg-gray-900 border border-white/10 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
+                <svg
+                  className="w-5 h-5 text-yellow-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  Potvrdiť akciu
+                </h3>
+                <p className="text-gray-300 text-sm">{confirmDialog.message}</p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setConfirmDialog(null)}
+                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors"
+              >
+                Zrušiť
+              </button>
+              <button
+                onClick={() => {
+                  confirmDialog.onConfirm();
+                  setConfirmDialog(null);
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
+              >
+                Potvrdiť
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-[color:var(--fluent-text)] mb-2">
-            Moje aktivity
-          </h1>
-          <p className="text-[color:var(--fluent-text-secondary)]">
-            Prehľad všetkých tvojich aktivít
-          </p>
+          <h1 className="text-4xl font-bold text-white mb-2">Moje aktivity</h1>
+          <p className="text-gray-300">Prehľad všetkých tvojich aktivít</p>
         </div>
 
         {/* Stats Cards */}
@@ -378,34 +587,30 @@ export default function MyActivitiesPage() {
           <Card>
             <CardContent>
               <div className="text-center">
-                <div className="text-3xl font-bold text-[color:var(--fluent-accent)] mb-1">
+                <div className="text-3xl font-bold text-emerald-500 mb-1">
                   {data.stats.totalCreated}
                 </div>
-                <div className="text-sm text-[color:var(--fluent-text-secondary)]">
-                  Vytvorené
-                </div>
+                <div className="text-sm text-gray-300">Vytvorené</div>
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent>
               <div className="text-center">
-                <div className="text-3xl font-bold text-[color:var(--fluent-accent)] mb-1">
+                <div className="text-3xl font-bold text-emerald-500 mb-1">
                   {data.stats.totalJoined}
                 </div>
-                <div className="text-sm text-[color:var(--fluent-text-secondary)]">
-                  Prihlásené
-                </div>
+                <div className="text-sm text-gray-300">Prihlásené</div>
               </div>
             </CardContent>
           </Card>
           <Card>
             <CardContent>
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-500 mb-1">
+                <div className="text-3xl font-bold text-emerald-400 mb-1">
                   {data.stats.upcomingCreated}
                 </div>
-                <div className="text-sm text-[color:var(--fluent-text-secondary)]">
+                <div className="text-sm text-gray-300">
                   Nadchádzajúce (vytvorené)
                 </div>
               </div>
@@ -414,10 +619,10 @@ export default function MyActivitiesPage() {
           <Card>
             <CardContent>
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-500 mb-1">
+                <div className="text-3xl font-bold text-emerald-400 mb-1">
                   {data.stats.upcomingJoined}
                 </div>
-                <div className="text-sm text-[color:var(--fluent-text-secondary)]">
+                <div className="text-sm text-gray-300">
                   Nadchádzajúce (prihlásené)
                 </div>
               </div>
@@ -426,7 +631,7 @@ export default function MyActivitiesPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-6 border-b border-[color:var(--fluent-border)]">
+        <div className="flex gap-4 mb-6 border-b border-white/10">
           <button
             onClick={() => {
               setActiveTab("created");
@@ -434,8 +639,8 @@ export default function MyActivitiesPage() {
             }}
             className={`px-6 py-3 font-medium transition-all ${
               activeTab === "created"
-                ? "text-[color:var(--fluent-accent)] border-b-2 border-[color:var(--fluent-accent)]"
-                : "text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)]"
+                ? "text-emerald-500 border-b-2 border-emerald-500"
+                : "text-gray-300 hover:text-white"
             }`}
           >
             Vytvorené ({data.stats.totalCreated})
@@ -447,8 +652,8 @@ export default function MyActivitiesPage() {
             }}
             className={`px-6 py-3 font-medium transition-all ${
               activeTab === "joined"
-                ? "text-[color:var(--fluent-accent)] border-b-2 border-[color:var(--fluent-accent)]"
-                : "text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)]"
+                ? "text-emerald-500 border-b-2 border-emerald-500"
+                : "text-gray-300 hover:text-white"
             }`}
           >
             Prihlásené ({data.stats.totalJoined})
@@ -457,12 +662,12 @@ export default function MyActivitiesPage() {
 
         {/* Bulk Actions Bar */}
         {displayActivities.length > 0 && (
-          <div className="mb-6 p-4 bg-[color:var(--fluent-surface-secondary)] rounded-lg border border-[color:var(--fluent-border)] flex items-center justify-between">
+          <div className="mb-6 p-4 bg-white/[0.03] rounded-lg border border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <span className="text-sm text-[color:var(--fluent-text)]">
-                {selectedActivities.size > 0 
-                  ? `Vybratých: ${selectedActivities.size}` 
-                  : 'Vyberte aktivity'}
+              <span className="text-sm text-white">
+                {selectedActivities.size > 0
+                  ? `Vybratých: ${selectedActivities.size}`
+                  : "Vyberte aktivity"}
               </span>
               <div className="flex gap-2">
                 <Button
@@ -488,20 +693,24 @@ export default function MyActivitiesPage() {
                 {activeTab === "created" ? (
                   <Button
                     variant="secondary"
-                    className="text-sm bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/30 dark:hover:bg-red-950/50 dark:text-red-400"
+                    className="text-sm bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20"
                     onClick={handleBulkDelete}
                     disabled={bulkActionLoading}
                   >
-                    {bulkActionLoading ? "Mažem..." : `Zmazať (${selectedActivities.size})`}
+                    {bulkActionLoading
+                      ? "Mažem..."
+                      : `Zmazať (${selectedActivities.size})`}
                   </Button>
                 ) : (
                   <Button
                     variant="secondary"
-                    className="text-sm bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-950/30 dark:hover:bg-orange-950/50 dark:text-orange-400"
+                    className="text-sm bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border-orange-500/20"
                     onClick={handleBulkLeave}
                     disabled={bulkActionLoading}
                   >
-                    {bulkActionLoading ? "Odhlasovanie..." : `Odhlásiť sa (${selectedActivities.size})`}
+                    {bulkActionLoading
+                      ? "Odhlasovanie..."
+                      : `Odhlásiť sa (${selectedActivities.size})`}
                   </Button>
                 )}
               </div>
@@ -515,18 +724,27 @@ export default function MyActivitiesPage() {
             <CardContent>
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">🏃</div>
-                <h3 className="text-xl font-semibold text-[color:var(--fluent-text)] mb-2">
-                  {activeTab === "created" ? "Zatiaľ si nevytvoril žiadne aktivity" : "Zatiaľ si sa neprihlásil na žiadne aktivity"}
+                <h3 className="text-xl font-semibold text-white mb-2">
+                  {activeTab === "created"
+                    ? "Zatiaľ si nevytvoril žiadne aktivity"
+                    : "Zatiaľ si sa neprihlásil na žiadne aktivity"}
                 </h3>
-                <p className="text-[color:var(--fluent-text-secondary)] mb-6">
-                  {activeTab === "created" 
+                <p className="text-gray-300 mb-6">
+                  {activeTab === "created"
                     ? "Vytvor svoju prvú športovú aktivitu a pozvi ostatných"
-                    : "Prehliadni dostupné aktivity a pripoj sa k niektorej"
-                  }
+                    : "Prehliadni dostupné aktivity a pripoj sa k niektorej"}
                 </p>
-                <Link href={activeTab === "created" ? "/activities/create" : "/activities"}>
+                <Link
+                  href={
+                    activeTab === "created"
+                      ? "/activities/create"
+                      : "/activities"
+                  }
+                >
                   <Button variant="primary">
-                    {activeTab === "created" ? "Vytvoriť aktivitu" : "Prehliadať aktivity"}
+                    {activeTab === "created"
+                      ? "Vytvoriť aktivitu"
+                      : "Prehliadať aktivity"}
                   </Button>
                 </Link>
               </div>
@@ -534,7 +752,9 @@ export default function MyActivitiesPage() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {displayActivities.map((activity) => renderActivity(activity, activeTab === "created"))}
+            {displayActivities.map((activity) =>
+              renderActivity(activity, activeTab === "created")
+            )}
           </div>
         )}
       </div>

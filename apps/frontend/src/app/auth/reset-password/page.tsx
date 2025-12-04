@@ -79,10 +79,10 @@ export default function ResetPasswordPage() {
             <CardContent className="py-12">
               <div className="text-center">
                 <div className="text-5xl mb-4">❌</div>
-                <h3 className="text-xl font-semibold text-[color:var(--fluent-text)] mb-2">
+                <h3 className="text-xl font-semibold text-white mb-2">
                   Neplatný link
                 </h3>
-                <p className="text-[color:var(--fluent-text-secondary)] mb-6">
+                <p className="text-gray-300 mb-6">
                   Tento reset link je neplatný alebo expiroval.
                 </p>
                 <Link href="/auth/forgot-password">
@@ -104,9 +104,7 @@ export default function ResetPasswordPage() {
             <div className="text-center mb-6">
               <div className="text-5xl mb-4">🔑</div>
               <CardTitle className="text-3xl">Nové heslo</CardTitle>
-              <p className="text-[color:var(--fluent-text-secondary)] mt-2">
-                Zadaj svoje nové heslo
-              </p>
+              <p className="text-gray-300 mt-2">Zadaj svoje nové heslo</p>
             </div>
           </CardHeader>
 
@@ -120,7 +118,7 @@ export default function ResetPasswordPage() {
                       <h3 className="font-semibold text-green-600 mb-1">
                         Heslo zmenené!
                       </h3>
-                      <p className="text-sm text-[color:var(--fluent-text-secondary)]">
+                      <p className="text-sm text-gray-300">
                         Tvoje heslo bolo úspešne zmenené. Budeš presmerovaný na
                         prihlasovaciu stránku...
                       </p>
@@ -137,7 +135,7 @@ export default function ResetPasswordPage() {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                  <label className="block text-sm font-medium mb-2 text-white">
                     Nové heslo *
                   </label>
                   <Input
@@ -151,7 +149,7 @@ export default function ResetPasswordPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+                  <label className="block text-sm font-medium mb-2 text-white">
                     Potvrdenie hesla *
                   </label>
                   <Input
@@ -164,8 +162,8 @@ export default function ResetPasswordPage() {
                   />
                 </div>
 
-                <div className="p-4 bg-[color:var(--fluent-surface-secondary)] rounded-lg">
-                  <p className="text-sm text-[color:var(--fluent-text-secondary)]">
+                <div className="p-4 bg-white/[0.03] border border-white/10 rounded-lg">
+                  <p className="text-sm text-gray-300">
                     <strong>💡 Tip:</strong> Použite silné heslo s kombináciou
                     písmen, čísiel a špeciálnych znakov.
                   </p>

@@ -60,10 +60,10 @@ const skillLevelLabels: Record<string, string> = {
 };
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  OPEN: { label: "Otvorená", color: "text-green-600 dark:text-green-400" },
-  FULL: { label: "Plná", color: "text-orange-600 dark:text-orange-400" },
-  CANCELLED: { label: "Zrušená", color: "text-red-600 dark:text-red-400" },
-  COMPLETED: { label: "Ukončená", color: "text-gray-600 dark:text-gray-400" },
+  OPEN: { label: "Otvorená", color: "text-emerald-400" },
+  FULL: { label: "Plná", color: "text-orange-400" },
+  CANCELLED: { label: "Zrušená", color: "text-red-400" },
+  COMPLETED: { label: "Ukončená", color: "text-gray-400" },
 };
 
 function ActivityCard({ activity }: { activity: Activity }) {
@@ -94,11 +94,11 @@ function ActivityCard({ activity }: { activity: Activity }) {
           {/* Header */}
           <div className="flex justify-between items-start mb-4">
             <div className="flex-1">
-              <h3 className="text-xl font-bold text-[color:var(--fluent-text)] mb-2">
+              <h3 className="text-xl font-bold text-white mb-2">
                 {activity.title}
               </h3>
               <div className="flex items-center gap-2 flex-wrap">
-                <p className="text-sm text-[color:var(--fluent-text-secondary)]">
+                <p className="text-sm text-gray-300">
                   {sportTypeLabels[activity.sportType] || activity.sportType}
                 </p>
                 {((activity.isRecurring &&
@@ -130,36 +130,34 @@ function ActivityCard({ activity }: { activity: Activity }) {
 
           {/* Date & Time */}
           <div className="mb-3 space-y-1">
-            <p className="text-sm text-[color:var(--fluent-text)]">
-              📅 {formattedDate}
-            </p>
-            <p className="text-sm text-[color:var(--fluent-text)]">
+            <p className="text-sm text-white">📅 {formattedDate}</p>
+            <p className="text-sm text-white">
               🕐 {formattedTime} ({activity.duration} min)
             </p>
           </div>
 
           {/* Location */}
           <div className="mb-3">
-            <p className="text-sm text-[color:var(--fluent-text)]">
+            <p className="text-sm text-white">
               📍 {activity.locationName || activity.location}
             </p>
           </div>
 
           {/* Skill Level */}
           <div className="mb-3">
-            <span className="inline-block px-3 py-1 text-xs font-medium bg-[color:var(--fluent-accent)]/10 text-[color:var(--fluent-accent)] rounded-full">
+            <span className="inline-block px-3 py-1 text-xs font-medium bg-emerald-500/10 text-emerald-400 rounded-full">
               {skillLevelLabels[activity.skillLevel] || activity.skillLevel}
             </span>
           </div>
 
           {/* Participants */}
-          <div className="mt-auto pt-3 border-t border-[color:var(--fluent-border)]">
+          <div className="mt-auto pt-3 border-t border-white/10">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-[color:var(--fluent-text-secondary)]">
+              <span className="text-sm text-gray-300">
                 Účastníci: {activity.currentParticipants}/
                 {activity.maxParticipants}
               </span>
-              <span className="text-sm font-medium text-[color:var(--fluent-accent)]">
+              <span className="text-sm font-medium text-emerald-400">
                 {freeSpots > 0 ? `${freeSpots} voľných miest` : "Obsadené"}
               </span>
             </div>
@@ -174,10 +172,10 @@ function ActivitySkeleton() {
   return (
     <Card>
       <div className="animate-pulse">
-        <div className="h-6 bg-[color:var(--fluent-border)] rounded w-3/4 mb-4"></div>
-        <div className="h-4 bg-[color:var(--fluent-border)] rounded w-1/2 mb-3"></div>
-        <div className="h-4 bg-[color:var(--fluent-border)] rounded w-2/3 mb-3"></div>
-        <div className="h-4 bg-[color:var(--fluent-border)] rounded w-1/2"></div>
+        <div className="h-6 bg-white/10 rounded w-3/4 mb-4"></div>
+        <div className="h-4 bg-white/10 rounded w-1/2 mb-3"></div>
+        <div className="h-4 bg-white/10 rounded w-2/3 mb-3"></div>
+        <div className="h-4 bg-white/10 rounded w-1/2"></div>
       </div>
     </Card>
   );
@@ -244,25 +242,26 @@ export default function ActivitiesPage() {
   );
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ backgroundColor: "var(--fluent-bg)" }}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen relative overflow-hidden pt-36">
+      {/* Background Effects (Orbs) */}
+      <div className="fixed top-[-20%] left-[-10%] w-[800px] h-[800px] bg-emerald-900/20 rounded-full blur-[130px] pointer-events-none z-0"></div>
+      <div className="fixed bottom-[-20%] right-[-10%] w-[700px] h-[700px] bg-green-900/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-[color:var(--fluent-text)] mb-2">
+            <h1 className="text-4xl font-bold text-white mb-2">
               Športové aktivity
             </h1>
-            <p className="text-[color:var(--fluent-text-secondary)]">
+            <p className="text-gray-300">
               Nájdi si aktivitu a pripoj sa k ostatným
             </p>
           </div>
           <Link href="/activities/create">
-            <Button variant="primary" className="whitespace-nowrap">
+            <button className="px-8 py-3 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/50 text-emerald-400 font-bold text-lg transition-all backdrop-blur-md shadow-lg hover:shadow-emerald-500/20 whitespace-nowrap">
               + Vytvoriť aktivitu
-            </Button>
+            </button>
           </Link>
         </div>
 
@@ -295,10 +294,10 @@ export default function ActivitiesPage() {
             <Card>
               <div className="text-center py-12">
                 <p className="text-4xl mb-4">🔍</p>
-                <h3 className="text-xl font-semibold text-[color:var(--fluent-text)] mb-2">
+                <h3 className="text-xl font-semibold text-white mb-2">
                   Žiadne výsledky
                 </h3>
-                <p className="text-[color:var(--fluent-text-secondary)] mb-6">
+                <p className="text-gray-300 mb-6">
                   Skús zmeniť vyhľadávacie kritériá alebo vytvor novú aktivitu
                 </p>
                 <Link href="/activities/create">

@@ -1,131 +1,220 @@
 @import "tailwindcss";
 
 :root {
-  /* Windows 11 Light Theme - Clean, bright, airy with transparency */
-  --fluent-bg: #f3f3f3; /* light neutral background */
-  --fluent-surface: rgba(
-    254,
-    254,
-    254,
-    0.25
-  ); /* ultra translucent for stronger glass effect */
-  --fluent-surface-secondary: rgba(249, 249, 249, 0.3); /* subtle variation */
-  --fluent-accent: #0067c0; /* Windows 11 blue accent */
-  --fluent-accent-hover: #005a9e; /* darker accent for hover */
-  --fluent-accent-light: rgba(0, 103, 192, 0.08); /* subtle accent tint */
-  --fluent-text: #1f1f1f; /* primary text - soft black */
-  --fluent-text-secondary: #605e5c; /* secondary text - warm gray */
-  --fluent-text-tertiary: #8a8886; /* tertiary text - lighter gray */
-  --fluent-border: rgba(230, 230, 230, 0.4); /* more translucent borders */
-  --fluent-border-strong: rgba(209, 209, 209, 0.6); /* stronger borders */
-  --fluent-divider: rgba(
-    220,
-    220,
-    220,
-    0.35
-  ); /* more translucent divider lines */
+  /* Emerald Night Theme - Darker & Richer */
+  --bg-dark: #011c16; /* Even darker emerald */
+  --bg-darker: #000a08; /* Deepest black-green */
+  --accent-primary: #059669; /* Emerald 600 - Darker green */
+  --accent-hover: #047857; /* Emerald 700 */
+  --accent-glow: 0 0 25px rgba(5, 150, 105, 0.4);
 
-  /* Windows 11 Light Gradients - Subtle, sophisticated */
-  --gradient-primary-start: #0078d4; /* MS blue */
-  --gradient-primary-end: #106ebe; /* deeper blue */
-  --gradient-cta-start: #0086f0; /* vibrant blue */
-  --gradient-cta-mid: #1490df; /* cyan blue */
-  --gradient-cta-end: #00b7c3; /* aqua */
-  --gradient-feature-1-start: #0078d4; /* blue */
-  --gradient-feature-1-end: #00bcf2; /* cyan */
-  --gradient-feature-2-start: #00cc6a; /* green */
-  --gradient-feature-2-end: #10893e; /* forest green */
-  --gradient-feature-3-start: #ffb900; /* gold */
-  --gradient-feature-3-end: #ff8c00; /* orange */
+  /* Glass Panels - More transparent & glassy */
+  --glass-surface: rgba(255, 255, 255, 0.03); /* Very transparent */
+  --glass-border: rgba(255, 255, 255, 0.08);
 
-  /* Shadows - layered depth */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 2px 4px 0 rgba(0, 0, 0, 0.08), 0 4px 8px 0 rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 4px 8px 0 rgba(0, 0, 0, 0.12), 0 8px 16px 0 rgba(0, 0, 0, 0.06);
-  --shadow-xl: 0 8px 16px 0 rgba(0, 0, 0, 0.14),
-    0 12px 24px 0 rgba(0, 0, 0, 0.08);
+  /* Text */
+  --text-main: #ffffff;
+  --text-muted: #d1d5db; /* Lighter grey for better contrast */
+
+  /* Fluent design tokens used by Tailwind arbitrary values */
+  --fluent-bg: #010c09;
+  --fluent-text: #f8fafc;
+  --fluent-text-secondary: #94a3b8;
+  --fluent-text-tertiary: #64748b;
+  --fluent-accent: #10b981;
+  --fluent-border: rgba(148, 163, 184, 0.2);
+  --fluent-surface: rgba(255, 255, 255, 0.03);
+  --fluent-surface-secondary: rgba(15, 23, 42, 0.55);
 }
 
-.dark {
-  /* Windows 11 Dark Theme - Rich, deep, contrasty */
-  --fluent-bg: #202020; /* dark neutral background */
-  --fluent-surface: #2c2c2c; /* elevated surfaces */
-  --fluent-surface-secondary: #282828; /* subtle variation */
-  --fluent-accent: #60cdff; /* Windows 11 cyan accent */
-  --fluent-accent-hover: #4db8e8; /* darker accent for hover */
-  --fluent-accent-light: rgba(96, 205, 255, 0.15); /* subtle accent tint */
-  --fluent-text: #fafafa; /* primary text - almost white but not pure */
-  --fluent-text-secondary: #c8c8c8; /* secondary text - light gray */
-  --fluent-text-tertiary: #9d9d9d; /* tertiary text - medium gray */
-  --fluent-border: #3d3d3d; /* subtle borders */
-  --fluent-border-strong: #505050; /* stronger borders */
-  --fluent-divider: #3b3b3b; /* divider lines */
-
-  /* Windows 11 Dark Gradients - Vibrant, energetic */
-  --gradient-primary-start: #4cc2ff; /* bright cyan */
-  --gradient-primary-end: #0078d4; /* MS blue */
-  --gradient-cta-start: #60cdff; /* cyan */
-  --gradient-cta-mid: #4db8e8; /* blue cyan */
-  --gradient-cta-end: #3aa0d1; /* deep cyan */
-  --gradient-feature-1-start: #60cdff; /* cyan */
-  --gradient-feature-1-end: #00b7c3; /* aqua */
-  --gradient-feature-2-start: #6bcf7f; /* bright green */
-  --gradient-feature-2-end: #00cc6a; /* green */
-  --gradient-feature-3-start: #ffd666; /* bright gold */
-  --gradient-feature-3-end: #ffb900; /* gold */
-
-  /* Shadows - stronger for dark mode */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 2px 4px 0 rgba(0, 0, 0, 0.4), 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 4px 8px 0 rgba(0, 0, 0, 0.5), 0 8px 16px 0 rgba(0, 0, 0, 0.3);
-  --shadow-xl: 0 8px 16px 0 rgba(0, 0, 0, 0.6), 0 12px 24px 0 rgba(0, 0, 0, 0.4);
+body {
+  background: radial-gradient(circle at 50% 0%, #064e3b, #022c22, #000000);
+  background-attachment: fixed;
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  font-size: 16px; /* Base font size increase */
 }
 
-/* Enhanced Glass / Acrylic effects - iOS inspired */
-.acrylic {
-  background: rgba(254, 254, 254, 0.2);
-  backdrop-filter: blur(80px) saturate(200%) brightness(1.08);
-  -webkit-backdrop-filter: blur(80px) saturate(200%) brightness(1.08);
-  border: 1px solid rgba(250, 250, 250, 0.5);
-  box-shadow: inset 0 1px 1px 0 rgba(254, 254, 254, 0.8),
-    0 4px 12px 0 rgba(0, 0, 0, 0.08), 0 12px 32px 0 rgba(0, 0, 0, 0.06);
+/* Glass Card Utility - Enhanced Glass Effect */
+.acrylic,
+.card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-radius: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.dark .acrylic {
-  background: rgba(44, 44, 44, 0.65);
-  backdrop-filter: blur(80px) saturate(200%) brightness(0.95);
-  -webkit-backdrop-filter: blur(80px) saturate(200%) brightness(0.95);
-  border: 1px solid rgba(250, 250, 250, 0.1);
-  box-shadow: inset 0 1px 1px 0 rgba(250, 250, 250, 0.05),
-    0 2px 8px 0 rgba(0, 0, 0, 0.3), 0 8px 24px 0 rgba(0, 0, 0, 0.2);
+.acrylic:hover,
+.card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-.acrylic-strong {
-  background: rgba(254, 254, 254, 0.35);
-  backdrop-filter: blur(80px) saturate(200%) brightness(1.12);
-  -webkit-backdrop-filter: blur(80px) saturate(200%) brightness(1.12);
-  border: 1px solid rgba(250, 250, 250, 0.7);
-  box-shadow: inset 0 1px 2px 0 rgba(254, 254, 254, 0.9),
-    0 6px 16px 0 rgba(0, 0, 0, 0.1), 0 16px 48px 0 rgba(0, 0, 0, 0.08);
+/* Navbar Capsule - Matching "Choose Sport" style */
+.nav-capsule {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.8);
 }
 
-.dark .acrylic-strong {
-  background: rgba(44, 44, 44, 0.85);
-  backdrop-filter: blur(80px) saturate(200%) brightness(0.92);
-  -webkit-backdrop-filter: blur(80px) saturate(200%) brightness(0.92);
-  border: 1px solid rgba(250, 250, 250, 0.15);
-  box-shadow: inset 0 1px 2px 0 rgba(250, 250, 250, 0.08),
-    0 4px 12px 0 rgba(0, 0, 0, 0.4);
+/* Scrolled navbar - very strong blur with dark overlay */
+.nav-scrolled {
+  background: rgba(2, 26, 20, 0.85) !important;
+  backdrop-filter: blur(80px) saturate(250%) brightness(0.9) !important;
+  -webkit-backdrop-filter: blur(80px) saturate(250%) brightness(0.9) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Mica material - subtle background texture */
-.mica {
-  background-color: var(--fluent-surface);
-  box-shadow: var(--shadow-sm);
+.nav-scrolled a,
+.nav-scrolled span,
+.nav-scrolled button {
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.dark .mica {
-  background-color: var(--fluent-surface);
+.nav-scrolled a:hover,
+.nav-scrolled button:hover {
+  color: #10b981 !important;
+}
+
+/* Prevent text selection on non-editable elements */
+*:not(input):not(textarea):not([contenteditable="true"]) {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Buttons */
+.btn-primary {
+  background: var(--accent-primary);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1.125rem; /* Larger text */
+  border-radius: 9999px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  transform: scale(1.02);
+  box-shadow: 0 6px 20px rgba(5, 150, 105, 0.6);
+}
+
+/* Glassy Button (Secondary) */
+.btn-glassy {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--accent-primary);
+  font-weight: 600;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s;
+}
+
+.btn-glassy:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-primary);
+  color: #fff;
+}
+
+/* Inputs */
+input,
+select,
+textarea {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border: 1px solid var(--glass-border) !important;
+  color: white !important;
+  border-radius: 1rem !important;
+  padding: 1rem 1.5rem !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  background: rgba(0, 0, 0, 0.5) !important;
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Select dropdown options - dark mode */
+select option {
+  background: #0a1f1a !important;
+  color: white !important;
+  padding: 12px !important;
+}
+
+select option:hover,
+select option:focus,
+select option:checked {
+  background: #064e3b !important;
+  color: white !important;
+}
+
+/* Date/Time picker dark mode */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+/* Glass Input Utility */
+.glass-input {
+  background: rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0.75rem !important;
+  color: white !important;
+  transition: all 0.2s ease-out;
+}
+
+.glass-input:focus {
+  outline: none;
+  border-color: rgba(16, 185, 129, 0.5) !important; /* emerald-500/50 */
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.glass-input:hover {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-main);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #022c22;
+}
+::-webkit-scrollbar-thumb {
+  background: #065f46;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #10b981;
 }
 
 /* Custom scrollbar */
@@ -138,9 +227,9 @@
   display: none;
 }
 
-/* Gradient text */
+/* Gradient text - Emerald theme */
 .gradient-text {
-  background: linear-gradient(to right, rgb(37 99 235), rgb(147 51 234));
+  background: linear-gradient(to right, #10b981, #059669);
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
@@ -179,24 +268,17 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Hover glow effect - Fluent style with glass morphism */
+/* Hover glow effect - Emerald style */
 .hover-glow {
   transition: all 0.3s cubic-bezier(0.33, 0, 0.67, 1);
 }
 
 .hover-glow:hover {
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.4);
   transform: translateY(-2px) scale(1.02);
-  backdrop-filter: blur(25px) saturate(200%) brightness(1.1);
-  -webkit-backdrop-filter: blur(25px) saturate(200%) brightness(1.1);
 }
 
-.dark .hover-glow:hover {
-  backdrop-filter: blur(25px) saturate(200%) brightness(1.15);
-  -webkit-backdrop-filter: blur(25px) saturate(200%) brightness(1.15);
-}
-
-/* Windows 11 reveal effect on hover - Enhanced for light mode */
+/* Reveal effect on hover */
 .reveal-effect {
   position: relative;
   overflow: hidden;
@@ -211,7 +293,7 @@
   height: 100%;
   background: radial-gradient(
     circle at center,
-    rgba(250, 250, 250, 0.15) 0%,
+    rgba(16, 185, 129, 0.15) 0%,
     transparent 70%
   );
   opacity: 0;
@@ -223,43 +305,7 @@
   opacity: 1;
 }
 
-.dark .reveal-effect::before {
-  background: radial-gradient(
-    circle at center,
-    rgba(250, 250, 250, 0.1) 0%,
-    transparent 70%
-  );
-}
-
-body {
-  background-color: var(--fluent-bg);
-  color: var(--fluent-text);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Site navigation surface tuned to variables */
-.site-nav {
-  background-color: var(--fluent-surface);
-  border-bottom: 1px solid var(--fluent-border);
-  backdrop-filter: blur(10px);
-}
-
-/* Ensure links and headings inherit our text colors by default */
-a,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-span,
-li {
-  color: inherit;
-}
-
-/* Utility classes for using CSS variables with Tailwind where needed */
+/* Utility classes */
 .text-fluent {
   color: var(--fluent-text) !important;
 }
@@ -270,44 +316,62 @@ li {
   background-color: var(--fluent-surface) !important;
 }
 
-/* Theme-aware gradient backgrounds */
+/* Emerald gradient backgrounds */
 .gradient-primary {
-  background: linear-gradient(
-    135deg,
-    var(--gradient-primary-start),
-    var(--gradient-primary-end)
-  );
+  background: linear-gradient(135deg, #10b981, #059669);
 }
 
 .gradient-cta {
-  background: linear-gradient(
-    135deg,
-    var(--gradient-cta-start),
-    var(--gradient-cta-mid),
-    var(--gradient-cta-end)
-  );
+  background: linear-gradient(135deg, #10b981, #047857, #064e3b);
 }
 
 .gradient-feature-1 {
-  background: linear-gradient(
-    135deg,
-    var(--gradient-feature-1-start),
-    var(--gradient-feature-1-end)
-  );
+  background: linear-gradient(135deg, #10b981, #6ee7b7);
 }
 
 .gradient-feature-2 {
-  background: linear-gradient(
-    135deg,
-    var(--gradient-feature-2-start),
-    var(--gradient-feature-2-end)
-  );
+  background: linear-gradient(135deg, #059669, #10b981);
 }
 
 .gradient-feature-3 {
-  background: linear-gradient(
-    135deg,
-    var(--gradient-feature-3-start),
-    var(--gradient-feature-3-end)
-  );
+  background: linear-gradient(135deg, #047857, #059669);
+}
+
+/* Custom scrollbar for emerald night theme */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-in {
+  animation: fadeIn 0.15s ease-out forwards;
 }

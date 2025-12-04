@@ -148,13 +148,11 @@ sportbuddy/
 │       │   │   ├── layout.tsx      # Hlavné rozloženie
 │       │   │   └── page.tsx        # Domovská stránka
 │       │   ├── components/         # React komponenty
-│       │   │   ├── ui/             # UI elementy (Button, Card, Input)
-│       │   │   ├── HtmlWrapper.tsx
-│       │   │   ├── Navigation.tsx
-│       │   │   ├── TemplateWrapper.tsx
-│       │   │   └── ThemeToggle.tsx
+│       │   │   ├── ui/             # UI elementy (Button, Card, Input, Select, etc.)
+│       │   │   ├── Navigation.tsx  # Navigačný komponent
+│       │   │   └── TemplateWrapper.tsx # Wrapper s layoutom
 │       │   ├── contexts/
-│       │   │   └── ThemeContext.tsx # Kontext tmavého režimu
+│       │   │   └── GoogleMapsContext.tsx # Google Maps provider
 │       │   └── lib/
 │       │       └── auth-client.ts  # Better Auth klient
 │       ├── Dockerfile              # Viacstupňový Docker (dev + prod)
@@ -356,6 +354,26 @@ docker-compose up -d --build
 # 4. Skontroluj záznamy
 docker-compose logs -f
 ```
+
+---
+
+## AI funkcie (Gemini)
+
+SportBuddy využíva **Google Gemini 2.0 Flash** pre inteligentné funkcie:
+
+- **🔍 AI Vyhľadávanie** - Vyhľadávanie aktivít prirodzeným jazykom ("futbal zajtra v Košiciach")
+- **💡 AI Odporúčania** - Personalizované návrhy aktivít na základe preferencií
+- **📝 AI Vytvorenie aktivity** - Vytvorenie aktivity pomocou prirodzeného jazyka
+
+### Konfigurácia Gemini
+
+1. Získaj API kľúč na [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Pridaj kľúč do `.env`:
+```properties
+GEMINI_API_KEY="tvoj-api-kluc"
+```
+
+Free tier má limit 60 requests/minútu, čo je pre vývoj a bežné použitie dostačujúce.
 
 ---
 

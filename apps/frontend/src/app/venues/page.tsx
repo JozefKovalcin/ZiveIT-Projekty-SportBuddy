@@ -139,12 +139,9 @@ export default function VenuesPage() {
     }
   };
 
-  const handleSearch = useCallback(
-    (filters: FilterState) => {
-      fetchActivities(filters);
-    },
-    []
-  );
+  const handleSearch = useCallback((filters: FilterState) => {
+    fetchActivities(filters);
+  }, []);
 
   const onMarkerClick = useCallback((activity: Activity) => {
     setSelectedActivity(activity);
@@ -156,11 +153,9 @@ export default function VenuesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen p-8">
+      <div className="min-h-screen p-8 pt-36">
         <div className="max-w-7xl mx-auto">
-          <p className="text-center text-[color:var(--fluent-text-secondary)]">
-            Načítavam...
-          </p>
+          <p className="text-center text-gray-300">Načítavam...</p>
         </div>
       </div>
     );
@@ -168,7 +163,7 @@ export default function VenuesPage() {
 
   if (loadError) {
     return (
-      <div className="min-h-screen p-8">
+      <div className="min-h-screen p-8 pt-36">
         <div className="max-w-7xl mx-auto">
           <p className="text-center text-red-500">Chyba pri načítaní mapy</p>
         </div>
@@ -178,11 +173,9 @@ export default function VenuesPage() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-screen p-8">
+      <div className="min-h-screen p-8 pt-36">
         <div className="max-w-7xl mx-auto">
-          <p className="text-center text-[color:var(--fluent-text-secondary)]">
-            Načítavam mapu...
-          </p>
+          <p className="text-center text-gray-300">Načítavam mapu...</p>
         </div>
       </div>
     );
@@ -190,7 +183,7 @@ export default function VenuesPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen p-8">
+      <div className="min-h-screen p-8 pt-36">
         <div className="max-w-7xl mx-auto">
           <p className="text-center text-red-500">{error}</p>
         </div>
@@ -199,14 +192,12 @@ export default function VenuesPage() {
   }
 
   return (
-    <div className="min-h-screen p-8">
+    <div className="min-h-screen p-8 pt-36">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-4xl font-bold text-[color:var(--fluent-text)] mb-2">
-            Mapa aktivít
-          </h1>
-          <p className="text-[color:var(--fluent-text-secondary)]">
+          <h1 className="text-4xl font-bold text-white mb-2">Mapa aktivít</h1>
+          <p className="text-gray-300">
             {activities.length} aktivít v tvojom okolí
           </p>
         </div>
@@ -354,7 +345,7 @@ export default function VenuesPage() {
                       style={{
                         width: "100%",
                         padding: "8px 16px",
-                        backgroundColor: "#2563eb",
+                        backgroundColor: "#10b981",
                         color: "white",
                         borderRadius: "8px",
                         fontWeight: "500",
@@ -407,17 +398,17 @@ function getMarkerIcon(sportType: string): string {
   };
 
   const icons: Record<string, string> = {
-    FOOTBALL: createMarkerSVG('⚽', '%2310b981'),      // Green
-    BASKETBALL: createMarkerSVG('🏀', '%23f97316'),   // Orange
-    TENNIS: createMarkerSVG('🎾', '%23eab308'),       // Yellow
-    VOLLEYBALL: createMarkerSVG('🏐', '%2306b6d4'),   // Cyan
-    BADMINTON: createMarkerSVG('🏸', '%238b5cf6'),    // Purple
-    TABLE_TENNIS: createMarkerSVG('🏓', '%23ec4899'), // Pink
-    RUNNING: createMarkerSVG('🏃', '%233b82f6'),      // Blue
-    CYCLING: createMarkerSVG('🚴', '%2314b8a6'),      // Teal
-    SWIMMING: createMarkerSVG('🏊', '%230ea5e9'),     // Light Blue
-    GYM: createMarkerSVG('💪', '%23dc2626'),          // Red
-    OTHER: createMarkerSVG('🎯', '%236366f1'),        // Indigo
+    FOOTBALL: createMarkerSVG("⚽", "%2310b981"), // Green
+    BASKETBALL: createMarkerSVG("🏀", "%23f97316"), // Orange
+    TENNIS: createMarkerSVG("🎾", "%23eab308"), // Yellow
+    VOLLEYBALL: createMarkerSVG("🏐", "%2306b6d4"), // Cyan
+    BADMINTON: createMarkerSVG("🏸", "%238b5cf6"), // Purple
+    TABLE_TENNIS: createMarkerSVG("🏓", "%23ec4899"), // Pink
+    RUNNING: createMarkerSVG("🏃", "%233b82f6"), // Blue
+    CYCLING: createMarkerSVG("🚴", "%2314b8a6"), // Teal
+    SWIMMING: createMarkerSVG("🏊", "%230ea5e9"), // Light Blue
+    GYM: createMarkerSVG("💪", "%23dc2626"), // Red
+    OTHER: createMarkerSVG("🎯", "%236366f1"), // Indigo
   };
 
   return icons[sportType] || icons.OTHER;

@@ -115,12 +115,13 @@ export default function DashboardPage() {
 
   if (isPending || loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[color:var(--fluent-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-[color:var(--fluent-text-secondary)]">
-            Načítavam...
-          </p>
+      <main className="min-h-screen flex items-center justify-center relative overflow-hidden">
+        {/* Background Effects (Orbs) */}
+        <div className="fixed top-[-20%] left-[-10%] w-[800px] h-[800px] bg-emerald-900/20 rounded-full blur-[130px] pointer-events-none z-0"></div>
+        <div className="fixed bottom-[-20%] right-[-10%] w-[700px] h-[700px] bg-green-900/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
+        <div className="text-center relative z-10">
+          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-300">Načítavam...</p>
         </div>
       </main>
     );
@@ -131,17 +132,15 @@ export default function DashboardPage() {
   }
 
   return (
-    <main
-      className="min-h-screen"
-      style={{ backgroundColor: "var(--fluent-bg)" }}
-    >
+    <main className="min-h-screen relative overflow-hidden pt-36">
+      {/* Background Effects (Orbs) */}
+      <div className="fixed top-[-20%] left-[-10%] w-[800px] h-[800px] bg-emerald-900/20 rounded-full blur-[130px] pointer-events-none z-0"></div>
+      <div className="fixed bottom-[-20%] right-[-10%] w-[700px] h-[700px] bg-green-900/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
+
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
         {/* Hero Section */}
-        <div
-          className="relative overflow-hidden gradient-cta py-12 px-8 rounded-2xl text-white mb-12"
-          style={{ boxShadow: "var(--shadow-lg)" }}
-        >
+        <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-emerald-800 py-12 px-8 rounded-3xl text-white mb-12 shadow-xl">
           <div className="relative z-10">
             <h1 className="text-4xl md:text-5xl font-bold mb-3 drop-shadow-lg">
               Ahoj{session.user?.name ? `, ${session.user.name}` : ""} 👋
@@ -156,10 +155,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <Card>
             <CardHeader>
-              <div
-                className="w-16 h-16 gradient-feature-1 rounded-xl mb-4 flex items-center justify-center"
-                style={{ boxShadow: "var(--shadow-sm)" }}
-              >
+              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl mb-4 flex items-center justify-center shadow-lg">
                 <svg
                   className="w-8 h-8 text-white"
                   fill="none"
@@ -177,10 +173,10 @@ export default function DashboardPage() {
               <CardTitle>Moje aktivity</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-[color:var(--fluent-text)]">
+              <p className="text-3xl font-bold text-white">
                 {activities?.stats.totalCreated || 0}
               </p>
-              <p className="text-sm text-[color:var(--fluent-text-secondary)] mt-1">
+              <p className="text-sm text-gray-300 mt-1">
                 Vytvorené aktivity ({activities?.stats.upcomingCreated || 0}{" "}
                 nadchádzajúcich)
               </p>
@@ -189,10 +185,7 @@ export default function DashboardPage() {
 
           <Card>
             <CardHeader>
-              <div
-                className="w-16 h-16 gradient-feature-2 rounded-xl mb-4 flex items-center justify-center"
-                style={{ boxShadow: "var(--shadow-sm)" }}
-              >
+              <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-700 rounded-xl mb-4 flex items-center justify-center shadow-lg">
                 <svg
                   className="w-8 h-8 text-white"
                   fill="none"
@@ -210,10 +203,10 @@ export default function DashboardPage() {
               <CardTitle>Prihlásený na</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-[color:var(--fluent-text)]">
+              <p className="text-3xl font-bold text-white">
                 {activities?.stats.totalJoined || 0}
               </p>
-              <p className="text-sm text-[color:var(--fluent-text-secondary)] mt-1">
+              <p className="text-sm text-gray-300 mt-1">
                 Aktivít ({activities?.stats.upcomingJoined || 0}{" "}
                 nadchádzajúcich)
               </p>
@@ -222,10 +215,7 @@ export default function DashboardPage() {
 
           <Card>
             <CardHeader>
-              <div
-                className="w-16 h-16 gradient-feature-3 rounded-xl mb-4 flex items-center justify-center"
-                style={{ boxShadow: "var(--shadow-sm)" }}
-              >
+              <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-cyan-700 rounded-xl mb-4 flex items-center justify-center shadow-lg">
                 <svg
                   className="w-8 h-8 text-white"
                   fill="none"
@@ -243,11 +233,11 @@ export default function DashboardPage() {
               <CardTitle>Celkom aktivít</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold text-[color:var(--fluent-text)]">
+              <p className="text-3xl font-bold text-white">
                 {(activities?.stats.totalCreated || 0) +
                   (activities?.stats.totalJoined || 0)}
               </p>
-              <p className="text-sm text-[color:var(--fluent-text-secondary)] mt-1">
+              <p className="text-sm text-gray-300 mt-1">
                 Účastí na športových aktivitách
               </p>
             </CardContent>
@@ -256,17 +246,12 @@ export default function DashboardPage() {
 
         {/* Quick Actions */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-[color:var(--fluent-text)] mb-6">
-            Rýchle akcie
-          </h2>
+          <h2 className="text-2xl font-bold text-white mb-6">Rýchle akcie</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Link href="/activities/create">
               <Card hover className="h-full cursor-pointer">
                 <CardContent className="flex items-center gap-4 p-6">
-                  <div
-                    className="w-16 h-16 gradient-primary rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ boxShadow: "var(--shadow-md)" }}
-                  >
+                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
                     <svg
                       className="w-8 h-8 text-white"
                       fill="none"
@@ -282,10 +267,10 @@ export default function DashboardPage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-[color:var(--fluent-text)] mb-1">
+                    <h3 className="text-lg font-bold text-white mb-1">
                       Vytvoriť aktivitu
                     </h3>
-                    <p className="text-sm text-[color:var(--fluent-text-secondary)]">
+                    <p className="text-sm text-gray-300">
                       Zorganizujte novú športovú aktivitu
                     </p>
                   </div>
@@ -296,10 +281,7 @@ export default function DashboardPage() {
             <Link href="/activities">
               <Card hover className="h-full cursor-pointer">
                 <CardContent className="flex items-center gap-4 p-6">
-                  <div
-                    className="w-16 h-16 gradient-feature-2 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ boxShadow: "var(--shadow-md)" }}
-                  >
+                  <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
                     <svg
                       className="w-8 h-8 text-white"
                       fill="none"
@@ -315,10 +297,10 @@ export default function DashboardPage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-[color:var(--fluent-text)] mb-1">
+                    <h3 className="text-lg font-bold text-white mb-1">
                       Hľadať aktivity
                     </h3>
-                    <p className="text-sm text-[color:var(--fluent-text-secondary)]">
+                    <p className="text-sm text-gray-300">
                       Nájdite si spoluhráčov vo vašom meste
                     </p>
                   </div>
@@ -335,7 +317,7 @@ export default function DashboardPage() {
             {/* Created Activities */}
             {activities.created.length > 0 && (
               <div>
-                <h2 className="text-2xl font-bold text-[color:var(--fluent-text)] mb-6">
+                <h2 className="text-2xl font-bold text-white mb-6">
                   Moje vytvorené aktivity
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -344,18 +326,18 @@ export default function DashboardPage() {
                       <Card hover className="h-full cursor-pointer">
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between mb-4">
-                            <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-600 text-white shadow-sm">
+                            <span className="px-3 py-1 rounded-full text-sm font-medium bg-emerald-600 text-white shadow-sm">
                               {SPORT_LABELS[activity.sportType] ||
                                 activity.sportType}
                             </span>
-                            <span className="text-xs text-[color:var(--fluent-text-secondary)]">
+                            <span className="text-xs text-gray-400">
                               Organizátor
                             </span>
                           </div>
-                          <h3 className="text-lg font-bold text-[color:var(--fluent-text)] mb-2">
+                          <h3 className="text-lg font-bold text-white mb-2">
                             {activity.title}
                           </h3>
-                          <div className="space-y-2 text-sm text-[color:var(--fluent-text-secondary)]">
+                          <div className="space-y-2 text-sm text-gray-300">
                             <div className="flex items-center gap-2">
                               <svg
                                 className="w-4 h-4"
@@ -427,7 +409,7 @@ export default function DashboardPage() {
             {/* Joined Activities */}
             {activities.joined.length > 0 && (
               <div>
-                <h2 className="text-2xl font-bold text-[color:var(--fluent-text)] mb-6">
+                <h2 className="text-2xl font-bold text-white mb-6">
                   Aktivity, na ktoré som prihlásený
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -440,14 +422,14 @@ export default function DashboardPage() {
                               {SPORT_LABELS[activity.sportType] ||
                                 activity.sportType}
                             </span>
-                            <span className="text-xs text-[color:var(--fluent-text-secondary)]">
+                            <span className="text-xs text-gray-400">
                               Účastník
                             </span>
                           </div>
-                          <h3 className="text-lg font-bold text-[color:var(--fluent-text)] mb-2">
+                          <h3 className="text-lg font-bold text-white mb-2">
                             {activity.title}
                           </h3>
-                          <div className="space-y-2 text-sm text-[color:var(--fluent-text-secondary)]">
+                          <div className="space-y-2 text-sm text-gray-300">
                             <div className="flex items-center gap-2">
                               <svg
                                 className="w-4 h-4"
@@ -517,12 +499,9 @@ export default function DashboardPage() {
           /* Empty State */
           <Card>
             <CardContent className="text-center py-16">
-              <div
-                className="w-20 h-20 bg-[color:var(--fluent-surface-secondary)] rounded-full mx-auto mb-6 flex items-center justify-center"
-                style={{ boxShadow: "var(--shadow-sm)" }}
-              >
+              <div className="w-20 h-20 bg-white/[0.05] rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg">
                 <svg
-                  className="w-10 h-10 text-[color:var(--fluent-text-tertiary)]"
+                  className="w-10 h-10 text-gray-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -535,10 +514,10 @@ export default function DashboardPage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-[color:var(--fluent-text)] mb-2">
+              <h3 className="text-xl font-bold text-white mb-2">
                 Zatiaľ žiadne aktivity
               </h3>
-              <p className="text-[color:var(--fluent-text-secondary)] mb-6 max-w-md mx-auto">
+              <p className="text-gray-300 mb-6 max-w-md mx-auto">
                 Začnite vytvorením novej aktivity alebo sa pripojte k
                 existujúcim aktivitám vo vašom okolí.
               </p>

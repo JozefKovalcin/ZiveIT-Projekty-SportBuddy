@@ -104,17 +104,17 @@ export default function AIActivityAssistant({
               </svg>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-[color:var(--fluent-text)]">
+              <h3 className="text-lg font-semibold text-white">
                 AI Asistent pre vytvorenie aktivity
               </h3>
-              <p className="text-sm text-[color:var(--fluent-text-secondary)]">
+              <p className="text-sm text-gray-400">
                 Popíš, akú aktivitu chceš vytvoriť a AI ti pomôže
               </p>
             </div>
           </div>
           <button
             onClick={() => setShowAssistant(false)}
-            className="text-[color:var(--fluent-text-secondary)] hover:text-[color:var(--fluent-text)]"
+            className="text-gray-400 hover:text-white"
           >
             <svg
               className="w-6 h-6"
@@ -141,7 +141,7 @@ export default function AIActivityAssistant({
             onKeyPress={handleKeyPress}
             disabled={loading}
             rows={4}
-            className="w-full px-4 py-3 bg-[color:var(--fluent-bg)] border-2 border-purple-500/30 rounded-lg text-[color:var(--fluent-text)] placeholder-[color:var(--fluent-text-secondary)] focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+            className="w-full px-4 py-3 bg-black/30 border-2 border-purple-500/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
           />
           <div className="absolute top-2 right-2 px-2 py-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xs font-bold rounded">
             AI
@@ -190,8 +190,8 @@ export default function AIActivityAssistant({
         </div>
 
         {/* Examples */}
-        <div className="pt-4 border-t border-[color:var(--fluent-border)]">
-          <p className="text-xs text-[color:var(--fluent-text-secondary)] mb-2">
+        <div className="pt-4 border-t border-white/10">
+          <p className="text-xs text-gray-400 mb-2">
             Príklady čo môžeš skúsiť:
           </p>
           <div className="flex flex-wrap gap-2">
@@ -205,7 +205,7 @@ export default function AIActivityAssistant({
                 key={example}
                 onClick={() => setPrompt(example)}
                 disabled={loading}
-                className="px-3 py-1.5 text-xs bg-[color:var(--fluent-surface-secondary)] hover:bg-[color:var(--fluent-surface-tertiary)] text-[color:var(--fluent-text)] rounded-lg border border-[color:var(--fluent-border)] transition-colors"
+                className="px-3 py-1.5 text-xs bg-white/[0.05] hover:bg-white/10 text-white rounded-lg border border-white/10 transition-colors"
               >
                 {example}
               </button>

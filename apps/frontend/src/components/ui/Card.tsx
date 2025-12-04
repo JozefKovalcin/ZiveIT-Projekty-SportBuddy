@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface CardProps {
   children: React.ReactNode;
@@ -8,23 +8,26 @@ interface CardProps {
 
 export const Card: React.FC<CardProps> = ({
   children,
-  className = '',
-  hover = false
+  className = "",
+  hover = false,
 }) => {
   return (
     <div
       className={`
-        acrylic
-        border border-[color:var(--fluent-border)]
-        rounded-xl
-        p-10
-        transition-all duration-200 ease-out
-        ${hover ? 'cursor-pointer hover-glow reveal-effect hover:border-[color:var(--fluent-border-strong)]' : ''}
+        bg-white/[0.03]
+        backdrop-blur-xl
+        border border-white/10
+        rounded-3xl
+        p-8
+        shadow-xl shadow-black/20
+        transition-all duration-300 ease-out
+        ${
+          hover
+            ? "cursor-pointer hover:bg-white/[0.06] hover:border-white/20 hover:shadow-2xl hover:scale-[1.02]"
+            : ""
+        }
         ${className}
       `}
-      style={{
-        boxShadow: 'var(--shadow-md)',
-      }}
     >
       {children}
     </div>
@@ -39,8 +42,8 @@ interface CardHeaderProps {
 
 export const CardHeader: React.FC<CardHeaderProps> = ({
   children,
-  className = '',
-  onClick
+  className = "",
+  onClick,
 }) => {
   return (
     <div className={`mb-5 ${className}`} onClick={onClick}>
@@ -56,12 +59,10 @@ interface CardTitleProps {
 
 export const CardTitle: React.FC<CardTitleProps> = ({
   children,
-  className = ''
+  className = "",
 }) => {
   return (
-    <h3 className={`text-2xl font-semibold text-[color:var(--fluent-text)] ${className}`}>
-      {children}
-    </h3>
+    <h3 className={`text-2xl font-bold text-white ${className}`}>{children}</h3>
   );
 };
 
@@ -72,10 +73,10 @@ interface CardContentProps {
 
 export const CardContent: React.FC<CardContentProps> = ({
   children,
-  className = ''
+  className = "",
 }) => {
   return (
-    <div className={`text-base text-[color:var(--fluent-text-secondary)] leading-relaxed ${className}`}>
+    <div className={`text-base text-gray-300 leading-relaxed ${className}`}>
       {children}
     </div>
   );

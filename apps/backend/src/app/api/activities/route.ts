@@ -4,55 +4,73 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
 // Validation schema
-const activitySchema = z.object({
-  title: z.string().min(3).max(100),
-  description: z.string().optional(),
-  sportType: z.enum([
-    "FOOTBALL",
-    "BASKETBALL",
-    "TENNIS",
-    "VOLLEYBALL",
-    "BADMINTON",
-    "TABLE_TENNIS",
-    "RUNNING",
-    "CYCLING",
-    "SWIMMING",
-    "GYM",
-    "OTHER",
-  ]),
-  skillLevel: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED", "EXPERT"]),
-  date: z.string().datetime(),
-  duration: z.number().min(15).max(480),
-  maxParticipants: z.number().min(2).max(50),
-  location: z.string().min(1), // Google Maps address
-  locationName: z.string().optional(), // Custom location name
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
-  venueId: z.string().optional(), // Now optional
-  gender: z.enum(["MALE", "FEMALE", "MIXED"]).default("MIXED"),
-  minAge: z.number().min(6).max(99).default(18),
-  maxAge: z.number().min(6).max(99).default(99),
-  price: z.number().min(0).default(0),
-  isPublic: z.boolean().default(true),
-  // Recurrence fields
-  isRecurring: z.boolean().default(false),
-  recurrenceFrequency: z.enum(["NONE", "DAILY", "WEEKLY", "MONTHLY"]).default("NONE"),
-  recurrenceDays: z.array(z.number().min(0).max(6)).default([]), // 0=Sunday, 1=Monday, etc.
-  recurrenceEndDate: z.string().datetime().optional(),
-  autoJoinAll: z.boolean().default(false),
-  autoJoinGuestCount: z.number().min(0).max(10).default(0),
-}).refine((data) => data.minAge <= data.maxAge, {
-  message: "Minimálny vek musí byť menší alebo rovný maximálnemu veku",
-  path: ["minAge"],
-}).refine((data) => {
-  if (data.isRecurring && data.recurrenceFrequency === "WEEKLY" && data.recurrenceDays.length === 0) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Pre týždenné opakovanie musíte vybrať aspoň jeden deň v týždni",
-  path: ["recurrenceDays"],
-});
+const activitySchema = z
+  .object({
+    title: z.string().min(3).max(100),
+    description: z.string().optional(),
+    sportType: z.enum([
+      "FOOTBALL",
+      "BASKETBALL",
+      "TENNIS",
+      "VOLLEYBALL",
+      "BADMINTON",
+      "TABLE_TENNIS",
+      "RUNNING",
+      "CYCLING",
+      "SWIMMING",
+      "GYM",
+      "OTHER",
+    ]),
+    skillLevel: z.enum([
+      "BEGINNER",
+      "INTERMEDIATE",
+      "ADVANCED",
+      "EXPERT",
+      "PROFESSIONAL",
+    ]),
+    date: z.string().datetime(),
+    duration: z.number().min(15).max(480),
+    maxParticipants: z.number().min(2).max(50),
+    location: z.string().min(1), // Google Maps address
+    locationName: z.string().optional(), // Custom location name
+    latitude: z.number().optional(),
+    longitude: z.number().optional(),
+    venueId: z.string().optional(), // Now optional
+    gender: z.enum(["MALE", "FEMALE", "MIXED"]).default("MIXED"),
+    minAge: z.number().min(6).max(99).default(18),
+    maxAge: z.number().min(6).max(99).default(99),
+    price: z.number().min(0).default(0),
+    isPublic: z.boolean().default(true),
+    // Recurrence fields
+    isRecurring: z.boolean().default(false),
+    recurrenceFrequency: z
+      .enum(["NONE", "DAILY", "WEEKLY", "MONTHLY"])
+      .default("NONE"),
+    recurrenceDays: z.array(z.number().min(0).max(6)).default([]), // 0=Sunday, 1=Monday, etc.
+    recurrenceEndDate: z.string().datetime().optional(),
+    autoJoinAll: z.boolean().default(false),
+    autoJoinGuestCount: z.number().min(0).max(10).default(0),
+  })
+  .refine((data) => data.minAge <= data.maxAge, {
+    message: "Minimálny vek musí byť menší alebo rovný maximálnemu veku",
+    path: ["minAge"],
+  })
+  .refine(
+    (data) => {
+      if (
+        data.isRecurring &&
+        data.recurrenceFrequency === "WEEKLY" &&
+        data.recurrenceDays.length === 0
+      ) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Pre týždenné opakovanie musíte vybrať aspoň jeden deň v týždni",
+      path: ["recurrenceDays"],
+    }
+  );
 
 // GET /api/activities - Get all activities with search and filtering
 export async function GET(request: NextRequest) {
@@ -76,13 +94,20 @@ export async function GET(request: NextRequest) {
     const dateFrom = searchParams.get("dateFrom");
     const dateTo = searchParams.get("dateTo");
 
+    // Helper function to get end of day
+    const getEndOfDay = (dateStr: string) => {
+      const date = new Date(dateStr);
+      date.setHours(23, 59, 59, 999);
+      return date;
+    };
+
     // Build where clause
     const where: any = {
       status: status as any,
       parentActivityId: null, // Only show parent activities, not recurring instances
       date: {
         gte: dateFrom ? new Date(dateFrom) : new Date(),
-        ...(dateTo && { lte: new Date(dateTo) }),
+        ...(dateTo && { lte: getEndOfDay(dateTo) }),
       },
     };
 
@@ -103,12 +128,9 @@ export async function GET(request: NextRequest) {
         { location: { contains: location.trim(), mode: "insensitive" } },
         { locationName: { contains: location.trim(), mode: "insensitive" } },
       ];
-      
+
       if (where.OR) {
-        where.AND = [
-          { OR: where.OR },
-          { OR: locationCondition }
-        ];
+        where.AND = [{ OR: where.OR }, { OR: locationCondition }];
         delete where.OR;
       } else {
         where.OR = locationCondition;
@@ -190,7 +212,8 @@ export async function POST(request: NextRequest) {
     const validatedData = activitySchema.parse(body);
 
     // Extract auto-join settings before creating activity
-    const { autoJoinAll, autoJoinGuestCount, ...activityFields } = validatedData;
+    const { autoJoinAll, autoJoinGuestCount, ...activityFields } =
+      validatedData;
 
     // Create base activity data
     const activityData: any = {
@@ -198,8 +221,8 @@ export async function POST(request: NextRequest) {
       date: new Date(validatedData.date),
       organizerId: session.user.id,
       currentParticipants: 1 + (autoJoinGuestCount || 0), // 1 for organizer + guests
-      recurrenceEndDate: validatedData.recurrenceEndDate 
-        ? new Date(validatedData.recurrenceEndDate) 
+      recurrenceEndDate: validatedData.recurrenceEndDate
+        ? new Date(validatedData.recurrenceEndDate)
         : undefined,
     };
 
@@ -223,13 +246,20 @@ export async function POST(request: NextRequest) {
         userId: session.user.id,
         activityId: activity.id,
         status: "CONFIRMED",
-        guestCount: validatedData.autoJoinAll ? validatedData.autoJoinGuestCount : 0,
+        guestCount: validatedData.autoJoinAll
+          ? validatedData.autoJoinGuestCount
+          : 0,
       },
     });
 
     // If recurring, create future instances
     if (activity.isRecurring && activity.recurrenceFrequency !== "NONE") {
-      await createRecurringActivities(activity, session.user.id, validatedData.autoJoinAll, validatedData.autoJoinGuestCount);
+      await createRecurringActivities(
+        activity,
+        session.user.id,
+        validatedData.autoJoinAll,
+        validatedData.autoJoinGuestCount
+      );
     }
 
     return NextResponse.json(activity, { status: 201 });
@@ -250,7 +280,12 @@ export async function POST(request: NextRequest) {
 }
 
 // Helper function to create recurring activities
-async function createRecurringActivities(parentActivity: any, userId: string, autoJoinAll: boolean, guestCount: number) {
+async function createRecurringActivities(
+  parentActivity: any,
+  userId: string,
+  autoJoinAll: boolean,
+  guestCount: number
+) {
   const maxInstances = 20; // Maximum 20 instances
   let instancesCreated = 0;
   // Calculate end date from the activity's start date, not from today
@@ -259,11 +294,13 @@ async function createRecurringActivities(parentActivity: any, userId: string, au
   let defaultEndDate = new Date(parentDate);
   defaultEndDate.setMonth(defaultEndDate.getMonth() + 2);
   const endDate = parentActivity.recurrenceEndDate || defaultEndDate;
-  
-  console.log(`Creating recurring activities from ${parentDate.toISOString()} until ${endDate.toISOString()}`);
-  
+
+  console.log(
+    `Creating recurring activities from ${parentDate.toISOString()} until ${endDate.toISOString()}`
+  );
+
   let currentDate = new Date(parentActivity.date);
-  
+
   while (instancesCreated < maxInstances && currentDate < endDate) {
     // Calculate next occurrence based on frequency
     if (parentActivity.recurrenceFrequency === "DAILY") {
@@ -273,27 +310,41 @@ async function createRecurringActivities(parentActivity: any, userId: string, au
       let daysToAdd = 1;
       let nextDate = new Date(currentDate);
       nextDate.setDate(nextDate.getDate() + daysToAdd);
-      
-      while (!parentActivity.recurrenceDays.includes(nextDate.getDay()) && daysToAdd < 8) {
+
+      while (
+        !parentActivity.recurrenceDays.includes(nextDate.getDay()) &&
+        daysToAdd < 8
+      ) {
         daysToAdd++;
         nextDate = new Date(currentDate);
         nextDate.setDate(nextDate.getDate() + daysToAdd);
       }
-      
+
       currentDate = nextDate;
     } else if (parentActivity.recurrenceFrequency === "MONTHLY") {
       // Safe month addition that handles year boundaries
       const targetMonth = currentDate.getMonth() + 1;
-      const targetYear = currentDate.getFullYear() + Math.floor(targetMonth / 12);
+      const targetYear =
+        currentDate.getFullYear() + Math.floor(targetMonth / 12);
       const actualMonth = targetMonth % 12;
-      currentDate = new Date(targetYear, actualMonth, currentDate.getDate(), currentDate.getHours(), currentDate.getMinutes());
+      currentDate = new Date(
+        targetYear,
+        actualMonth,
+        currentDate.getDate(),
+        currentDate.getHours(),
+        currentDate.getMinutes()
+      );
     }
-    
-    console.log(`Next occurrence: ${currentDate.toISOString()}, end date: ${endDate.toISOString()}, passed: ${currentDate >= endDate}`);
-    
+
+    console.log(
+      `Next occurrence: ${currentDate.toISOString()}, end date: ${endDate.toISOString()}, passed: ${
+        currentDate >= endDate
+      }`
+    );
+
     // Stop if we've passed the end date
     if (currentDate >= endDate) break;
-    
+
     // Create child activity
     try {
       const childActivity = await prisma.activity.create({
@@ -322,7 +373,7 @@ async function createRecurringActivities(parentActivity: any, userId: string, au
           currentParticipants: autoJoinAll ? 1 + guestCount : 0, // 1 for organizer + guests
         },
       });
-      
+
       // Auto-join organizer if requested
       if (autoJoinAll) {
         await prisma.participation.create({
@@ -334,13 +385,13 @@ async function createRecurringActivities(parentActivity: any, userId: string, au
           },
         });
       }
-      
+
       instancesCreated++;
     } catch (error) {
       console.error("Error creating recurring instance:", error);
       break;
     }
   }
-  
+
   console.log(`Created ${instancesCreated} recurring activity instances`);
 }

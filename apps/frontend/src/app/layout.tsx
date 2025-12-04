@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { ThemeProvider } from "@/contexts/ThemeContext";
 import { GoogleMapsProvider } from "@/contexts/GoogleMapsContext";
+import { ToastProvider } from "@/components/ui/Toast";
 import TemplateWrapper from "@/components/TemplateWrapper";
 import "./globals.css";
 
@@ -20,7 +20,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#0078d4",
+  themeColor: "#10b981",
 };
 
 export default function RootLayout({
@@ -29,17 +29,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sk">
+    <html lang="sk" className="dark">
       <head>
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
       </head>
-      <body className="antialiased bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-        <ThemeProvider>
-          <GoogleMapsProvider>
+      <body className="antialiased">
+        <GoogleMapsProvider>
+          <ToastProvider>
             <TemplateWrapper>{children}</TemplateWrapper>
-          </GoogleMapsProvider>
-        </ThemeProvider>
+          </ToastProvider>
+        </GoogleMapsProvider>
       </body>
     </html>
   );

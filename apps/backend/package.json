@@ -24,7 +24,6 @@
     "@prisma/client": "latest",
     "better-auth": "latest",
     "next": "latest",
-    "openai": "latest",
     "pg": "latest",
     "react": "latest",
     "react-dom": "latest",

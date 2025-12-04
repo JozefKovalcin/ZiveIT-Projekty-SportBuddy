@@ -47,7 +47,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
       input.type = "text";
       input.placeholder = "Začnite písať adresu...";
       input.className =
-        "w-full px-4 py-2.5 bg-[color:var(--fluent-surface-secondary)] border border-[color:var(--fluent-border)] rounded-lg text-[color:var(--fluent-text)] focus:outline-none focus:ring-2 focus:ring-[color:var(--fluent-accent)]";
+        "w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500";
       input.value = value.address;
 
       // Clear container and add input
@@ -79,10 +79,10 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
       const style = document.createElement("style");
       style.textContent = `
         .pac-container {
-          background-color: var(--fluent-surface-secondary);
-          border: 1px solid var(--fluent-border);
+          background-color: rgba(2, 44, 34, 0.95);
+          border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 12px;
-          box-shadow: var(--shadow-lg);
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
           margin-top: 4px;
           font-family: inherit;
           overflow: hidden;
@@ -92,8 +92,8 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
         }
         .pac-item {
           padding: 12px 16px;
-          border-top: 1px solid var(--fluent-divider);
-          color: var(--fluent-text);
+          border-top: 1px solid rgba(255, 255, 255, 0.05);
+          color: white;
           cursor: pointer;
           transition: background-color 0.15s ease;
         }
@@ -101,21 +101,21 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
           border-top: none;
         }
         .pac-item:hover {
-          background-color: var(--fluent-surface);
+          background-color: rgba(255, 255, 255, 0.05);
         }
         .pac-item-selected {
-          background-color: var(--fluent-accent-light);
+          background-color: rgba(16, 185, 129, 0.2);
         }
         .pac-icon {
           display: none;
         }
         .pac-item-query {
-          color: var(--fluent-text);
+          color: white;
           font-size: 14px;
           font-weight: 500;
         }
         .pac-matched {
-          color: var(--fluent-accent);
+          color: #10b981;
           font-weight: 600;
         }
       `;
@@ -151,7 +151,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
           <p className="text-xs mt-3">Manuálny vstup:</p>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+          <label className="block text-sm font-medium mb-2 text-white">
             Adresa *
           </label>
           <Input
@@ -163,7 +163,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+          <label className="block text-sm font-medium mb-2 text-white">
             Názov miesta (voliteľné)
           </label>
           <Input
@@ -179,10 +179,8 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
 
   if (!isLoaded) {
     return (
-      <div className="p-4 bg-[color:var(--fluent-surface-secondary)] rounded-lg">
-        <p className="text-sm text-[color:var(--fluent-text-secondary)]">
-          Načítavam Google Maps...
-        </p>
+      <div className="p-4 bg-white/5 rounded-lg">
+        <p className="text-sm text-gray-400">Načítavam Google Maps...</p>
       </div>
     );
   }
@@ -190,20 +188,20 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium mb-2 text-[color:var(--fluent-text)]">
+        <label className="block text-sm font-medium mb-2 text-white">
           Vyhľadajte adresu *
         </label>
         <div ref={autocompleteRef}></div>
-        <p className="mt-2 text-xs text-[color:var(--fluent-text-tertiary)]">
+        <p className="mt-2 text-xs text-gray-500">
           Začnite písať a vyberte adresu zo zoznamu návrhov
         </p>
       </div>
 
       {value.address && (
-        <div className="p-3 bg-[color:var(--fluent-surface-secondary)] rounded-lg border border-[color:var(--fluent-border)]">
+        <div className="p-3 bg-white/5 rounded-lg border border-white/10">
           <div className="flex items-start gap-2">
             <svg
-              className="w-5 h-5 text-[color:var(--fluent-accent)] flex-shrink-0 mt-0.5"
+              className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -223,15 +221,11 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
             </svg>
             <div className="flex-1">
               {value.name && (
-                <p className="text-sm font-medium text-[color:var(--fluent-text)]">
-                  {value.name}
-                </p>
+                <p className="text-sm font-medium text-white">{value.name}</p>
               )}
-              <p className="text-sm text-[color:var(--fluent-text-secondary)]">
-                {value.address}
-              </p>
+              <p className="text-sm text-gray-400">{value.address}</p>
               {value.latitude && value.longitude && (
-                <p className="text-xs text-[color:var(--fluent-text-tertiary)] mt-1">
+                <p className="text-xs text-gray-500 mt-1">
                   GPS: {value.latitude.toFixed(6)}, {value.longitude.toFixed(6)}
                 </p>
               )}

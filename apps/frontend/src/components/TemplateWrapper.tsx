@@ -1,24 +1,16 @@
-'use client';
+"use client";
 
-import { ReactNode } from 'react';
-import { usePathname } from 'next/navigation';
-import Navigation from '@/components/Navigation';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import Navigation from "@/components/Navigation";
 
 export default function TemplateWrapper({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const isAuthPage = pathname?.startsWith('/auth');
+  const isAuthPage = pathname?.startsWith("/auth");
 
-  // For auth pages, just show ThemeToggle in corner
+  // For auth pages, no navigation needed
   if (isAuthPage) {
-    return (
-      <>
-        <div className="fixed top-4 right-4 z-50">
-          <ThemeToggle />
-        </div>
-        {children}
-      </>
-    );
+    return <>{children}</>;
   }
 
   // For all other pages, show full Navigation
