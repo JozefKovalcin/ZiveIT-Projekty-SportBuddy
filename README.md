@@ -361,10 +361,9 @@ docker-compose logs -f
 
 ## AI funkcie (Gemini)
 
-SportBuddy využíva **Google Gemini 2.0 Flash** pre inteligentné funkcie:
+SportBuddy využíva **Google Gemini 2.5 Flash** pre inteligentné funkcie:
 
 - **🔍 AI Vyhľadávanie** - Vyhľadávanie aktivít prirodzeným jazykom ("futbal zajtra v Košiciach")
-- **💡 AI Odporúčania** - Personalizované návrhy aktivít na základe preferencií
 - **📝 AI Vytvorenie aktivity** - Vytvorenie aktivity pomocou prirodzeného jazyka
 
 ### Konfigurácia Gemini
@@ -375,7 +374,7 @@ SportBuddy využíva **Google Gemini 2.0 Flash** pre inteligentné funkcie:
 GEMINI_API_KEY="tvoj-api-kluc"
 ```
 
-Free tier má limit 60 requests/minútu, čo je pre vývoj a bežné použitie dostačujúce.
+Free tier tohto modelu má limit 15 requests/minútu.
 
 ---
 
