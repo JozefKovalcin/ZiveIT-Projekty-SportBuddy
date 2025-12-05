@@ -411,6 +411,9 @@ export default function ActivityDetailPage() {
   const [ratingComment, setRatingComment] = useState<string>("");
   const [existingComment, setExistingComment] = useState<string>("");
   const [isEditingRating, setIsEditingRating] = useState(false);
+  const [instanceGuestCounts, setInstanceGuestCounts] = useState<
+    Record<string, number>
+  >({});
 
   // Helper to show status messages
   const showStatus = useCallback(
@@ -952,7 +955,7 @@ export default function ActivityDetailPage() {
         </Link>
 
         {/* Header */}
-        <Card className="mb-6">
+        <Card className="mb-6 relative z-30">
           <CardContent>
             <div className="flex justify-between items-start mb-4">
               <div className="flex-1">
@@ -1722,55 +1725,126 @@ export default function ActivityDetailPage() {
                                   {!isParticipatingInInstance &&
                                     instance.currentParticipants <
                                       instance.maxParticipants && (
-                                      <Button
-                                        variant="primary"
-                                        className="flex-1 text-sm py-2"
-                                        onClick={async () => {
-                                          try {
-                                            const response = await fetch(
-                                              `${process.env.NEXT_PUBLIC_API_URL}/api/activities/${instance.id}/join`,
-                                              {
-                                                method: "POST",
-                                                headers: {
-                                                  "Content-Type":
-                                                    "application/json",
-                                                },
-                                                credentials: "include",
-                                                body: JSON.stringify({
-                                                  guestCount: 0,
-                                                }),
-                                              }
-                                            );
-                                            if (response.ok) {
-                                              fetchUpcomingInstances();
-                                              if (
-                                                instance.id === activity?.id
-                                              ) {
-                                                fetchActivity();
-                                              }
-                                              showStatus(
-                                                "Úspešne prihlásený!",
-                                                "success"
+                                      <div className="flex-1 flex gap-2">
+                                        <div className="flex items-center bg-white/[0.03] border border-white/10 rounded-lg h-10 shrink-0">
+                                          <button
+                                            className="w-8 h-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors rounded-l-lg"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setInstanceGuestCounts((prev) => {
+                                                const current =
+                                                  prev[instance.id] || 0;
+                                                return {
+                                                  ...prev,
+                                                  [instance.id]: Math.max(
+                                                    0,
+                                                    current - 1
+                                                  ),
+                                                };
+                                              });
+                                            }}
+                                          >
+                                            -
+                                          </button>
+                                          <div className="w-8 text-center text-sm font-medium text-white">
+                                            {instanceGuestCounts[instance.id] ||
+                                              0}
+                                          </div>
+                                          <button
+                                            className="w-8 h-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors rounded-r-lg"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setInstanceGuestCounts((prev) => {
+                                                const current =
+                                                  prev[instance.id] || 0;
+                                                return {
+                                                  ...prev,
+                                                  [instance.id]: Math.min(
+                                                    10,
+                                                    current + 1
+                                                  ),
+                                                };
+                                              });
+                                            }}
+                                          >
+                                            +
+                                          </button>
+                                        </div>
+                                        <Button
+                                          variant="primary"
+                                          className="flex-1 text-sm py-2"
+                                          onClick={async () => {
+                                            const guests =
+                                              instanceGuestCounts[
+                                                instance.id
+                                              ] || 0;
+                                            try {
+                                              const response = await fetch(
+                                                `${process.env.NEXT_PUBLIC_API_URL}/api/activities/${instance.id}/join`,
+                                                {
+                                                  method: "POST",
+                                                  headers: {
+                                                    "Content-Type":
+                                                      "application/json",
+                                                  },
+                                                  credentials: "include",
+                                                  body: JSON.stringify({
+                                                    guestCount: guests,
+                                                  }),
+                                                }
                                               );
-                                            } else {
-                                              const data =
-                                                await response.json();
+                                              if (response.ok) {
+                                                fetchUpcomingInstances();
+                                                if (
+                                                  instance.id === activity?.id
+                                                ) {
+                                                  fetchActivity();
+                                                }
+                                                // Reset guest count for this instance
+                                                setInstanceGuestCounts(
+                                                  (prev) => {
+                                                    const newState = {
+                                                      ...prev,
+                                                    };
+                                                    delete newState[
+                                                      instance.id
+                                                    ];
+                                                    return newState;
+                                                  }
+                                                );
+                                                showStatus(
+                                                  `Úspešne prihlásený${
+                                                    guests > 0
+                                                      ? ` (+${guests} hostia)`
+                                                      : ""
+                                                  }!`,
+                                                  "success"
+                                                );
+                                              } else {
+                                                const data =
+                                                  await response.json();
+                                                showStatus(
+                                                  data.error ||
+                                                    "Chyba pri prihlásení",
+                                                  "error"
+                                                );
+                                              }
+                                            } catch (err) {
                                               showStatus(
-                                                data.error ||
-                                                  "Chyba pri prihlásení",
+                                                "Chyba pri prihlásení",
                                                 "error"
                                               );
                                             }
-                                          } catch (err) {
-                                            showStatus(
-                                              "Chyba pri prihlásení",
-                                              "error"
-                                            );
-                                          }
-                                        }}
-                                      >
-                                        Prihlásiť sa
-                                      </Button>
+                                          }}
+                                        >
+                                          Prihlásiť
+                                          {instanceGuestCounts[instance.id] >
+                                            0 &&
+                                            ` (+${
+                                              instanceGuestCounts[instance.id]
+                                            })`}
+                                        </Button>
+                                      </div>
                                     )}
                                   {isParticipatingInInstance && (
                                     <div className="flex-1 flex items-center justify-between gap-2">
