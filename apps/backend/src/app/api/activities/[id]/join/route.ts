@@ -1,6 +1,7 @@
 import { getServerSession } from "@/lib/get-session";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { notifyUsersAboutUserJoined, notifyUsersAboutUserLeft } from "@/lib/notification-service";
 
 // POST /api/activities/:id/join - Join an activity
 export async function POST(
@@ -67,6 +68,13 @@ export async function POST(
     });
 
     if (existingParticipation) {
+      if (existingParticipation.status === "BLOCKED") {
+        return NextResponse.json(
+          { error: "Boli ste zablokovaný organizátorom z tejto aktivity" },
+          { status: 403 }
+        );
+      }
+
       // If already participating, update guest count
       const totalParticipants = 1 + guestCount; // user + guests
       const currentTotalWithoutThisUser = activity.currentParticipants - (1 + existingParticipation.guestCount);
@@ -138,6 +146,9 @@ export async function POST(
         status: newParticipantCount >= activity.maxParticipants ? "FULL" : "OPEN",
       },
     });
+
+    // Notify organizer and participants
+    notifyUsersAboutUserJoined(id, session.user.id).catch(console.error);
 
     return NextResponse.json({ activity: updatedActivity });
   } catch (error) {
@@ -216,6 +227,9 @@ export async function DELETE(
         status: "OPEN",
       },
     });
+
+    // Notify organizer and participants
+    notifyUsersAboutUserLeft(id, session.user.id).catch(console.error);
 
     return NextResponse.json({ activity: updatedActivity });
   } catch (error) {

@@ -27,7 +27,8 @@
     "pg": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "zod": "latest"
+    "zod": "latest",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@types/node": "latest",
@@ -37,6 +38,7 @@
     "eslint-config-next": "latest",
     "prisma": "latest",
     "tsx": "latest",
-    "typescript": "latest"
+    "typescript": "latest",
+    "@types/web-push": "^3.6.3"
   }
 }

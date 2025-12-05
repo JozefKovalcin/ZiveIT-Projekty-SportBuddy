@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useSession, signOut } from "@/lib/auth-client";
+import NotificationBell from "./NotificationBell";
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -57,7 +58,7 @@ export default function Navigation() {
     // Fixed position, centered, full width minus padding
     <div className="fixed top-6 left-4 right-4 z-50 flex justify-center pointer-events-none">
       <nav
-        className={`pointer-events-auto px-8 py-4 flex items-center justify-between w-full max-w-7xl transition-all duration-300 rounded-full border nav-capsule ${
+        className={`pointer-events-auto px-8 py-4 flex items-center justify-between w-full max-w-7xl transition-all duration-300 rounded-full border nav-capsule overflow-visible ${
           scrolled
             ? "backdrop-blur-2xl border-white/20 shadow-2xl nav-scrolled"
             : ""
@@ -121,9 +122,11 @@ export default function Navigation() {
         {/* PRAVÁ STRANA */}
         <div className="flex items-center gap-6 shrink-0">
           {session ? (
-            <div className="relative" ref={userMenuRef}>
-              <button
-                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+            <>
+              <NotificationBell scrolled={scrolled} />
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                 className="w-14 h-14 rounded-full border-2 border-emerald-500/50 p-[2px] cursor-pointer hover:scale-105 transition-transform bg-black/50 flex items-center justify-center overflow-hidden group"
               >
                 {session.user?.image ? (
@@ -141,8 +144,11 @@ export default function Navigation() {
 
               {/* User Dropdown */}
               {isUserMenuOpen && (
-                <div className="absolute right-0 mt-4 w-80 acrylic overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 origin-top-right z-50">
-                  <div className="px-6 py-5 border-b border-white/10 bg-black/20">
+                <div className={`absolute right-0 mt-4 w-80 rounded-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 origin-top-right z-50 border transition-all duration-300
+                     ${scrolled 
+                       ? "bg-[#021a14]/90 backdrop-blur-2xl border-emerald-500/30 shadow-2xl" 
+                       : "bg-black/40 backdrop-blur-xl border-white/10 shadow-xl"}`}>
+                  <div className={`px-6 py-5 border-b ${scrolled ? "border-emerald-500/20 bg-emerald-900/20" : "border-white/10 bg-white/5"}`}>
                     <p className="text-white font-bold text-xl truncate">
                       {session.user?.name}
                     </p>
@@ -183,6 +189,7 @@ export default function Navigation() {
                 </div>
               )}
             </div>
+            </>
           ) : (
             <div className="flex items-center gap-3">
               <Link href="/auth/signup">

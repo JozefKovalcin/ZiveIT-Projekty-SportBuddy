@@ -3,8 +3,7 @@ const CACHE_NAME = 'sportbuddy-v1';
 const urlsToCache = [
   '/',
   '/manifest.json',
-  '/icon-192x192.png',
-  '/icon-512x512.png',
+  '/icon-144x144.png',
 ];
 
 // Install service worker
@@ -57,5 +56,43 @@ self.addEventListener('activate', (event) => {
         })
       );
     })
+  );
+});
+
+// Push Notifications
+self.addEventListener('push', function(event) {
+  if (event.data) {
+    const data = event.data.json();
+    const options = {
+      body: data.body,
+      icon: '/icon-144x144.png',
+      badge: '/icon-144x144.png',
+      data: {
+        url: data.url || '/'
+      }
+    };
+
+    event.waitUntil(
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+        // Check if the app is currently focused
+        const isAppFocused = windowClients.some(client => client.focused);
+
+        if (isAppFocused) {
+          // App is open and focused, suppress system notification
+          // The user will see the in-app notification instead
+          console.log('App is focused, suppressing push notification');
+          return;
+        }
+
+        return self.registration.showNotification(data.title, options);
+      })
+    );
+  }
+});
+
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow(event.notification.data.url)
   );
 });

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import ActivityChat from "@/components/ActivityChat";
+import ShareActivityButton from "@/components/ShareActivityButton";
 
 // Status message type
 type StatusMessage = {
@@ -756,6 +757,54 @@ export default function ActivityDetailPage() {
     }
   };
 
+  const handleRemoveParticipant = async (userId: string, userName: string) => {
+    showConfirm(`Naozaj chcete odstrániť používateľa ${userName} z aktivity?`, async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/activities/${activity?.id}/participants/${userId}`,
+          {
+            method: "DELETE",
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || "Chyba pri odstraňovaní účastníka");
+        }
+
+        showStatus(`Používateľ ${userName} bol odstránený`, "success");
+        await fetchActivity();
+      } catch (err: any) {
+        showStatus(err.message, "error");
+      }
+    });
+  };
+
+  const handleBlockParticipant = async (userId: string, userName: string) => {
+    showConfirm(`Naozaj chcete zablokovať používateľa ${userName}? Nebude sa môcť znova prihlásiť.`, async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/activities/${activity?.id}/participants/${userId}`,
+          {
+            method: "PATCH",
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || "Chyba pri blokovaní účastníka");
+        }
+
+        showStatus(`Používateľ ${userName} bol zablokovaný`, "success");
+        await fetchActivity();
+      } catch (err: any) {
+        showStatus(err.message, "error");
+      }
+    });
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 pt-36">
@@ -1031,9 +1080,10 @@ export default function ActivityDetailPage() {
                 </>
               )}
 
-              {/* AddToCalendarDropdown under action buttons */}
-              <div className="flex items-center">
+              {/* AddToCalendarDropdown and Share button under action buttons */}
+              <div className="flex items-center gap-3">
                 <AddToCalendarDropdown activity={activity} />
+                <ShareActivityButton activity={activity} />
               </div>
             </div>
 
@@ -1991,36 +2041,101 @@ export default function ActivityDetailPage() {
               <CardContent>
                 <div className="space-y-3">
                   {activity.participations.map((participation) => (
-                    <Link
+                    <div
                       key={participation.id}
-                      href={`/users/${participation.user.id}`}
-                      className="flex items-center gap-3 hover:bg-white/[0.03] rounded-lg p-2 -m-2 transition-colors cursor-pointer"
+                      className="flex items-center justify-between p-2 -m-2 hover:bg-white/[0.03] rounded-lg transition-colors group"
                     >
-                      {participation.user.image ? (
-                        <img
-                          src={participation.user.image}
-                          alt={participation.user.name}
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-sm">
-                          {participation.user.name.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <p className="text-sm text-white">
-                        {participation.user.name}
-                        {participation.guestCount > 0 && (
-                          <span className="ml-2 text-xs text-gray-400">
-                            +{participation.guestCount}
-                          </span>
+                      <Link
+                        href={`/users/${participation.user.id}`}
+                        className="flex items-center gap-3 flex-1"
+                      >
+                        {participation.user.image ? (
+                          <img
+                            src={participation.user.image}
+                            alt={participation.user.name}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-sm">
+                            {participation.user.name.charAt(0).toUpperCase()}
+                          </div>
                         )}
-                        {participation.user.id === activity.organizer.id && (
-                          <span className="ml-2 text-xs text-emerald-400">
-                            (Organizátor)
-                          </span>
+                        <p className="text-sm text-white">
+                          {participation.user.name}
+                          {participation.guestCount > 0 && (
+                            <span className="ml-2 text-xs text-gray-400">
+                              +{participation.guestCount}
+                            </span>
+                          )}
+                          {participation.user.id === activity.organizer.id && (
+                            <span className="ml-2 text-xs text-emerald-400">
+                              (Organizátor)
+                            </span>
+                          )}
+                        </p>
+                      </Link>
+
+                      {isOrganizer &&
+                        participation.user.id !== currentUserId && (
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleRemoveParticipant(
+                                  participation.user.id,
+                                  participation.user.name
+                                );
+                              }}
+                              className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors"
+                              title="Odstrániť z aktivity"
+                            >
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                              </svg>
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleBlockParticipant(
+                                  participation.user.id,
+                                  participation.user.name
+                                );
+                              }}
+                              className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors"
+                              title="Zablokovať používateľa"
+                            >
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line
+                                  x1="4.93"
+                                  y1="4.93"
+                                  x2="19.07"
+                                  y2="19.07"
+                                ></line>
+                              </svg>
+                            </button>
+                          </div>
                         )}
-                      </p>
-                    </Link>
+                    </div>
                   ))}
                 </div>
               </CardContent>

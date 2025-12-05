@@ -1,6 +1,7 @@
 import { getServerSession } from "@/lib/get-session";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { notifyUsersAboutActivityDeleted } from "@/lib/notification-service";
 
 // GET /api/activities/:id - Get activity by ID
 export async function GET(
@@ -202,6 +203,9 @@ export async function DELETE(
         });
       }
     }
+
+    // Notify participants before deletion
+    await notifyUsersAboutActivityDeleted(id);
 
     await prisma.activity.delete({
       where: { id: id },

@@ -32,7 +32,7 @@ export default function RootLayout({
     <html lang="sk" className="dark">
       <head>
         <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/icon-192x192.png" />
+        <link rel="apple-touch-icon" href="/icon-144x144.png" />
       </head>
       <body className="antialiased">
         <GoogleMapsProvider>

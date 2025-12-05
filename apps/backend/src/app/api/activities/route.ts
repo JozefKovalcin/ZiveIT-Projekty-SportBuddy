@@ -2,6 +2,7 @@ import { getServerSession } from "@/lib/get-session";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { notifyUsersAboutNewActivity } from "@/lib/notification-service";
 
 // Validation schema
 const activitySchema = z
@@ -261,6 +262,9 @@ export async function POST(request: NextRequest) {
         validatedData.autoJoinGuestCount
       );
     }
+
+    // Notify users about new activity (async, don't wait)
+    notifyUsersAboutNewActivity(activity.id).catch(console.error);
 
     return NextResponse.json(activity, { status: 201 });
   } catch (error) {

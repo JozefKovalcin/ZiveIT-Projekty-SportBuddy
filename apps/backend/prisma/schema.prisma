@@ -32,6 +32,11 @@ model User {
   favoriteVenues VenueFavorite[]
   passwordResets PasswordReset[]
   messages      Message[]
+
+  // Notifications
+  notifications          Notification[]
+  notificationPreferences NotificationPreferences?
+  pushSubscriptions      PushSubscription[]
 }
 
 // Profile model for user details (separate from auth)
@@ -165,6 +170,8 @@ enum ParticipationStatus {
   CONFIRMED
   PENDING
   CANCELLED
+  KICKED
+  BLOCKED
 }
 
 // Venue (Športovisko) model
@@ -249,6 +256,9 @@ model Activity {
   childActivities Activity[]     @relation("RecurringActivities")
   ratings         ActivityRating[]
   messages       Message[]
+
+  // Notifications
+  notifications  Notification[]
 
   @@index([sportType])
   @@index([date])
@@ -344,4 +354,104 @@ model ActivityRating {
 
   @@unique([userId, activityId])
   @@index([activityId])
+}
+
+// Notification type enumeration
+enum NotificationType {
+  NEW_ACTIVITY
+  ACTIVITY_REMINDER
+  ACTIVITY_CANCELLED
+  ACTIVITY_UPDATED
+  PARTICIPANT_JOINED
+  PARTICIPANT_LEFT
+  ACTIVITY_FULL
+  SYSTEM
+}
+
+// Notification frequency for email digests
+enum NotificationFrequency {
+  INSTANT
+  DAILY_DIGEST
+  WEEKLY_DIGEST
+  NONE
+}
+
+// Notification model
+model Notification {
+  id          String           @id @default(cuid())
+  type        NotificationType
+  title       String
+  message     String
+  read        Boolean          @default(false)
+
+  // Relations
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  activityId  String?
+  activity    Activity?        @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  // Metadata (JSON for flexible additional data)
+  metadata    Json?
+
+  createdAt   DateTime         @default(now())
+
+  @@index([userId])
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
+// Notification preferences model
+model NotificationPreferences {
+  id                    String                @id @default(cuid())
+  userId                String                @unique
+  user                  User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Email notifications
+  emailEnabled          Boolean               @default(true)
+  emailFrequency        NotificationFrequency @default(INSTANT)
+
+  // Push notifications
+  pushEnabled           Boolean               @default(true)
+
+  // In-app notifications
+  inAppEnabled          Boolean               @default(true)
+
+  // Filters - what to notify about
+  notifyNewActivities   Boolean               @default(true)
+  notifyReminders       Boolean               @default(true)
+  notifyParticipants    Boolean               @default(true)
+  notifyActivityFull    Boolean               @default(true)
+
+  // Activity matching preferences
+  onlyFavoriteSports    Boolean               @default(false)
+  maxDistance           Int?
+  maxPrice              Float?
+
+  // Quiet hours (24h format)
+  quietHoursEnabled     Boolean               @default(false)
+  quietHoursStart       Int                   @default(22)
+  quietHoursEnd         Int                   @default(8)
+
+  // Rate limiting
+  maxNotificationsPerDay Int                  @default(20)
+
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+}
+
+// Push subscription for Web Push API
+model PushSubscription {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  endpoint    String   @unique
+  p256dh      String
+  auth        String
+
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
 }
