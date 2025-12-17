@@ -1,6 +1,7 @@
 services:
   postgres:
-    image: postgres:alpine
+    build:
+      context: ./apps/postgres
     container_name: sportbuddy-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-sportbuddy}
@@ -25,8 +26,6 @@ services:
     container_name: sportbuddy-backend
     env_file:
       - .env
-    environment:
-      NODE_ENV: development
     ports:
       - "3001:3001"
       - "5555:5555" # Prisma Studio
@@ -48,7 +47,9 @@ services:
     env_file:
       - .env
     environment:
-      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NEXT_PUBLIC_FRONTEND_URL: ${NEXT_PUBLIC_FRONTEND_URL}
+      NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
     ports:
       - "3000:3000"
     depends_on:

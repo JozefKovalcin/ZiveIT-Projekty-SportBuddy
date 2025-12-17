@@ -16,9 +16,17 @@ const GoogleMapsContext = createContext<GoogleMapsContextValue | undefined>(
   undefined
 );
 
-export function GoogleMapsProvider({ children }: { children: ReactNode }) {
+interface GoogleMapsProviderProps {
+  children: ReactNode;
+  apiKey: string;
+}
+
+export function GoogleMapsProvider({
+  children,
+  apiKey,
+}: GoogleMapsProviderProps) {
   const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+    googleMapsApiKey: apiKey || "",
     libraries,
   });
 

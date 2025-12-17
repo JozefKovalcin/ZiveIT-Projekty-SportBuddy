@@ -14,21 +14,23 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    "font-bold rounded-full transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+    "acrylic text-center transition-all duration-300 border border-white/10 font-bold tracking-wide text-gray-200 inline-flex items-center justify-center !rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]";
 
+  // Match the two reference buttons:
+  // - Primary: emerald accent on hover
+  // - Secondary: neutral hover (no green border)
   const variantStyles = {
     primary:
-      "bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 active:scale-[0.98]",
-    secondary:
-      "bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/20 focus:ring-white/30 backdrop-blur-xl active:scale-[0.98]",
+      "hover:border-emerald-500/40 hover:text-emerald-400 focus:ring-emerald-500/40",
+    secondary: "hover:border-white/20 hover:text-white focus:ring-white/30",
     outline:
-      "border-2 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500 focus:ring-emerald-500 active:scale-[0.98]",
+      "border-2 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500 focus:ring-emerald-500/40",
   };
 
   const sizeStyles = {
-    sm: "px-4 py-2 text-sm",
-    md: "px-6 py-3 text-base",
-    lg: "px-8 py-4 text-lg",
+    sm: "px-6 py-3 text-sm",
+    md: "px-10 py-3.5 text-base",
+    lg: "px-12 py-4 text-lg",
   };
 
   return (

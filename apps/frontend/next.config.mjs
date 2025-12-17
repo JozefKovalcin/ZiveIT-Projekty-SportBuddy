@@ -2,11 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
-    webpackBuildWorker: true,
     optimizePackageImports: ["lucide-react", "date-fns"],
-  },
-  turbopack: {
-    root: "/app",
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",

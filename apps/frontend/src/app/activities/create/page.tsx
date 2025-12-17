@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { TimePicker } from "@/components/ui/TimePicker";
@@ -69,11 +70,16 @@ export default function CreateActivityPage() {
     autoJoinGuestCount: 0,
   });
 
-  const [location, setLocation] = useState({
+  const [location, setLocation] = useState<{
+    address: string;
+    name?: string;
+    latitude?: number;
+    longitude?: number;
+  }>({
     address: "",
     name: "",
-    latitude: undefined as number | undefined,
-    longitude: undefined as number | undefined,
+    latitude: undefined,
+    longitude: undefined,
   });
 
   if (isPending) {
@@ -321,8 +327,26 @@ export default function CreateActivityPage() {
         </h1>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500">
-            {error}
+          <div
+            className="mb-6 p-5 rounded-2xl text-red-400 font-medium text-[15px] flex items-start gap-3"
+            style={{
+              background: "rgba(220, 38, 38, 0.1)",
+              border: "1px solid rgba(248, 113, 113, 0.5)",
+              boxShadow: "0 4px 16px rgba(220, 38, 38, 0.2)",
+            }}
+          >
+            <svg
+              className="w-5 h-5 flex-shrink-0 mt-0.5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span>{error}</span>
           </div>
         )}
 
@@ -541,38 +565,63 @@ export default function CreateActivityPage() {
 
               {/* Miesto konania */}
               <div className="mb-6">
-                <LocationPicker value={location} onChange={setLocation} />
+                <LocationPicker
+                  value={location}
+                  onChange={(nextLocation) => setLocation(nextLocation)}
+                />
               </div>
 
               {/* Pohlavie */}
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-2 text-white">
+                <label className="block text-sm font-semibold text-gray-200 mb-3 tracking-wide">
                   Pohlavie *
                 </label>
                 <div className="grid grid-cols-3 gap-3">
-                  {genderOptions.map((option) => (
-                    <label
-                      key={option.value}
-                      className={`
-                        flex items-center justify-center px-4 py-3 rounded-lg border-2 cursor-pointer transition-all
-                        ${
-                          formData.gender === option.value
-                            ? "border-emerald-500 bg-emerald-500/10 text-emerald-400 font-semibold"
-                            : "border-white/10 bg-white/[0.03] text-white hover:border-white/20"
-                        }
-                      `}
-                    >
-                      <input
-                        type="radio"
-                        name="gender"
-                        value={option.value}
-                        checked={formData.gender === option.value}
-                        onChange={handleChange}
-                        className="sr-only"
-                      />
-                      <span className="text-sm">{option.label}</span>
-                    </label>
-                  ))}
+                  {genderOptions.map((option) => {
+                    const isSelected = formData.gender === option.value;
+                    return (
+                      <label
+                        key={option.value}
+                        className="flex items-center justify-center px-4 py-3.5 rounded-2xl cursor-pointer transition-all duration-200"
+                        style={{
+                          background: isSelected
+                            ? "rgba(16, 185, 129, 0.15)"
+                            : "rgba(255, 255, 255, 0.05)",
+                          border: isSelected
+                            ? "2px solid rgba(16, 185, 129, 0.5)"
+                            : "2px solid rgba(255, 255, 255, 0.1)",
+                          color: isSelected ? "#6ee7b7" : "white",
+                          fontWeight: isSelected ? "600" : "500",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isSelected) {
+                            e.currentTarget.style.background =
+                              "rgba(255, 255, 255, 0.1)";
+                            e.currentTarget.style.borderColor =
+                              "rgba(255, 255, 255, 0.2)";
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isSelected) {
+                            e.currentTarget.style.background =
+                              "rgba(255, 255, 255, 0.05)";
+                            e.currentTarget.style.borderColor =
+                              "rgba(255, 255, 255, 0.1)";
+                          }
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="gender"
+                          value={option.value}
+                          checked={formData.gender === option.value}
+                          onChange={handleChange}
+                          className="sr-only"
+                        />
+                        <span className="text-[15px]">{option.label}</span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -793,16 +842,13 @@ export default function CreateActivityPage() {
 
               {/* Popis */}
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-2 text-white">
-                  Popis (voliteľné)
-                </label>
-                <textarea
+                <Textarea
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
                   rows={4}
                   placeholder="Pridajte podrobnosti o aktivite..."
-                  className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none placeholder-gray-500"
+                  label="Popis (voliteľné)"
                 />
               </div>
 
@@ -814,9 +860,8 @@ export default function CreateActivityPage() {
                     name="isPublic"
                     checked={formData.isPublic}
                     onChange={handleChange}
-                    className="w-5 h-5 rounded border-white/10 text-emerald-500 focus:ring-2 focus:ring-emerald-500 bg-white/[0.03]"
                   />
-                  <span className="text-sm text-white">
+                  <span className="text-[15px] text-white font-medium">
                     Verejná aktivita (viditeľná pre všetkých)
                   </span>
                 </label>
@@ -830,15 +875,21 @@ export default function CreateActivityPage() {
                     name="isRecurring"
                     checked={formData.isRecurring}
                     onChange={handleChange}
-                    className="w-5 h-5 rounded border-white/10 text-emerald-500 focus:ring-2 focus:ring-emerald-500 bg-white/[0.03]"
                   />
-                  <span className="text-sm text-white">
+                  <span className="text-[15px] text-white font-medium">
                     Pravidelne opakovaná aktivita
                   </span>
                 </label>
 
                 {formData.isRecurring && (
-                  <div className="ml-8 space-y-4 p-4 bg-white/[0.03] rounded-lg border border-white/10">
+                  <div
+                    className="ml-8 space-y-4 p-5 rounded-2xl"
+                    style={{
+                      background: "rgba(0, 0, 0, 0.2)",
+                      backdropFilter: "blur(12px)",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                    }}
+                  >
                     {/* Frequency */}
                     <div>
                       <label className="block text-sm font-medium mb-2 text-white">
@@ -895,14 +946,35 @@ export default function CreateActivityPage() {
                                           ].sort(),
                                     }));
                                   }}
-                                  className={`
-                                  px-3 py-2 rounded-lg text-sm font-medium transition-all
-                                  ${
-                                    isSelected
-                                      ? "bg-emerald-500 text-white"
-                                      : "bg-white/[0.03] border border-white/10 text-white hover:border-white/20"
-                                  }
-                                `}
+                                  className="px-4 py-2.5 rounded-2xl text-[15px] font-semibold transition-all duration-200"
+                                  style={{
+                                    background: isSelected
+                                      ? "linear-gradient(135deg, #10b981, #059669)"
+                                      : "rgba(255, 255, 255, 0.05)",
+                                    border: isSelected
+                                      ? "1px solid rgba(255, 255, 255, 0.1)"
+                                      : "1px solid rgba(255, 255, 255, 0.1)",
+                                    boxShadow: isSelected
+                                      ? "0 4px 12px rgba(16, 185, 129, 0.4)"
+                                      : "none",
+                                    color: "white",
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    if (!isSelected) {
+                                      e.currentTarget.style.background =
+                                        "rgba(255, 255, 255, 0.1)";
+                                      e.currentTarget.style.borderColor =
+                                        "rgba(255, 255, 255, 0.2)";
+                                    }
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    if (!isSelected) {
+                                      e.currentTarget.style.background =
+                                        "rgba(255, 255, 255, 0.05)";
+                                      e.currentTarget.style.borderColor =
+                                        "rgba(255, 255, 255, 0.1)";
+                                    }
+                                  }}
                                 >
                                   {day}
                                 </button>
@@ -953,9 +1025,8 @@ export default function CreateActivityPage() {
                                 : 0,
                             }));
                           }}
-                          className="w-5 h-5 rounded border-white/10 text-emerald-500 focus:ring-2 focus:ring-emerald-500 bg-white/[0.03]"
                         />
-                        <span className="text-sm text-white">
+                        <span className="text-[15px] text-white font-medium">
                           Automaticky sa prihlás na všetky vygenerované aktivity
                         </span>
                       </label>

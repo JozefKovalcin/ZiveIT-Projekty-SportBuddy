@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface TextareaProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
 }
 
-export const Input: React.FC<InputProps> = ({
+export const Textarea: React.FC<TextareaProps> = ({
   label,
   error,
   className = "",
@@ -15,12 +16,12 @@ export const Input: React.FC<InputProps> = ({
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
-  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleFocus = (e: React.FocusEvent<HTMLTextAreaElement>) => {
     setIsFocused(true);
     onFocus?.(e);
   };
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
     setIsFocused(false);
     onBlur?.(e);
   };
@@ -33,7 +34,7 @@ export const Input: React.FC<InputProps> = ({
         </label>
       )}
       <div
-        className="relative rounded-full overflow-hidden transition-all duration-300 ease-out"
+        className="relative rounded-3xl overflow-hidden transition-all duration-300 ease-out"
         style={{
           background: isFocused
             ? "rgba(16, 185, 129, 0.05)"
@@ -52,7 +53,7 @@ export const Input: React.FC<InputProps> = ({
             : "0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
         }}
       >
-        <input
+        <textarea
           className={`
             w-full px-5 py-3.5
             bg-transparent
@@ -62,6 +63,7 @@ export const Input: React.FC<InputProps> = ({
             border-0
             transition-all duration-200 ease-out
             disabled:opacity-50 disabled:cursor-not-allowed
+            resize-none
             ${className}
           `}
           style={{

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { Input } from "./ui/Input";
-import { useGoogleMaps } from "@/contexts/GoogleMapsContext";
+import { useGoogleMaps } from "@/contexts/GoogleMapsProvider";
 
 interface LocationPickerProps {
   value: {

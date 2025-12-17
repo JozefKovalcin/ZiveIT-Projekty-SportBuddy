@@ -14,25 +14,32 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      enabled: !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET,
+      enabled:
+        !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET,
       mapProfileToUser: (profile) => {
         return {
-          name: profile.name,
+          name:
+            profile.name ||
+            profile.given_name ||
+            profile.displayName ||
+            profile.email ||
+            "Používateľ",
           email: profile.email,
-          emailVerified: profile.email_verified,
-          image: profile.picture, // Map Google profile picture to user image
+          emailVerified: !!(profile.email_verified ?? profile.emailVerified),
+          image:
+            profile.picture ||
+            profile.image ||
+            profile.avatar_url ||
+            profile.avatarUrl ||
+            null,
         };
       },
-    },
-    facebook: {
-      clientId: process.env.FACEBOOK_CLIENT_ID || "",
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || "",
-      enabled: !!process.env.FACEBOOK_CLIENT_ID && !!process.env.FACEBOOK_CLIENT_SECRET,
     },
     apple: {
       clientId: process.env.APPLE_CLIENT_ID || "",
       clientSecret: process.env.APPLE_CLIENT_SECRET || "",
-      enabled: !!process.env.APPLE_CLIENT_ID && !!process.env.APPLE_CLIENT_SECRET,
+      enabled:
+        !!process.env.APPLE_CLIENT_ID && !!process.env.APPLE_CLIENT_SECRET,
     },
   },
   onAPIError: {
@@ -42,7 +49,7 @@ export const auth = betterAuth({
   account: {
     accountLinking: {
       enabled: true,
-      trustedProviders: ["google", "facebook", "apple"],
+      trustedProviders: ["google", "apple"],
     },
   },
   session: {
@@ -57,7 +64,7 @@ export const auth = betterAuth({
   basePath: "/api/auth",
   // Redirect to frontend after errors
   pages: {
-    errorPage: process.env.NEXT_PUBLIC_FRONTEND_URL 
+    errorPage: process.env.NEXT_PUBLIC_FRONTEND_URL
       ? `${process.env.NEXT_PUBLIC_FRONTEND_URL}/auth/signin`
       : "http://localhost:3000/auth/signin",
   },
@@ -65,4 +72,3 @@ export const auth = betterAuth({
 
 export type Session = typeof auth.$Infer.Session.session;
 export type User = typeof auth.$Infer.Session.user;
-

@@ -117,7 +117,15 @@ export default function SignInPage() {
         {/* Form */}
         <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-xl p-10 transition-all duration-200 shadow-xl">
           {errors.general && (
-            <div className="mb-6 p-4 bg-red-900/30 border-2 border-red-800 rounded-lg text-red-400 text-base font-medium">
+            <div
+              className="mb-6 p-4 rounded-2xl text-red-400 text-[15px] font-semibold"
+              style={{
+                background:
+                  "linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15))",
+                border: "1px solid rgba(239, 68, 68, 0.5)",
+                boxShadow: "0 4px 12px rgba(239, 68, 68, 0.2)",
+              }}
+            >
               {errors.general}
             </div>
           )}
@@ -183,7 +191,7 @@ export default function SignInPage() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full !rounded-2xl"
               size="lg"
               disabled={isLoading}
             >
@@ -198,7 +206,7 @@ export default function SignInPage() {
                 <div className="w-full border-t border-white/10"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-black/50 text-gray-300 font-medium">
+                <span className="px-4 bg-transparent text-gray-300 font-medium">
                   Alebo sa prihláste pomocou
                 </span>
               </div>
@@ -216,7 +224,22 @@ export default function SignInPage() {
                 });
               }}
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 px-6 py-3.5 border-2 border-white/20 rounded-lg font-semibold text-base text-white hover:bg-white/10 hover:border-white/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full flex items-center justify-center gap-3 px-6 py-3.5 rounded-2xl font-semibold text-[15px] text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              style={{
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+              }}
+              onMouseEnter={(e) => {
+                if (!isLoading) {
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+                  e.currentTarget.style.borderColor =
+                    "rgba(255, 255, 255, 0.2)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+                e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.1)";
+              }}
             >
               <svg
                 className="w-5 h-5"
@@ -242,28 +265,6 @@ export default function SignInPage() {
                 />
               </svg>
               Pokračovať s Google
-            </button>
-
-            <button
-              type="button"
-              onClick={async () => {
-                await signIn.social({
-                  provider: "facebook",
-                  callbackURL: "http://localhost:3000/dashboard",
-                });
-              }}
-              disabled={isLoading}
-              className="w-full flex items-center justify-center gap-3 px-6 py-3.5 border-2 border-white/20 rounded-lg font-semibold text-base text-white hover:bg-white/10 hover:border-white/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-            >
-              <svg
-                className="w-5 h-5"
-                viewBox="0 0 24 24"
-                fill="#1877F2"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg>
-              Pokračovať s Facebook
             </button>
           </div>
 

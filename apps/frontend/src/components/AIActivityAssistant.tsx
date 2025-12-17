@@ -58,13 +58,29 @@ export default function AIActivityAssistant({
 
   if (!showAssistant) {
     return (
-      <Button
-        variant="secondary"
+      <button
         onClick={() => setShowAssistant(true)}
-        className="w-full bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-2 border-purple-500/30 hover:border-purple-500/50 transition-all"
+        className="w-full h-[56px] px-6 rounded-full font-bold text-[16px] backdrop-blur-xl transition-all duration-200 flex items-center justify-center gap-3"
+        style={{
+          background: "rgba(255, 255, 255, 0.03)",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          color: "#e5e7eb",
+          boxShadow:
+            "0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "rgba(255, 255, 255, 0.06)";
+          e.currentTarget.style.borderColor = "rgba(168, 85, 247, 0.4)";
+          e.currentTarget.style.color = "#c084fc";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "rgba(255, 255, 255, 0.03)";
+          e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.1)";
+          e.currentTarget.style.color = "#e5e7eb";
+        }}
       >
         <svg
-          className="w-5 h-5 mr-2 text-purple-500"
+          className="w-5 h-5"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -76,10 +92,8 @@ export default function AIActivityAssistant({
             d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
           />
         </svg>
-        <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent font-semibold">
-          Vytvoriť aktivitu s pomocou AI
-        </span>
-      </Button>
+        <span>Vytvoriť aktivitu s pomocou AI</span>
+      </button>
     );
   }
 

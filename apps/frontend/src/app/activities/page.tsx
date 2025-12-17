@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import SearchAndFilter, { FilterState } from "@/components/SearchAndFilter";
@@ -104,7 +105,15 @@ function ActivityCard({ activity }: { activity: Activity }) {
                 {((activity.isRecurring &&
                   activity.recurrenceFrequency !== "NONE") ||
                   activity.parentActivityId) && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-purple-500 text-white rounded-full shadow-sm">
+                  <span
+                    className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full backdrop-blur-xl"
+                    style={{
+                      background: "rgba(168, 85, 247, 0.2)",
+                      border: "1px solid rgba(168, 85, 247, 0.5)",
+                      color: "#c084fc",
+                      boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
+                    }}
+                  >
                     <svg
                       width="12"
                       height="12"
@@ -145,7 +154,15 @@ function ActivityCard({ activity }: { activity: Activity }) {
 
           {/* Skill Level */}
           <div className="mb-3">
-            <span className="inline-block px-3 py-1 text-xs font-medium bg-emerald-500/10 text-emerald-400 rounded-full">
+            <span
+              className="inline-block px-4 py-1.5 text-xs font-semibold rounded-full backdrop-blur-xl"
+              style={{
+                background: "rgba(16, 185, 129, 0.15)",
+                border: "1px solid rgba(16, 185, 129, 0.4)",
+                color: "#34d399",
+                boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
+              }}
+            >
               {skillLevelLabels[activity.skillLevel] || activity.skillLevel}
             </span>
           </div>
@@ -182,6 +199,7 @@ function ActivitySkeleton() {
 }
 
 export default function ActivitiesPage() {
+  const router = useRouter();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -258,23 +276,49 @@ export default function ActivitiesPage() {
               Nájdi si aktivitu a pripoj sa k ostatným
             </p>
           </div>
-          <Link href="/activities/create">
-            <button className="px-8 py-3 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/50 text-emerald-400 font-bold text-lg transition-all backdrop-blur-md shadow-lg hover:shadow-emerald-500/20 whitespace-nowrap">
-              + Vytvoriť aktivitu
-            </button>
-          </Link>
+          <Button
+            variant="primary"
+            size="md"
+            className="h-[52px] pl-6 pr-10 text-lg whitespace-nowrap gap-2"
+            onClick={() => router.push("/activities/create")}
+          >
+            <svg
+              className="w-5 h-5 text-emerald-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Vytvoriť aktivitu
+          </Button>
         </div>
 
         {/* Search and Filter */}
-        <SearchAndFilter
-          onSearch={handleSearch}
-          loading={loading}
-          resultCount={activities.length}
-        />
+        <Suspense fallback={null}>
+          <SearchAndFilter
+            onSearch={handleSearch}
+            loading={loading}
+            resultCount={activities.length}
+          />
+        </Suspense>
 
         {/* Error */}
         {error && (
-          <div className="mt-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500">
+          <div
+            className="mt-6 p-4 rounded-2xl text-red-500"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15))",
+              border: "1px solid rgba(239, 68, 68, 0.5)",
+              boxShadow: "0 4px 12px rgba(239, 68, 68, 0.2)",
+            }}
+          >
             {error}
           </div>
         )}

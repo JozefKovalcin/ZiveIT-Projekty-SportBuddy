@@ -5,7 +5,7 @@ import { GoogleMap, Marker, InfoWindow } from "@react-google-maps/api";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { useGoogleMaps } from "@/contexts/GoogleMapsContext";
+import { useGoogleMaps } from "@/contexts/GoogleMapsProvider";
 import SearchAndFilter, { FilterState } from "@/components/SearchAndFilter";
 
 interface Activity {
@@ -211,7 +211,15 @@ export default function VenuesPage() {
 
         {/* Error */}
         {error && (
-          <div className="mt-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500">
+          <div
+            className="mt-6 p-4 rounded-2xl text-red-500"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15))",
+              border: "1px solid rgba(239, 68, 68, 0.5)",
+              boxShadow: "0 4px 12px rgba(239, 68, 68, 0.2)",
+            }}
+          >
             {error}
           </div>
         )}

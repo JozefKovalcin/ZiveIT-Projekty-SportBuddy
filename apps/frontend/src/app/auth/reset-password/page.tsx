@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -8,6 +8,14 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 
 export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResetPasswordContent />
+    </Suspense>
+  );
+}
+
+function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -111,7 +119,15 @@ export default function ResetPasswordPage() {
           <CardContent>
             {success ? (
               <div className="space-y-6">
-                <div className="p-4 bg-green-500/10 border border-green-500/50 rounded-lg">
+                <div
+                  className="p-4 rounded-2xl"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.15))",
+                    border: "1px solid rgba(16, 185, 129, 0.5)",
+                    boxShadow: "0 4px 12px rgba(16, 185, 129, 0.2)",
+                  }}
+                >
                   <div className="flex items-start gap-3">
                     <div className="text-2xl">✅</div>
                     <div>
@@ -129,7 +145,15 @@ export default function ResetPasswordPage() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 {error && (
-                  <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-lg text-red-500">
+                  <div
+                    className="p-4 rounded-2xl text-red-500"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15))",
+                      border: "1px solid rgba(239, 68, 68, 0.5)",
+                      boxShadow: "0 4px 12px rgba(239, 68, 68, 0.2)",
+                    }}
+                  >
                     {error}
                   </div>
                 )}
@@ -162,7 +186,16 @@ export default function ResetPasswordPage() {
                   />
                 </div>
 
-                <div className="p-4 bg-white/[0.03] border border-white/10 rounded-lg">
+                <div
+                  className="p-4 rounded-2xl"
+                  style={{
+                    background: "rgba(0, 0, 0, 0.25)",
+                    backdropFilter: "blur(20px)",
+                    WebkitBackdropFilter: "blur(20px)",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                  }}
+                >
                   <p className="text-sm text-gray-300">
                     <strong>💡 Tip:</strong> Použite silné heslo s kombináciou
                     písmen, čísiel a špeciálnych znakov.

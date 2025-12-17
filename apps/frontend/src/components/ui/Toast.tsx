@@ -62,13 +62,37 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const getToastStyles = (type: ToastType) => {
     switch (type) {
       case "success":
-        return "bg-emerald-600 border-emerald-500";
+        return {
+          background:
+            "linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95))",
+          border: "1px solid rgba(52, 211, 153, 0.5)",
+          boxShadow:
+            "0 8px 32px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+        };
       case "error":
-        return "bg-red-600 border-red-500";
+        return {
+          background:
+            "linear-gradient(135deg, rgba(220, 38, 38, 0.95), rgba(185, 28, 28, 0.95))",
+          border: "1px solid rgba(248, 113, 113, 0.5)",
+          boxShadow:
+            "0 8px 32px rgba(220, 38, 38, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+        };
       case "warning":
-        return "bg-yellow-600 border-yellow-500";
+        return {
+          background:
+            "linear-gradient(135deg, rgba(217, 119, 6, 0.95), rgba(180, 83, 9, 0.95))",
+          border: "1px solid rgba(251, 191, 36, 0.5)",
+          boxShadow:
+            "0 8px 32px rgba(217, 119, 6, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+        };
       default:
-        return "bg-blue-600 border-blue-500";
+        return {
+          background:
+            "linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(29, 78, 216, 0.95))",
+          border: "1px solid rgba(96, 165, 250, 0.5)",
+          boxShadow:
+            "0 8px 32px rgba(37, 99, 235, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+        };
     }
   };
 
@@ -146,22 +170,22 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
 
       {/* Toast Container */}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2">
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-3">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg border text-white shadow-lg animate-slide-in ${getToastStyles(
-              toast.type
-            )}`}
+            className="flex items-center gap-3 px-5 py-4 rounded-full text-white animate-slide-down"
             style={{
-              animation: "slideIn 0.3s ease-out forwards",
+              ...getToastStyles(toast.type),
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
             }}
           >
             {getToastIcon(toast.type)}
-            <span className="text-sm font-medium">{toast.message}</span>
+            <span className="text-[15px] font-semibold">{toast.message}</span>
             <button
               onClick={() => removeToast(toast.id)}
-              className="ml-2 hover:opacity-70 transition-opacity"
+              className="ml-2 p-1 hover:bg-white/20 rounded-lg transition-all duration-200"
             >
               <svg
                 className="w-4 h-4"
@@ -188,11 +212,27 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={handleCancel}
           />
-          <div className="relative bg-gray-900 border border-white/10 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+          <div
+            className="relative rounded-3xl p-8 max-w-md w-full mx-4 animate-spring"
+            style={{
+              background: "rgba(2, 44, 34, 0.95)",
+              backdropFilter: "blur(24px) saturate(180%)",
+              WebkitBackdropFilter: "blur(24px) saturate(180%)",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              boxShadow:
+                "0 25px 50px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+            }}
+          >
             <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
+              <div
+                className="flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center"
+                style={{
+                  background: "rgba(251, 191, 36, 0.15)",
+                  border: "1px solid rgba(251, 191, 36, 0.3)",
+                }}
+              >
                 <svg
-                  className="w-5 h-5 text-yellow-400"
+                  className="w-6 h-6 text-yellow-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -206,22 +246,54 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 </svg>
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-white mb-2">
+                <h3 className="text-xl font-bold text-white mb-2 tracking-tight">
                   Potvrdiť akciu
                 </h3>
-                <p className="text-gray-300 text-sm">{confirmModal.message}</p>
+                <p className="text-gray-300 text-[15px] leading-relaxed">
+                  {confirmModal.message}
+                </p>
               </div>
             </div>
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="flex justify-end gap-3 mt-8">
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors"
+                className="px-6 py-3 text-[15px] font-semibold text-white rounded-full transition-all duration-200"
+                style={{
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+                  e.currentTarget.style.borderColor =
+                    "rgba(255, 255, 255, 0.2)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background =
+                    "rgba(255, 255, 255, 0.05)";
+                  e.currentTarget.style.borderColor =
+                    "rgba(255, 255, 255, 0.1)";
+                }}
               >
                 Zrušiť
               </button>
               <button
                 onClick={handleConfirm}
-                className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
+                className="px-6 py-3 text-[15px] font-semibold text-white rounded-full transition-all duration-200"
+                style={{
+                  background: "linear-gradient(135deg, #10b981, #059669)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  boxShadow: "0 8px 24px rgba(16, 185, 129, 0.4)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow =
+                    "0 12px 32px rgba(16, 185, 129, 0.5)";
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow =
+                    "0 8px 24px rgba(16, 185, 129, 0.4)";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
               >
                 Potvrdiť
               </button>
@@ -229,19 +301,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       )}
-
-      <style jsx global>{`
-        @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateX(100%);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-      `}</style>
     </ToastContext.Provider>
   );
 }

@@ -18,12 +18,14 @@ interface Activity {
   maxParticipants: number;
   currentParticipants: number;
   status: string;
+  location?: string;
+  locationName?: string | null;
   venue: {
     id: string;
     name: string;
     city: string;
     address: string;
-  };
+  } | null;
   organizer: {
     id: string;
     name: string;
@@ -326,7 +328,15 @@ export default function DashboardPage() {
                       <Card hover className="h-full cursor-pointer">
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between mb-4">
-                            <span className="px-3 py-1 rounded-full text-sm font-medium bg-emerald-600 text-white shadow-sm">
+                            <span
+                              className="px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-xl"
+                              style={{
+                                background: "rgba(16, 185, 129, 0.15)",
+                                border: "1px solid rgba(16, 185, 129, 0.4)",
+                                color: "#34d399",
+                                boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
+                              }}
+                            >
                               {SPORT_LABELS[activity.sportType] ||
                                 activity.sportType}
                             </span>
@@ -418,7 +428,15 @@ export default function DashboardPage() {
                       <Card hover className="h-full cursor-pointer">
                         <CardContent className="p-6">
                           <div className="flex items-start justify-between mb-4">
-                            <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-600 text-white shadow-sm">
+                            <span
+                              className="px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-xl"
+                              style={{
+                                background: "rgba(16, 185, 129, 0.15)",
+                                border: "1px solid rgba(16, 185, 129, 0.4)",
+                                color: "#34d399",
+                                boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
+                              }}
+                            >
                               {SPORT_LABELS[activity.sportType] ||
                                 activity.sportType}
                             </span>

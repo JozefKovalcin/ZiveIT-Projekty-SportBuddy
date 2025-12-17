@@ -1,13 +1,10 @@
 // Service Worker for PWA
-const CACHE_NAME = 'sportbuddy-v1';
-const urlsToCache = [
-  '/',
-  '/manifest.json',
-  '/icon-144x144.png',
-];
+const CACHE_NAME = "sportbuddy-v2";
+const urlsToCache = ["/", "/manifest.json", "/icon-144x144.png"];
 
 // Install service worker
-self.addEventListener('install', (event) => {
+self.addEventListener("install", (event) => {
+  self.skipWaiting(); // Force activation
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(urlsToCache);
@@ -16,7 +13,7 @@ self.addEventListener('install', (event) => {
 });
 
 // Fetch from cache
-self.addEventListener('fetch', (event) => {
+self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
       // Cache hit - return response
@@ -26,7 +23,7 @@ self.addEventListener('fetch', (event) => {
 
       return fetch(event.request).then((response) => {
         // Check if valid response
-        if (!response || response.status !== 200 || response.type !== 'basic') {
+        if (!response || response.status !== 200 || response.type !== "basic") {
           return response;
         }
 
@@ -44,7 +41,8 @@ self.addEventListener('fetch', (event) => {
 });
 
 // Activate and clean old caches
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
+  event.waitUntil(clients.claim()); // Take control immediately
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -60,39 +58,39 @@ self.addEventListener('activate', (event) => {
 });
 
 // Push Notifications
-self.addEventListener('push', function(event) {
+self.addEventListener("push", function (event) {
   if (event.data) {
     const data = event.data.json();
     const options = {
       body: data.body,
-      icon: '/icon-144x144.png',
-      badge: '/icon-144x144.png',
+      icon: "/icon-144x144.png",
+      badge: "/icon-144x144.png",
       data: {
-        url: data.url || '/'
-      }
+        url: data.url || "/",
+      },
     };
 
     event.waitUntil(
-      clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
-        // Check if the app is currently focused
-        const isAppFocused = windowClients.some(client => client.focused);
+      clients
+        .matchAll({ type: "window", includeUncontrolled: true })
+        .then((windowClients) => {
+          // Check if the app is currently focused
+          const isAppFocused = windowClients.some((client) => client.focused);
 
-        if (isAppFocused) {
-          // App is open and focused, suppress system notification
-          // The user will see the in-app notification instead
-          console.log('App is focused, suppressing push notification');
-          return;
-        }
+          if (isAppFocused) {
+            // App is open and focused, suppress system notification
+            // The user will see the in-app notification instead
+            console.log("App is focused, suppressing push notification");
+            return;
+          }
 
-        return self.registration.showNotification(data.title, options);
-      })
+          return self.registration.showNotification(data.title, options);
+        })
     );
   }
 });
 
-self.addEventListener('notificationclick', function(event) {
+self.addEventListener("notificationclick", function (event) {
   event.notification.close();
-  event.waitUntil(
-    clients.openWindow(event.notification.data.url)
-  );
+  event.waitUntil(clients.openWindow(event.notification.data.url));
 });

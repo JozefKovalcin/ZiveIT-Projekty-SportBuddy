@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 import { SkillSlider } from "@/components/SkillSlider";
 
 interface ProfileData {
@@ -228,174 +229,255 @@ export default function ProfileEditPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-radial from-emerald-900/40 via-[#022c22] to-black pt-36">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Upraviť profil</h1>
-          <p className="text-gray-300">
-            Aktualizujte svoje informácie a športové preferencie
-          </p>
+    <main className="min-h-screen bg-gradient-radial from-emerald-900/40 via-[#022c22] to-black pt-36 relative">
+      {success && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50">
+          <div className="px-6 py-3 rounded-full bg-emerald-500/20 border border-emerald-500/30 backdrop-blur-md shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+            <p className="text-emerald-300 font-semibold text-sm tracking-wide">
+              Profil bol úspešne aktualizovaný!
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Upraviť profil
+            </h1>
+            <p className="text-gray-300">
+              Aktualizujte svoje informácie a športové preferencie
+            </p>
+          </div>
+          <div className="flex gap-4">
+            <button
+              type="button"
+              onClick={() => router.push("/profile")}
+              disabled={saving}
+              className="acrylic text-center transition-all duration-300 border border-white/10 hover:border-red-500/40 font-bold tracking-wide text-gray-200 hover:text-red-400 inline-block"
+              style={{
+                borderRadius: "9999px",
+                padding: "14px 40px",
+                fontSize: "16px",
+                textDecoration: "none",
+              }}
+            >
+              Zrušiť
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              onClick={handleSubmit}
+              className="acrylic text-center transition-all duration-300 border border-white/10 hover:border-emerald-500/40 font-bold tracking-wide text-gray-200 hover:text-emerald-400 inline-block"
+              style={{
+                borderRadius: "9999px",
+                padding: "14px 40px",
+                fontSize: "16px",
+                textDecoration: "none",
+              }}
+            >
+              {saving ? "Ukladám..." : "Uložiť zmeny"}
+            </button>
+          </div>
         </div>
 
-        <Card>
-          <CardContent className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-white mb-3">
-                  Profilová fotka
-                </label>
-                <div className="flex items-center gap-6">
-                  <div className="flex-shrink-0">
-                    {imagePreview ? (
-                      <img
-                        src={imagePreview}
-                        alt="Náhľad"
-                        className="w-24 h-24 rounded-full object-cover shadow-lg shadow-black/30"
-                      />
-                    ) : (
-                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg shadow-black/30">
-                        <span className="text-3xl font-bold text-white">
-                          {formData.name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex-1">
-                    <input
-                      type="file"
-                      id="imageUpload"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                    <div className="flex gap-3">
-                      <label
-                        htmlFor="imageUpload"
-                        className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium cursor-pointer hover:bg-emerald-500 transition-colors shadow-sm"
-                      >
-                        Nahrať obrázok
-                      </label>
-                      {imagePreview && (
-                        <button
-                          type="button"
-                          onClick={handleRemoveImage}
-                          className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors shadow-sm"
-                        >
-                          Odstrániť
-                        </button>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="grid lg:grid-cols-[1fr_1fr] gap-10">
+            <Card>
+              <CardContent className="p-8 space-y-6">
+                <div>
+                  <label className="block text-[15px] font-semibold text-white mb-3 tracking-wide">
+                    Profilová fotka
+                  </label>
+                  <div className="flex items-center gap-6">
+                    <div className="flex-shrink-0">
+                      {imagePreview ? (
+                        <img
+                          src={imagePreview}
+                          alt="Náhľad"
+                          className="w-24 h-24 rounded-full object-cover shadow-lg shadow-black/30"
+                        />
+                      ) : (
+                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg shadow-black/30">
+                          <span className="text-3xl font-bold text-white">
+                            {formData.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
                       )}
                     </div>
-                    <p className="text-xs text-gray-400 mt-2">
-                      JPG, PNG alebo GIF. Maximum 2MB.
-                    </p>
+
+                    <div className="flex-1">
+                      <input
+                        type="file"
+                        id="imageUpload"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      <div className="flex gap-3">
+                        <label
+                          htmlFor="imageUpload"
+                          className="acrylic text-center transition-all duration-300 border border-white/10 hover:border-emerald-500/40 font-bold tracking-wide text-gray-200 hover:text-emerald-400 cursor-pointer"
+                          style={{
+                            borderRadius: "9999px",
+                            padding: "10px 24px",
+                            fontSize: "14px",
+                            textDecoration: "none",
+                            background: "rgba(255, 255, 255, 0.03)",
+                            backdropFilter: "blur(24px) saturate(180%)",
+                            WebkitBackdropFilter: "blur(24px) saturate(180%)",
+                            boxShadow:
+                              "0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                          }}
+                        >
+                          Nahrať obrázok
+                        </label>
+                        {imagePreview && (
+                          <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className="acrylic text-center transition-all duration-300 border border-white/10 hover:border-red-500/40 font-bold tracking-wide text-gray-200 hover:text-red-400"
+                            style={{
+                              borderRadius: "9999px",
+                              padding: "10px 24px",
+                              fontSize: "14px",
+                              textDecoration: "none",
+                              background: "rgba(255, 255, 255, 0.03)",
+                              backdropFilter: "blur(24px) saturate(180%)",
+                              WebkitBackdropFilter: "blur(24px) saturate(180%)",
+                              boxShadow:
+                                "0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                            }}
+                          >
+                            Odstrániť
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-400 mt-2">
+                        JPG, PNG alebo GIF. Maximum 2MB.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-white mb-2"
-                >
-                  Meno <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  id="name"
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  required
-                  placeholder="Vaše meno"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="bio"
-                  className="block text-sm font-medium text-white mb-2"
-                >
-                  O mne
-                </label>
-                <textarea
-                  id="bio"
-                  value={formData.bio}
-                  onChange={(e) =>
-                    setFormData({ ...formData, bio: e.target.value })
-                  }
-                  placeholder="Niečo o vás..."
-                  rows={4}
-                  className="w-full px-4 py-3 rounded-lg border-2 border-white/10 bg-white/[0.03] text-white placeholder-gray-500 focus:border-emerald-500 focus:outline-none transition-colors backdrop-blur-xl"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="city"
-                  className="block text-sm font-medium text-white mb-2"
-                >
-                  Mesto
-                </label>
-                <Input
-                  id="city"
-                  type="text"
-                  value={formData.city}
-                  onChange={(e) =>
-                    setFormData({ ...formData, city: e.target.value })
-                  }
-                  placeholder="Bratislava"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium text-white mb-2"
-                >
-                  Telefón
-                </label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
-                  placeholder="+421 XXX XXX XXX"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white mb-3">
-                  Obľúbené športy
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {SPORT_OPTIONS.map((sport) => (
-                    <button
-                      key={sport.value}
-                      type="button"
-                      onClick={() => handleSportToggle(sport.value)}
-                      className={`px-4 py-3 rounded-lg border-2 transition-all ${
-                        formData.favoriteSports.includes(sport.value)
-                          ? "border-emerald-500 bg-emerald-600 text-white font-medium shadow-sm"
-                          : "border-white/10 bg-white/[0.03] text-white hover:border-emerald-500/50"
-                      }`}
-                    >
-                      {sport.label}
-                    </button>
-                  ))}
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="block text-[15px] font-semibold text-white mb-2 tracking-wide"
+                  >
+                    Meno <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    id="name"
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    required
+                    placeholder="Vaše meno"
+                  />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-white mb-4">
+                <div>
+                  <label
+                    htmlFor="bio"
+                    className="block text-[15px] font-semibold text-white mb-2 tracking-wide"
+                  >
+                    O mne
+                  </label>
+                  <Textarea
+                    id="bio"
+                    value={formData.bio}
+                    onChange={(e) =>
+                      setFormData({ ...formData, bio: e.target.value })
+                    }
+                    placeholder="Niečo o vás..."
+                    rows={4}
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="city"
+                    className="block text-[15px] font-semibold text-white mb-2 tracking-wide"
+                  >
+                    Mesto
+                  </label>
+                  <Input
+                    id="city"
+                    type="text"
+                    value={formData.city}
+                    onChange={(e) =>
+                      setFormData({ ...formData, city: e.target.value })
+                    }
+                    placeholder="Bratislava"
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="phone"
+                    className="block text-[15px] font-semibold text-white mb-2 tracking-wide"
+                  >
+                    Telefón
+                  </label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    placeholder="+421 XXX XXX XXX"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[15px] font-semibold text-white mb-3 tracking-wide">
+                    Obľúbené športy
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {SPORT_OPTIONS.map((sport) => {
+                      const isSelected = formData.favoriteSports.includes(
+                        sport.value
+                      );
+                      return (
+                        <button
+                          key={sport.value}
+                          type="button"
+                          onClick={() => handleSportToggle(sport.value)}
+                          className={`px-8 py-4 rounded-full text-base font-semibold transition-all duration-200 ${
+                            isSelected
+                              ? "bg-emerald-500/20 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                              : "bg-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-200"
+                          }`}
+                          style={{
+                            border: isSelected
+                              ? "1px solid rgba(16, 185, 129, 0.45)"
+                              : "1px solid rgba(255, 255, 255, 0.12)",
+                            boxShadow: "none",
+                            color: isSelected ? "#a7f3d0" : "white",
+                          }}
+                        >
+                          {sport.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-8 space-y-5">
+                <label className="block text-[15px] font-semibold text-white tracking-wide">
                   Úroveň zručností v jednotlivých športoch
                 </label>
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm text-gray-300 mb-2">
+                    <label className="block text-[15px] text-gray-300 mb-2 font-medium">
                       Futbal
                     </label>
                     <SkillSlider
@@ -407,7 +489,7 @@ export default function ProfileEditPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-300 mb-2">
+                    <label className="block text-[15px] text-gray-300 mb-2 font-medium">
                       Basketbal
                     </label>
                     <SkillSlider
@@ -419,7 +501,7 @@ export default function ProfileEditPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-300 mb-2">
+                    <label className="block text-[15px] text-gray-300 mb-2 font-medium">
                       Tenis
                     </label>
                     <SkillSlider
@@ -431,7 +513,7 @@ export default function ProfileEditPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-300 mb-2">
+                    <label className="block text-[15px] text-gray-300 mb-2 font-medium">
                       Volejbal
                     </label>
                     <SkillSlider
@@ -443,7 +525,7 @@ export default function ProfileEditPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-300 mb-2">
+                    <label className="block text-[15px] text-gray-300 mb-2 font-medium">
                       Bedminton
                     </label>
                     <SkillSlider
@@ -455,7 +537,7 @@ export default function ProfileEditPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-300 mb-2">
+                    <label className="block text-[15px] text-gray-300 mb-2 font-medium">
                       Stolný tenis
                     </label>
                     <SkillSlider
@@ -467,7 +549,7 @@ export default function ProfileEditPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-300 mb-2">
+                    <label className="block text-[15px] text-gray-300 mb-2 font-medium">
                       Beh
                     </label>
                     <SkillSlider
@@ -479,7 +561,7 @@ export default function ProfileEditPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-300 mb-2">
+                    <label className="block text-[15px] text-gray-300 mb-2 font-medium">
                       Cyklistika
                     </label>
                     <SkillSlider
@@ -491,7 +573,7 @@ export default function ProfileEditPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-300 mb-2">
+                    <label className="block text-[15px] text-gray-300 mb-2 font-medium">
                       Plávanie
                     </label>
                     <SkillSlider
@@ -503,7 +585,7 @@ export default function ProfileEditPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm text-gray-300 mb-2">
+                    <label className="block text-[15px] text-gray-300 mb-2 font-medium">
                       Fitnes
                     </label>
                     <SkillSlider
@@ -514,38 +596,16 @@ export default function ProfileEditPage() {
                     />
                   </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
+          </div>
 
-              {error && (
-                <div className="p-4 rounded-lg bg-red-500/10 border-2 border-red-500/30">
-                  <p className="text-red-400">{error}</p>
-                </div>
-              )}
-
-              {success && (
-                <div className="p-4 rounded-lg bg-emerald-500/10 border-2 border-emerald-500/30">
-                  <p className="text-emerald-400">
-                    Profil bol úspešne aktualizovaný! Presmerovávam...
-                  </p>
-                </div>
-              )}
-
-              <div className="flex gap-4 pt-4">
-                <Button type="submit" disabled={saving} className="flex-1">
-                  {saving ? "Ukladám..." : "Uložiť zmeny"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => router.push("/profile")}
-                  disabled={saving}
-                >
-                  Zrušiť
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+          {error && (
+            <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/25">
+              <p className="text-red-300">{error}</p>
+            </div>
+          )}
+        </form>
       </div>
     </main>
   );

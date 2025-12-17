@@ -2,32 +2,38 @@
   "name": "@sportbuddy/frontend",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.26.0",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@next/swc",
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
+  },
   "dependencies": {
     "@react-google-maps/api": "latest",
-    "@tailwindcss/postcss": "latest",
-    "@tailwindcss/typography": "latest",
     "better-auth": "latest",
     "class-variance-authority": "latest",
     "date-fns": "latest",
     "lucide-react": "latest",
     "next": "latest",
-    "next-pwa": "latest",
     "react": "latest",
     "react-dom": "latest",
     "zod": "latest"
   },
   "devDependencies": {
-    "@next/third-parties": "latest",
+    "@tailwindcss/postcss": "latest",
+    "@tailwindcss/typography": "latest",
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "autoprefixer": "latest",
     "eslint": "latest",
     "eslint-config-next": "latest",
     "postcss": "latest",

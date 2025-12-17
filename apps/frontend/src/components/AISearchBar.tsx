@@ -111,18 +111,16 @@ export default function AISearchBar({ onFiltersApplied }: AISearchBarProps) {
     <div className="space-y-3">
       {/* AI Search Input */}
       <div className="relative">
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <input
-              type="text"
-              placeholder='Skús napríklad: "futbal v Košiciach zajtra"'
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyPress={handleKeyPress}
-              disabled={loading}
-              className="w-full h-[50px] px-4 pl-12 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border-2 border-emerald-500/30 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-            />
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2">
+        <div className="flex flex-col md:flex-row gap-2">
+          <div
+            className="relative flex flex-1 min-w-0 items-center rounded-full backdrop-blur-xl"
+            style={{
+              background: "rgba(255, 255, 255, 0.03)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              boxShadow: "0 8px 20px -5px rgba(0, 0, 0, 0.4)",
+            }}
+          >
+            <div className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2">
               <svg
                 className="w-5 h-5 text-purple-500"
                 fill="none"
@@ -137,13 +135,22 @@ export default function AISearchBar({ onFiltersApplied }: AISearchBarProps) {
                 />
               </svg>
             </div>
+            <input
+              type="text"
+              placeholder='Skús napríklad: "futbal v Košiciach zajtra"'
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyPress={handleKeyPress}
+              disabled={loading}
+              className="sb-no-global w-full h-[52px] pl-16 pr-4 bg-transparent text-white text-[15px] placeholder-gray-400 focus:outline-none transition-all"
+            />
           </div>
 
           <Button
             onClick={handleAISearch}
             disabled={loading || !query.trim()}
             variant="primary"
-            className="h-[50px] px-6 flex items-center justify-center bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 whitespace-nowrap"
+            className="group h-[52px] pl-6 pr-10 flex items-center justify-center whitespace-nowrap font-bold text-lg tracking-wide w-full md:w-auto"
           >
             {loading ? (
               <>
@@ -153,7 +160,7 @@ export default function AISearchBar({ onFiltersApplied }: AISearchBarProps) {
             ) : (
               <>
                 <svg
-                  className="w-5 h-5 mr-2"
+                  className="w-5 h-5 mr-2 text-purple-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -186,7 +193,7 @@ export default function AISearchBar({ onFiltersApplied }: AISearchBarProps) {
 
       {/* AI Response Preview */}
       {aiResponse && (
-        <div className="p-4 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/30 rounded-lg">
+        <div className="p-4 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/30 rounded-3xl">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
               <svg
@@ -209,7 +216,15 @@ export default function AISearchBar({ onFiltersApplied }: AISearchBarProps) {
               </p>
               <div className="flex flex-wrap gap-2">
                 {aiResponse.filters.sportType && (
-                  <span className="px-3 py-1 bg-purple-500/20 text-purple-400 text-xs font-medium rounded-full">
+                  <span
+                    className="px-4 py-1.5 text-xs font-semibold rounded-full backdrop-blur-xl"
+                    style={{
+                      background: "rgba(168, 85, 247, 0.15)",
+                      border: "1px solid rgba(168, 85, 247, 0.4)",
+                      color: "#c084fc",
+                      boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
+                    }}
+                  >
                     🏃{" "}
                     {Array.isArray(aiResponse.filters.sportType)
                       ? aiResponse.filters.sportType
@@ -220,26 +235,58 @@ export default function AISearchBar({ onFiltersApplied }: AISearchBarProps) {
                   </span>
                 )}
                 {aiResponse.filters.skillLevel && (
-                  <span className="px-3 py-1 bg-blue-500/20 text-blue-400 text-xs font-medium rounded-full">
+                  <span
+                    className="px-4 py-1.5 text-xs font-semibold rounded-full backdrop-blur-xl"
+                    style={{
+                      background: "rgba(59, 130, 246, 0.15)",
+                      border: "1px solid rgba(59, 130, 246, 0.4)",
+                      color: "#60a5fa",
+                      boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
+                    }}
+                  >
                     📊{" "}
                     {skillLevelLabels[aiResponse.filters.skillLevel] ||
                       aiResponse.filters.skillLevel}
                   </span>
                 )}
                 {aiResponse.filters.gender && (
-                  <span className="px-3 py-1 bg-pink-500/20 text-pink-400 text-xs font-medium rounded-full">
+                  <span
+                    className="px-4 py-1.5 text-xs font-semibold rounded-full backdrop-blur-xl"
+                    style={{
+                      background: "rgba(236, 72, 153, 0.15)",
+                      border: "1px solid rgba(236, 72, 153, 0.4)",
+                      color: "#f472b6",
+                      boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
+                    }}
+                  >
                     👥{" "}
                     {genderLabels[aiResponse.filters.gender] ||
                       aiResponse.filters.gender}
                   </span>
                 )}
                 {aiResponse.filters.location && (
-                  <span className="px-3 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded-full">
+                  <span
+                    className="px-4 py-1.5 text-xs font-semibold rounded-full backdrop-blur-xl"
+                    style={{
+                      background: "rgba(16, 185, 129, 0.15)",
+                      border: "1px solid rgba(16, 185, 129, 0.4)",
+                      color: "#34d399",
+                      boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
+                    }}
+                  >
                     📍 {aiResponse.filters.location}
                   </span>
                 )}
                 {aiResponse.filters.dateFrom && (
-                  <span className="px-3 py-1 bg-yellow-500/20 text-yellow-400 text-xs font-medium rounded-full">
+                  <span
+                    className="px-4 py-1.5 text-xs font-semibold rounded-full backdrop-blur-xl"
+                    style={{
+                      background: "rgba(234, 179, 8, 0.15)",
+                      border: "1px solid rgba(234, 179, 8, 0.4)",
+                      color: "#fbbf24",
+                      boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
+                    }}
+                  >
                     📅{" "}
                     {new Date(aiResponse.filters.dateFrom).toLocaleDateString(
                       "sk-SK"
@@ -248,7 +295,15 @@ export default function AISearchBar({ onFiltersApplied }: AISearchBarProps) {
                 )}
                 {aiResponse.filters.priceFrom === 0 &&
                   aiResponse.filters.priceTo === 0 && (
-                    <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-medium rounded-full">
+                    <span
+                      className="px-4 py-1.5 text-xs font-semibold rounded-full backdrop-blur-xl"
+                      style={{
+                        background: "rgba(16, 185, 129, 0.15)",
+                        border: "1px solid rgba(16, 185, 129, 0.4)",
+                        color: "#34d399",
+                        boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
+                      }}
+                    >
                       💰 Zadarmo
                     </span>
                   )}
@@ -271,7 +326,13 @@ export default function AISearchBar({ onFiltersApplied }: AISearchBarProps) {
             key={example}
             onClick={() => setQuery(example)}
             disabled={loading}
-            className="px-2 py-1 text-xs bg-white/5 hover:bg-white/10 text-gray-400 rounded border border-white/10 transition-colors"
+            className="px-4 py-1.5 text-xs font-medium rounded-full transition-colors backdrop-blur-xl"
+            style={{
+              background: "rgba(255, 255, 255, 0.03)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              color: "#9ca3af",
+              boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
+            }}
           >
             {example}
           </button>

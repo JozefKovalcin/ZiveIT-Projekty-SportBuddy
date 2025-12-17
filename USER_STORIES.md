@@ -338,22 +338,21 @@ aby som mal dobrý zážitok
 **Status:** ✅ HOTOVÉ
 
 Ako používateľ
-chcem sa prihlásiť pomocou Google, Facebook alebo iných platforiem
+chcem sa prihlásiť pomocou Google alebo iných platforiem
 aby som nemusel vytvárať nové heslo a prihlásenie bolo rýchlejšie
 
 **Vývojár:** Jozef Kovalčín
 
 ### Tasky:
-- ✅ BetterAuth konfigurácia OAuth providers (Google, Facebook, Apple)
+- ✅ BetterAuth konfigurácia OAuth providers (Google, Apple)
 - ✅ Google OAuth setup (Client ID, Secret)
-- ✅ Facebook OAuth setup (App ID, Secret)
 - ✅ Apple OAuth setup (Client ID, Secret)
 - ✅ Prisma schema: rozšírenie Account modelu (accessTokenExpiresAt, refreshTokenExpiresAt, scope)
 - ✅ Account linking konfigurácia (trustedProviders)
 - ✅ API: OAuth callback handling (redirect na frontend URL)
 - ✅ Error page redirect (na frontend signin page)
-- ✅ Tlačidlá "Prihlásiť cez Google/Facebook" na login/register stránke
-- ✅ OAuth callback URLs (/api/auth/callback/google, /facebook)
+- ✅ Tlačidlá "Prihlásiť cez Google" na login/register stránke
+- ✅ OAuth callback URLs (/api/auth/callback/google)
 - ✅ Mapovanie OAuth dát na User profil (email, meno, avatar)
 - ✅ Session management pre OAuth users
 - ✅ Responzívne OAuth tlačidlá
@@ -361,10 +360,9 @@ aby som nemusel vytvárať nové heslo a prihlásenie bolo rýchlejšie
 
 ### Výsledné funkcie:
 - ✅ Google login funguje
-- ✅ Facebook login funguje (vyžaduje konfiguráciu Facebook Developer App)
 - ✅ Apple login funguje (vyžaduje konfiguráciu Apple Developer Account)
 - ✅ Automatické vytvorenie profilu
-- ✅ Account linking medzi providers (trusted: Google, Facebook, Apple)
+- ✅ Account linking medzi providers (trusted: Google, Apple)
 
 
 ---

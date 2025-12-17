@@ -12,6 +12,10 @@ package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
+# pnpm store (local cache)
+.pnpm-store/
+**/.pnpm-store/
+
 # Testing
 coverage/
 .nyc_output/
@@ -51,7 +55,6 @@ build/
 next-env.d.ts
 
 # Prisma
-prisma/migrations/
 node_modules/.prisma/
 .prisma/
 

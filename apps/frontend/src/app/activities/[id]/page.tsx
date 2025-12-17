@@ -97,10 +97,22 @@ const genderLabels: Record<string, string> = {
 };
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  OPEN: { label: "Otvorená", color: "bg-green-600 shadow-sm" },
-  FULL: { label: "Plná", color: "bg-orange-600 shadow-sm" },
-  CANCELLED: { label: "Zrušená", color: "bg-red-600 shadow-sm" },
-  COMPLETED: { label: "Ukončená", color: "bg-gray-600 shadow-sm" },
+  OPEN: {
+    label: "Otvorená",
+    color: "bg-emerald-500/20 border border-emerald-500/50 text-emerald-400",
+  },
+  FULL: {
+    label: "Plná",
+    color: "bg-orange-500/20 border border-orange-500/50 text-orange-400",
+  },
+  CANCELLED: {
+    label: "Zrušená",
+    color: "bg-red-500/20 border border-red-500/50 text-red-400",
+  },
+  COMPLETED: {
+    label: "Ukončená",
+    color: "bg-gray-500/20 border border-gray-500/50 text-gray-400",
+  },
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -201,11 +213,11 @@ const AddToCalendarDropdown = ({ activity }: { activity: Activity }) => {
   };
 
   return (
-    <div className="relative inline-block text-left">
+    <div className="relative w-full text-left">
       <Button
         variant="secondary"
         onClick={() => setOpen((s) => !s)}
-        className="flex items-center gap-2"
+        className="w-full justify-center flex items-center gap-2"
       >
         <svg
           width="18"
@@ -758,51 +770,57 @@ export default function ActivityDetailPage() {
   };
 
   const handleRemoveParticipant = async (userId: string, userName: string) => {
-    showConfirm(`Naozaj chcete odstrániť používateľa ${userName} z aktivity?`, async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/activities/${activity?.id}/participants/${userId}`,
-          {
-            method: "DELETE",
-            credentials: "include",
+    showConfirm(
+      `Naozaj chcete odstrániť používateľa ${userName} z aktivity?`,
+      async () => {
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/activities/${activity?.id}/participants/${userId}`,
+            {
+              method: "DELETE",
+              credentials: "include",
+            }
+          );
+
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || "Chyba pri odstraňovaní účastníka");
           }
-        );
 
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || "Chyba pri odstraňovaní účastníka");
+          showStatus(`Používateľ ${userName} bol odstránený`, "success");
+          await fetchActivity();
+        } catch (err: any) {
+          showStatus(err.message, "error");
         }
-
-        showStatus(`Používateľ ${userName} bol odstránený`, "success");
-        await fetchActivity();
-      } catch (err: any) {
-        showStatus(err.message, "error");
       }
-    });
+    );
   };
 
   const handleBlockParticipant = async (userId: string, userName: string) => {
-    showConfirm(`Naozaj chcete zablokovať používateľa ${userName}? Nebude sa môcť znova prihlásiť.`, async () => {
-      try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/activities/${activity?.id}/participants/${userId}`,
-          {
-            method: "PATCH",
-            credentials: "include",
+    showConfirm(
+      `Naozaj chcete zablokovať používateľa ${userName}? Nebude sa môcť znova prihlásiť.`,
+      async () => {
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/activities/${activity?.id}/participants/${userId}`,
+            {
+              method: "PATCH",
+              credentials: "include",
+            }
+          );
+
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || "Chyba pri blokovaní účastníka");
           }
-        );
 
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || "Chyba pri blokovaní účastníka");
+          showStatus(`Používateľ ${userName} bol zablokovaný`, "success");
+          await fetchActivity();
+        } catch (err: any) {
+          showStatus(err.message, "error");
         }
-
-        showStatus(`Používateľ ${userName} bol zablokovaný`, "success");
-        await fetchActivity();
-      } catch (err: any) {
-        showStatus(err.message, "error");
       }
-    });
+    );
   };
 
   if (loading) {
@@ -977,7 +995,12 @@ export default function ActivityDetailPage() {
             <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => setConfirmDialog(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors"
+                className="px-5 py-2.5 text-sm font-semibold rounded-full backdrop-blur-xl transition-colors"
+                style={{
+                  background: "rgba(255, 255, 255, 0.03)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  color: "#e5e7eb",
+                }}
               >
                 Zrušiť
               </button>
@@ -986,7 +1009,12 @@ export default function ActivityDetailPage() {
                   confirmDialog.onConfirm();
                   setConfirmDialog(null);
                 }}
-                className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
+                className="px-5 py-2.5 text-sm font-semibold rounded-full backdrop-blur-xl transition-colors"
+                style={{
+                  background: "rgba(16, 185, 129, 0.2)",
+                  border: "1px solid rgba(16, 185, 129, 0.5)",
+                  color: "#34d399",
+                }}
               >
                 Potvrdiť
               </button>
@@ -1006,8 +1034,8 @@ export default function ActivityDetailPage() {
         {/* Header */}
         <Card className="mb-6 relative z-30">
           <CardContent>
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex-1">
+            <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start mb-4">
+              <div className="flex-1 min-w-0">
                 <h1 className="text-4xl font-bold text-white mb-2">
                   {activity.title}
                 </h1>
@@ -1017,7 +1045,15 @@ export default function ActivityDetailPage() {
                   </p>
                   {activity.isRecurring &&
                     activity.recurrenceFrequency !== "NONE" && (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 text-sm font-medium bg-purple-500 text-white rounded-full shadow-sm">
+                      <span
+                        className="inline-flex items-center gap-1 px-4 py-1.5 text-sm font-semibold rounded-full backdrop-blur-xl"
+                        style={{
+                          background: "rgba(168, 85, 247, 0.2)",
+                          border: "1px solid rgba(168, 85, 247, 0.5)",
+                          color: "#c084fc",
+                          boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
+                        }}
+                      >
                         <svg
                           width="14"
                           height="14"
@@ -1036,20 +1072,28 @@ export default function ActivityDetailPage() {
                     )}
                 </div>
               </div>
-              <span
-                className={`px-4 py-2 text-sm font-medium text-white rounded-full ${statusInfo.color}`}
-              >
-                {statusInfo.label}
-              </span>
+              <div className="flex items-center gap-3 shrink-0">
+                {isOrganizer && (
+                  <span className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-full backdrop-blur-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+                    👤 Organizátor
+                  </span>
+                )}
+                <span
+                  className={`px-4 py-2 text-sm font-semibold rounded-full backdrop-blur-xl ${statusInfo.color}`}
+                >
+                  {statusInfo.label}
+                </span>
+              </div>
             </div>
 
             {/* Action buttons */}
-            <div className="flex flex-wrap gap-3 mt-6">
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {canJoin && (
                 <Button
                   variant="primary"
                   onClick={handleJoin}
                   disabled={joining}
+                  className="w-full justify-center"
                 >
                   {joining ? "Prihlasovanie..." : "✓ Prihlásiť sa"}
                 </Button>
@@ -1059,30 +1103,26 @@ export default function ActivityDetailPage() {
                   variant="secondary"
                   onClick={handleLeave}
                   disabled={leaving}
-                  className="bg-red-950/30 hover:bg-red-950/50 text-red-400"
+                  className="w-full justify-center hover:border-red-500/40 text-red-400 hover:text-red-300"
                 >
                   {leaving ? "Odhlasovanie..." : "✗ Odhlásiť sa"}
                 </Button>
               )}
               {isOrganizer && (
-                <>
-                  <span className="px-4 py-2 text-sm font-medium bg-emerald-500/10 text-emerald-400 rounded-lg">
-                    👤 Organizátor
-                  </span>
-                  <Button
-                    variant="secondary"
-                    onClick={handleDelete}
-                    disabled={deleting}
-                    className="bg-red-950/30 hover:bg-red-950/50 text-red-400 border-red-700"
-                  >
-                    {deleting ? "Mažem..." : "🗑️ Zmazať aktivitu"}
-                  </Button>
-                </>
+                <Button
+                  variant="secondary"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="w-full justify-center hover:border-red-500/40 text-red-400 hover:text-red-300"
+                >
+                  {deleting ? "Mažem..." : "🗑️ Zmazať aktivitu"}
+                </Button>
               )}
 
-              {/* AddToCalendarDropdown and Share button under action buttons */}
-              <div className="flex items-center gap-3">
+              <div className="w-full">
                 <AddToCalendarDropdown activity={activity} />
+              </div>
+              <div className="w-full">
                 <ShareActivityButton activity={activity} />
               </div>
             </div>
@@ -1195,7 +1235,12 @@ export default function ActivityDetailPage() {
                         }
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 mt-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-semibold shadow-sm"
+                        className="inline-flex items-center gap-2 mt-2 px-5 py-2.5 rounded-full text-sm font-semibold backdrop-blur-xl transition-colors"
+                        style={{
+                          background: "rgba(16, 185, 129, 0.2)",
+                          border: "1px solid rgba(16, 185, 129, 0.5)",
+                          color: "#34d399",
+                        }}
                       >
                         <svg
                           width="16"
@@ -2233,7 +2278,12 @@ export default function ActivityDetailPage() {
                         <button
                           onClick={() => handleSubmitRating(userRating)}
                           disabled={submittingRating}
-                          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                          className="px-5 py-2.5 rounded-full font-semibold backdrop-blur-xl transition-colors disabled:opacity-50"
+                          style={{
+                            background: "rgba(16, 185, 129, 0.2)",
+                            border: "1px solid rgba(16, 185, 129, 0.5)",
+                            color: "#34d399",
+                          }}
                         >
                           {submittingRating
                             ? "Odosielam..."
@@ -2248,7 +2298,12 @@ export default function ActivityDetailPage() {
                               setUserRating(existingRating || 0);
                               setRatingComment(existingComment);
                             }}
-                            className="px-4 py-2 bg-white/10 hover:bg-white/20 text-gray-300 rounded-lg font-medium transition-colors"
+                            className="px-5 py-2.5 rounded-full font-semibold backdrop-blur-xl transition-colors"
+                            style={{
+                              background: "rgba(255, 255, 255, 0.03)",
+                              border: "1px solid rgba(255, 255, 255, 0.1)",
+                              color: "#9ca3af",
+                            }}
                           >
                             Zrušiť
                           </button>

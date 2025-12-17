@@ -2,6 +2,7 @@
   "name": "@sportbuddy/backend",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.26.0",
   "engines": {
     "node": ">=20.16.0"
   },
@@ -11,12 +12,22 @@
     "start": "next start -p 3001",
     "lint": "next lint",
     "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma",
+      "@next/swc",
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
   },
   "dependencies": {
     "@getbrevo/brevo": "latest",
@@ -24,21 +35,22 @@
     "@prisma/client": "latest",
     "better-auth": "latest",
     "next": "latest",
+    "openai": "latest",
     "pg": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "zod": "latest",
-    "web-push": "^3.6.7"
+    "web-push": "latest",
+    "zod": "latest"
   },
   "devDependencies": {
     "@types/node": "latest",
     "@types/pg": "latest",
     "@types/react": "latest",
+    "@types/web-push": "latest",
     "eslint": "latest",
     "eslint-config-next": "latest",
     "prisma": "latest",
     "tsx": "latest",
-    "typescript": "latest",
-    "@types/web-push": "^3.6.3"
+    "typescript": "latest"
   }
 }

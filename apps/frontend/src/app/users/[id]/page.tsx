@@ -78,10 +78,22 @@ const skillLevelLabels: Record<string, string> = {
 };
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  OPEN: { label: "Otvorená", color: "bg-green-600" },
-  FULL: { label: "Plná", color: "bg-orange-600" },
-  CANCELLED: { label: "Zrušená", color: "bg-red-600" },
-  COMPLETED: { label: "Ukončená", color: "bg-gray-600" },
+  OPEN: {
+    label: "Otvorená",
+    color: "bg-emerald-500/20 border border-emerald-500/50 text-emerald-400",
+  },
+  FULL: {
+    label: "Plná",
+    color: "bg-orange-500/20 border border-orange-500/50 text-orange-400",
+  },
+  CANCELLED: {
+    label: "Zrušená",
+    color: "bg-red-500/20 border border-red-500/50 text-red-400",
+  },
+  COMPLETED: {
+    label: "Ukončená",
+    color: "bg-gray-500/20 border border-gray-500/50 text-gray-400",
+  },
 };
 
 interface OwnProfileStats {
@@ -264,7 +276,7 @@ export default function UserProfilePage() {
           </Link>
           {isOwnProfile && (
             <Link href="/profile/edit">
-              <Button>Upraviť profil</Button>
+              <Button variant="primary">Upraviť profil</Button>
             </Link>
           )}
         </div>
@@ -323,7 +335,13 @@ export default function UserProfilePage() {
                         {user.profile.favoriteSports.map((sport) => (
                           <span
                             key={sport}
-                            className="px-3 py-1 text-sm bg-white/[0.03] text-white rounded-full border border-white/10"
+                            className="px-4 py-2 text-sm font-semibold rounded-full backdrop-blur-xl"
+                            style={{
+                              background: "rgba(255, 255, 255, 0.03)",
+                              border: "1px solid rgba(255, 255, 255, 0.1)",
+                              color: "#e5e7eb",
+                              boxShadow: "0 8px 20px -5px rgba(0, 0, 0, 0.4)",
+                            }}
                           >
                             {sportTypeLabels[sport] || sport}
                           </span>
@@ -443,7 +461,13 @@ export default function UserProfilePage() {
                 {user.stats.mostPlayedSports.map((sport) => (
                   <span
                     key={sport}
-                    className="px-4 py-2 text-lg bg-emerald-600/10 text-emerald-500 rounded-lg font-medium border border-emerald-500/20"
+                    className="px-5 py-2.5 text-[15px] font-semibold text-emerald-400 rounded-full backdrop-blur-xl"
+                    style={{
+                      background: "rgba(16, 185, 129, 0.15)",
+                      border: "1px solid rgba(16, 185, 129, 0.4)",
+                      boxShadow:
+                        "0 8px 20px -5px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(16, 185, 129, 0.1)",
+                    }}
                   >
                     {sportTypeLabels[sport] || sport}
                   </span>
@@ -458,24 +482,40 @@ export default function UserProfilePage() {
           <CardHeader>
             <CardTitle>Aktivity</CardTitle>
             {/* Tabs */}
-            <div className="flex gap-2 mt-4">
+            <div className="flex gap-3 mt-4">
               <button
                 onClick={() => setActiveTab("upcoming")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  activeTab === "upcoming"
-                    ? "bg-emerald-600 text-white"
-                    : "bg-white/[0.03] text-gray-300 hover:text-white border border-white/10"
-                }`}
+                className="px-5 py-2.5 rounded-full font-semibold transition-all duration-200 backdrop-blur-xl"
+                style={{
+                  background:
+                    activeTab === "upcoming"
+                      ? "rgba(16, 185, 129, 0.2)"
+                      : "rgba(255, 255, 255, 0.03)",
+                  border:
+                    activeTab === "upcoming"
+                      ? "1px solid rgba(16, 185, 129, 0.5)"
+                      : "1px solid rgba(255, 255, 255, 0.1)",
+                  color: activeTab === "upcoming" ? "#34d399" : "#e5e7eb",
+                  boxShadow: "0 8px 20px -5px rgba(0, 0, 0, 0.4)",
+                }}
               >
                 Nadchádzajúce ({upcomingActivities.length})
               </button>
               <button
                 onClick={() => setActiveTab("completed")}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  activeTab === "completed"
-                    ? "bg-emerald-600 text-white"
-                    : "bg-white/[0.03] text-gray-300 hover:text-white border border-white/10"
-                }`}
+                className="px-5 py-2.5 rounded-full font-semibold transition-all duration-200 backdrop-blur-xl"
+                style={{
+                  background:
+                    activeTab === "completed"
+                      ? "rgba(16, 185, 129, 0.2)"
+                      : "rgba(255, 255, 255, 0.03)",
+                  border:
+                    activeTab === "completed"
+                      ? "1px solid rgba(16, 185, 129, 0.5)"
+                      : "1px solid rgba(255, 255, 255, 0.1)",
+                  color: activeTab === "completed" ? "#34d399" : "#e5e7eb",
+                  boxShadow: "0 8px 20px -5px rgba(0, 0, 0, 0.4)",
+                }}
               >
                 Dokončené ({completedActivities.length})
               </button>
@@ -515,13 +555,31 @@ export default function UserProfilePage() {
                         href={`/activities/${activity.id}`}
                         className="block"
                       >
-                        <div className="p-4 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] transition-colors border border-white/10">
+                        <div
+                          className="p-4 rounded-2xl transition-all duration-200 border"
+                          style={{
+                            background: "rgba(255, 255, 255, 0.03)",
+                            borderColor: "rgba(255, 255, 255, 0.1)",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background =
+                              "rgba(255, 255, 255, 0.06)";
+                            e.currentTarget.style.borderColor =
+                              "rgba(255, 255, 255, 0.15)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background =
+                              "rgba(255, 255, 255, 0.03)";
+                            e.currentTarget.style.borderColor =
+                              "rgba(255, 255, 255, 0.1)";
+                          }}
+                        >
                           <div className="flex justify-between items-start mb-2">
                             <h3 className="text-lg font-semibold text-white">
                               {activity.title}
                             </h3>
                             <span
-                              className={`px-2 py-1 text-xs font-medium text-white rounded ${statusInfo.color}`}
+                              className={`px-3 py-1.5 text-xs font-semibold rounded-full backdrop-blur-xl ${statusInfo.color}`}
                             >
                               {statusInfo.label}
                             </span>

@@ -31,13 +31,13 @@ cp .env.example .env
 
 # 3. Spusti Docker Compose (automaticky stiahne závislosti a spustí všetky služby)
 docker-compose up -d
-
+   - custom PostgreSQL image (databáza)
 # 4. Otvor aplikáciu v prehliadači
 # Frontend: http://localhost:3000
 # Backend API: http://localhost:3001/api
 ```
 
-Prvé spustenie trvá ~1-2 minúty (sťahovanie obrazov + npm install).
+   - Aplikuje databázové migrácie (`prisma migrate deploy`)
 
 ---
 
@@ -57,7 +57,6 @@ Prvé spustenie trvá ~1-2 minúty (sťahovanie obrazov + npm install).
    - Vytvorí databázové tabuľky (`prisma db push`)
    - Spustí vývojársky server na porte **3001**
 
-3. **Frontend automaticky:**
    - Nainštaluje npm závislosti
    - Spustí vývojársky server na porte **3000**
 
@@ -103,7 +102,7 @@ docker-compose exec frontend sh
 
 # Prisma Studio (grafické rozhranie pre databázu)
 docker-compose exec backend npx prisma studio
-# Otvor: http://localhost:5555
+│       │   │   └── GoogleMapsProvider.tsx # Google Maps provider
 ```
 
 ---

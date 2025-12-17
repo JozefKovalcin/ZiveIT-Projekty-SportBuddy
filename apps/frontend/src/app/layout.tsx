@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { GoogleMapsProvider } from "@/contexts/GoogleMapsContext";
+import { GoogleMapsProvider } from "@/contexts/GoogleMapsProvider";
 import { ToastProvider } from "@/components/ui/Toast";
 import TemplateWrapper from "@/components/TemplateWrapper";
 import "./globals.css";
@@ -9,6 +9,10 @@ export const metadata: Metadata = {
   description:
     "Aplikácia pre športových nadšencov na hľadanie spoluhráčov a organizáciu športových aktivít",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/icon-144x144.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -28,14 +32,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const googleMapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+
   return (
     <html lang="sk" className="dark">
-      <head>
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/icon-144x144.png" />
-      </head>
       <body className="antialiased">
-        <GoogleMapsProvider>
+        <GoogleMapsProvider apiKey={googleMapsApiKey}>
           <ToastProvider>
             <TemplateWrapper>{children}</TemplateWrapper>
           </ToastProvider>

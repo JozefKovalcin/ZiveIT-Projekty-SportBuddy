@@ -88,10 +88,22 @@ const sportTypeLabels: Record<string, string> = {
 };
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  OPEN: { label: "Otvorená", color: "bg-green-500" },
-  FULL: { label: "Plná", color: "bg-orange-500" },
-  CANCELLED: { label: "Zrušená", color: "bg-red-500" },
-  COMPLETED: { label: "Ukončená", color: "bg-gray-500" },
+  OPEN: {
+    label: "Otvorená",
+    color: "bg-emerald-500/20 border border-emerald-500/50 text-emerald-400",
+  },
+  FULL: {
+    label: "Plná",
+    color: "bg-orange-500/20 border border-orange-500/50 text-orange-400",
+  },
+  CANCELLED: {
+    label: "Zrušená",
+    color: "bg-red-500/20 border border-red-500/50 text-red-400",
+  },
+  COMPLETED: {
+    label: "Ukončená",
+    color: "bg-gray-500/20 border border-gray-500/50 text-gray-400",
+  },
 };
 
 export default function MyActivitiesPage() {
@@ -283,7 +295,14 @@ export default function MyActivitiesPage() {
             {((activity.isRecurring &&
               activity.recurrenceFrequency !== "NONE") ||
               activity.parentActivityId) && (
-              <span className="px-2 py-1 text-xs font-medium bg-purple-500/20 text-purple-400 rounded flex items-center gap-1">
+              <span
+                className="px-3 py-1.5 text-xs font-semibold rounded-full backdrop-blur-xl flex items-center gap-1"
+                style={{
+                  background: "rgba(168, 85, 247, 0.2)",
+                  border: "1px solid rgba(168, 85, 247, 0.5)",
+                  color: "#c084fc",
+                }}
+              >
                 <svg
                   width="12"
                   height="12"
@@ -300,7 +319,7 @@ export default function MyActivitiesPage() {
               </span>
             )}
             <span
-              className={`px-2 py-1 text-xs font-medium text-white rounded ${statusInfo.color}`}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-full backdrop-blur-xl ${statusInfo.color}`}
             >
               {statusInfo.label}
             </span>
@@ -462,13 +481,24 @@ export default function MyActivitiesPage() {
       {statusMessage && (
         <div className="fixed bottom-4 right-4 z-50">
           <div
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg border text-white shadow-lg ${
-              statusMessage.type === "success"
-                ? "bg-emerald-600 border-emerald-500"
-                : statusMessage.type === "error"
-                ? "bg-red-600 border-red-500"
-                : "bg-yellow-600 border-yellow-500"
-            }`}
+            className="flex items-center gap-3 px-4 py-3 rounded-2xl text-white shadow-lg"
+            style={{
+              background:
+                statusMessage.type === "success"
+                  ? "linear-gradient(135deg, #10b981, #059669)"
+                  : statusMessage.type === "error"
+                  ? "linear-gradient(135deg, #ef4444, #dc2626)"
+                  : "linear-gradient(135deg, #f59e0b, #d97706)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              boxShadow:
+                statusMessage.type === "success"
+                  ? "0 8px 32px rgba(16, 185, 129, 0.4)"
+                  : statusMessage.type === "error"
+                  ? "0 8px 32px rgba(239, 68, 68, 0.4)"
+                  : "0 8px 32px rgba(245, 158, 11, 0.4)",
+            }}
           >
             {statusMessage.type === "success" && (
               <svg
@@ -500,7 +530,9 @@ export default function MyActivitiesPage() {
                 />
               </svg>
             )}
-            <span className="text-sm font-medium">{statusMessage.text}</span>
+            <span className="text-[15px] font-semibold">
+              {statusMessage.text}
+            </span>
             <button
               onClick={() => setStatusMessage(null)}
               className="ml-2 hover:opacity-70"
@@ -530,7 +562,19 @@ export default function MyActivitiesPage() {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setConfirmDialog(null)}
           />
-          <div className="relative bg-gray-900 border border-white/10 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl">
+          <div
+            className="relative p-6 max-w-md w-full mx-4 rounded-2xl"
+            style={{
+              background: "rgba(0, 0, 0, 0.25)",
+              backdropFilter: "blur(20px) saturate(180%)",
+              WebkitBackdropFilter: "blur(20px) saturate(180%)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              boxShadow:
+                "0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+              animation:
+                "springScale 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+            }}
+          >
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center">
                 <svg
@@ -551,13 +595,21 @@ export default function MyActivitiesPage() {
                 <h3 className="text-lg font-semibold text-white mb-2">
                   Potvrdiť akciu
                 </h3>
-                <p className="text-gray-300 text-sm">{confirmDialog.message}</p>
+                <p className="text-gray-300 text-[15px]">
+                  {confirmDialog.message}
+                </p>
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => setConfirmDialog(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors"
+                className="px-5 py-2.5 text-[15px] font-semibold rounded-full transition-all duration-200 backdrop-blur-xl"
+                style={{
+                  background: "rgba(255, 255, 255, 0.03)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  color: "#e5e7eb",
+                  boxShadow: "0 8px 20px -5px rgba(0, 0, 0, 0.4)",
+                }}
               >
                 Zrušiť
               </button>
@@ -566,7 +618,13 @@ export default function MyActivitiesPage() {
                   confirmDialog.onConfirm();
                   setConfirmDialog(null);
                 }}
-                className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
+                className="px-5 py-2.5 text-[15px] font-semibold rounded-full transition-all duration-200 backdrop-blur-xl"
+                style={{
+                  background: "rgba(16, 185, 129, 0.2)",
+                  border: "1px solid rgba(16, 185, 129, 0.5)",
+                  color: "#34d399",
+                  boxShadow: "0 8px 20px -5px rgba(0, 0, 0, 0.4)",
+                }}
               >
                 Potvrdiť
               </button>
@@ -662,9 +720,19 @@ export default function MyActivitiesPage() {
 
         {/* Bulk Actions Bar */}
         {displayActivities.length > 0 && (
-          <div className="mb-6 p-4 bg-white/[0.03] rounded-lg border border-white/10 flex items-center justify-between">
+          <div
+            className="mb-6 p-4 rounded-2xl flex items-center justify-between"
+            style={{
+              background: "rgba(0, 0, 0, 0.25)",
+              backdropFilter: "blur(20px) saturate(180%)",
+              WebkitBackdropFilter: "blur(20px) saturate(180%)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              boxShadow:
+                "0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+            }}
+          >
             <div className="flex items-center gap-4">
-              <span className="text-sm text-white">
+              <span className="text-[15px] text-white font-semibold">
                 {selectedActivities.size > 0
                   ? `Vybratých: ${selectedActivities.size}`
                   : "Vyberte aktivity"}
@@ -672,7 +740,6 @@ export default function MyActivitiesPage() {
               <div className="flex gap-2">
                 <Button
                   variant="secondary"
-                  className="text-sm"
                   onClick={selectAll}
                   disabled={bulkActionLoading}
                 >
@@ -680,7 +747,6 @@ export default function MyActivitiesPage() {
                 </Button>
                 <Button
                   variant="secondary"
-                  className="text-sm"
                   onClick={deselectAll}
                   disabled={bulkActionLoading || selectedActivities.size === 0}
                 >

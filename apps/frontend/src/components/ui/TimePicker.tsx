@@ -97,22 +97,28 @@ export function TimePicker({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`
-          w-full px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-lg 
-          text-left text-white focus:outline-none focus:ring-2 focus:ring-emerald-500
-          transition-all duration-150 flex items-center justify-between
-          ${
-            isOpen
-              ? "ring-2 ring-emerald-500 border-emerald-500/50"
-              : "hover:border-white/20"
-          }
-        `}
+        className="w-full px-5 py-3.5 rounded-full text-left text-[15px] focus:outline-none transition-all duration-200 flex items-center justify-between"
+        style={{
+          background: isOpen
+            ? "rgba(16, 185, 129, 0.05)"
+            : "rgba(0, 0, 0, 0.25)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          border: isOpen
+            ? "1px solid rgba(16, 185, 129, 0.5)"
+            : "1px solid rgba(255, 255, 255, 0.1)",
+          boxShadow: isOpen
+            ? "0 0 20px rgba(16, 185, 129, 0.2), 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)"
+            : "0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+        }}
       >
         <span className={displayValue ? "text-white" : "text-gray-500"}>
           {displayValue || "Vyberte čas"}
         </span>
         <svg
-          className="w-5 h-5 text-gray-400"
+          className={`w-5 h-5 transition-colors duration-200 ${
+            isOpen ? "text-emerald-400" : "text-gray-400"
+          }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -129,24 +135,22 @@ export function TimePicker({
       {/* Time Picker Dropdown */}
       {isOpen && (
         <div
-          className="
-            absolute z-50 mt-1
-            bg-[rgba(2,44,34,0.95)] border border-white/10 rounded-xl
-            shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]
-            animate-in fade-in-0 zoom-in-95 duration-150
-            overflow-hidden
-          "
+          className="absolute z-50 mt-2 rounded-2xl overflow-hidden animate-slide-down"
           style={{
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
+            background: "rgba(2, 44, 34, 0.95)",
+            backdropFilter: "blur(24px) saturate(180%)",
+            WebkitBackdropFilter: "blur(24px) saturate(180%)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            boxShadow:
+              "0 25px 50px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
           }}
         >
           <div className="flex">
             {/* Hours column */}
             <div
               ref={hoursRef}
-              className="h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent"
-              style={{ width: "70px" }}
+              className="h-64 overflow-y-auto scrollbar-thin"
+              style={{ width: "80px" }}
             >
               <div className="py-2">
                 {hoursList.map((hour) => (
@@ -155,14 +159,25 @@ export function TimePicker({
                     type="button"
                     data-hour={hour}
                     onClick={() => handleHourClick(hour)}
-                    className={`
-                      w-full py-3 px-4 text-center text-sm font-medium transition-colors
-                      ${
+                    className="w-full py-3 px-4 text-center text-[15px] font-medium transition-all duration-150"
+                    style={{
+                      background:
                         hours === hour
-                          ? "bg-emerald-500/20 text-emerald-400"
-                          : "text-white hover:bg-white/5"
+                          ? "rgba(16, 185, 129, 0.2)"
+                          : "transparent",
+                      color: hours === hour ? "#6ee7b7" : "white",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (hours !== hour) {
+                        e.currentTarget.style.background =
+                          "rgba(255, 255, 255, 0.08)";
                       }
-                    `}
+                    }}
+                    onMouseLeave={(e) => {
+                      if (hours !== hour) {
+                        e.currentTarget.style.background = "transparent";
+                      }
+                    }}
                   >
                     {String(hour).padStart(2, "0")}
                   </button>
@@ -171,40 +186,60 @@ export function TimePicker({
             </div>
 
             {/* Separator */}
-            <div className="w-px bg-white/10" />
+            <div
+              className="w-px"
+              style={{ background: "rgba(255, 255, 255, 0.1)" }}
+            />
 
             {/* Minutes column */}
             <div
               ref={minutesRef}
-              className="h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent"
-              style={{ width: "70px" }}
+              className="h-64 overflow-y-auto scrollbar-thin"
+              style={{ width: "80px" }}
             >
               <div className="py-2">
-                {minutesList.map((minute) => (
-                  <button
-                    key={minute}
-                    type="button"
-                    data-minute={minute}
-                    onClick={() => handleMinuteClick(minute)}
-                    className={`
-                      w-full py-3 px-4 text-center text-sm font-medium transition-colors
-                      ${
-                        minutes !== null &&
-                        Math.round(minutes / minuteStep) * minuteStep === minute
-                          ? "bg-emerald-500/20 text-emerald-400"
-                          : "text-white hover:bg-white/5"
-                      }
-                    `}
-                  >
-                    {String(minute).padStart(2, "0")}
-                  </button>
-                ))}
+                {minutesList.map((minute) => {
+                  const isSelected =
+                    minutes !== null &&
+                    Math.round(minutes / minuteStep) * minuteStep === minute;
+                  return (
+                    <button
+                      key={minute}
+                      type="button"
+                      data-minute={minute}
+                      onClick={() => handleMinuteClick(minute)}
+                      className="w-full py-3 px-4 text-center text-[15px] font-medium transition-all duration-150"
+                      style={{
+                        background: isSelected
+                          ? "rgba(16, 185, 129, 0.2)"
+                          : "transparent",
+                        color: isSelected ? "#6ee7b7" : "white",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isSelected) {
+                          e.currentTarget.style.background =
+                            "rgba(255, 255, 255, 0.08)";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isSelected) {
+                          e.currentTarget.style.background = "transparent";
+                        }
+                      }}
+                    >
+                      {String(minute).padStart(2, "0")}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
 
           {/* Quick options */}
-          <div className="border-t border-white/10 p-2 flex gap-2">
+          <div
+            className="p-3 flex gap-2"
+            style={{ borderTop: "1px solid rgba(255, 255, 255, 0.1)" }}
+          >
             {[
               {
                 label: "Teraz",
@@ -223,7 +258,18 @@ export function TimePicker({
                   onChange(formatTime(quick.h, quick.m >= 60 ? 0 : quick.m));
                   setIsOpen(false);
                 }}
-                className="flex-1 py-2 text-xs text-emerald-400 hover:text-emerald-300 hover:bg-white/5 rounded-lg transition-colors"
+                className="flex-1 py-2.5 text-xs font-semibold text-emerald-400 rounded-xl transition-all duration-200"
+                style={{
+                  background: "rgba(16, 185, 129, 0.1)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(16, 185, 129, 0.2)";
+                  e.currentTarget.style.color = "#6ee7b7";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "rgba(16, 185, 129, 0.1)";
+                  e.currentTarget.style.color = "#34d399";
+                }}
               >
                 {quick.label}
               </button>

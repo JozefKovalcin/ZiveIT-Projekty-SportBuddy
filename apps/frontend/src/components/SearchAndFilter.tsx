@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { DatePicker } from "@/components/ui/DatePicker";
 import AISearchBar from "@/components/AISearchBar";
@@ -175,31 +176,42 @@ export default function SearchAndFilter({
       {/* Search Bar */}
       <Card>
         <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-          <div className="relative flex-1">
+          <div
+            className="relative flex flex-1 min-w-0 items-center rounded-full transition-all duration-200"
+            style={{
+              background: "rgba(255, 255, 255, 0.03)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              boxShadow: "0 8px 20px -5px rgba(0, 0, 0, 0.4)",
+            }}
+          >
+            <div className="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2">
+              <svg
+                className="w-5 h-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
             <input
               type="text"
               placeholder="Hľadať aktivity..."
               value={filters.search}
               onChange={(e) => handleFilterChange("search", e.target.value)}
-              className="w-full px-4 py-3 pl-12 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="sb-no-global w-full h-[52px] pl-16 pr-4 bg-transparent text-white text-base placeholder-gray-500 focus:outline-none border-0"
             />
-            <svg
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
             {filters.search && (
               <button
                 onClick={handleClearSearch}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                className="flex items-center justify-center w-12 h-[52px] text-gray-400 hover:text-white transition-colors duration-200"
                 aria-label="Vymazať vyhľadávanie"
               >
                 <svg
@@ -222,7 +234,7 @@ export default function SearchAndFilter({
           <Button
             variant="secondary"
             onClick={() => setShowFilters(!showFilters)}
-            className="relative whitespace-nowrap h-[50px] flex items-center gap-2"
+            className="relative whitespace-nowrap h-[52px] flex items-center gap-2"
           >
             <svg
               className="w-5 h-5"
@@ -239,7 +251,13 @@ export default function SearchAndFilter({
             </svg>
             <span>Filter</span>
             {activeFilterCount > 0 && (
-              <span className="px-2 py-0.5 text-xs font-bold bg-emerald-600 text-white rounded-full">
+              <span
+                className="px-2.5 py-1 text-xs font-bold text-white rounded-full"
+                style={{
+                  background: "linear-gradient(135deg, #10b981, #059669)",
+                  boxShadow: "0 2px 8px rgba(16, 185, 129, 0.4)",
+                }}
+              >
                 {activeFilterCount}
               </span>
             )}
@@ -247,9 +265,10 @@ export default function SearchAndFilter({
 
           {activeFilterCount > 0 && (
             <Button
-              variant="ghost"
+              variant="secondary"
               onClick={handleReset}
-              className="h-[50px] whitespace-nowrap"
+              size="sm"
+              className="h-[52px] whitespace-nowrap"
             >
               Resetovať
             </Button>
@@ -348,7 +367,7 @@ export default function SearchAndFilter({
                   Cena (€)
                 </label>
                 <div className="flex gap-2">
-                  <input
+                  <Input
                     type="number"
                     placeholder="Od"
                     value={filters.minPrice}
@@ -356,9 +375,8 @@ export default function SearchAndFilter({
                       handleFilterChange("minPrice", e.target.value)
                     }
                     min="0"
-                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
-                  <input
+                  <Input
                     type="number"
                     placeholder="Do"
                     value={filters.maxPrice}
@@ -366,7 +384,6 @@ export default function SearchAndFilter({
                       handleFilterChange("maxPrice", e.target.value)
                     }
                     min="0"
-                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               </div>
@@ -377,7 +394,7 @@ export default function SearchAndFilter({
                   Vek
                 </label>
                 <div className="flex gap-2">
-                  <input
+                  <Input
                     type="number"
                     placeholder="Od"
                     value={filters.minAge}
@@ -386,9 +403,8 @@ export default function SearchAndFilter({
                     }
                     min="6"
                     max="99"
-                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
-                  <input
+                  <Input
                     type="number"
                     placeholder="Do"
                     value={filters.maxAge}
@@ -397,7 +413,6 @@ export default function SearchAndFilter({
                     }
                     min="6"
                     max="99"
-                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               </div>
@@ -470,14 +485,19 @@ export default function SearchAndFilter({
                     return (
                       <span
                         key={key}
-                        className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-emerald-600/10 text-emerald-400 rounded-full"
+                        className="inline-flex items-center gap-1 px-3 py-1 text-sm text-gray-200 rounded-full"
+                        style={{
+                          background: "rgba(255, 255, 255, 0.03)",
+                          backdropFilter: "blur(16px)",
+                          border: "1px solid rgba(255, 255, 255, 0.1)",
+                        }}
                       >
                         {label}
                         <button
                           onClick={() =>
                             handleFilterChange(key as keyof FilterState, "")
                           }
-                          className="ml-1 hover:text-white"
+                          className="ml-1 hover:text-emerald-400 transition-colors"
                         >
                           ×
                         </button>

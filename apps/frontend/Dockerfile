@@ -3,28 +3,29 @@
 #   Development: docker-compose up (uses 'development' target)
 #   Production: docker build --target production -t sportbuddy-frontend .
 
-FROM node:alpine AS base
-RUN apk add --no-cache libc6-compat
+FROM node:24-alpine AS base
+RUN apk add --no-cache libc6-compat && \
+    corepack enable && corepack prepare pnpm@latest --activate && \
+    rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 WORKDIR /app
 
 # Stage 1: Install dependencies
 FROM base AS deps
-COPY package*.json ./
-RUN npm install --legacy-peer-deps
+COPY package.json pnpm-lock.yaml* ./
+RUN pnpm install --frozen-lockfile || pnpm install
 
 # Stage 2: Development (hot reload with volume mounts)
 FROM base AS development
-COPY package*.json ./
-RUN npm install --legacy-peer-deps
+COPY package.json pnpm-lock.yaml* ./
 EXPOSE 3000
-CMD ["npm", "run", "dev"]
+CMD ["sh", "-c", "pnpm install && pnpm run dev"]
 
 # Stage 3: Build for production
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+RUN pnpm run build
 
 # Stage 4: Production runtime
 FROM base AS production
