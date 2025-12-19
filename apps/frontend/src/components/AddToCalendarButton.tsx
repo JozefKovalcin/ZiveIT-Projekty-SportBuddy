@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar, ChevronDown, Download } from "lucide-react";
 import {
   generateGoogleCalendarLink,
   generateOutlookCalendarLink,
   generateOffice365CalendarLink,
   downloadICSFile,
+  downloadICSFileFromEvent,
   openCalendarLink,
   CalendarEvent,
 } from "@/lib/calendar-utils";
@@ -64,6 +65,18 @@ export default function AddToCalendarButton({
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+      setIsMobile(mobile);
+    };
+    checkMobile();
+  }, []);
 
   // Prepare calendar event data
   const startTime = new Date(activity.datetime);
@@ -87,20 +100,26 @@ export default function AddToCalendarButton({
     setErrorMessage(null);
 
     try {
-      switch (option) {
-        case "google":
-          openCalendarLink(generateGoogleCalendarLink(calendarEvent));
-          break;
-        case "outlook":
-          openCalendarLink(generateOutlookCalendarLink(calendarEvent));
-          break;
-        case "office365":
-          openCalendarLink(generateOffice365CalendarLink(calendarEvent));
-          break;
-        case "apple":
-        case "download":
-          await downloadICSFile(activity.id);
-          break;
+      // On mobile, always download ICS file for better compatibility
+      if (isMobile) {
+        await downloadICSFileFromEvent(calendarEvent, `sportbuddy-${activity.id}.ics`);
+      } else {
+        // On desktop, use web links
+        switch (option) {
+          case "google":
+            openCalendarLink(generateGoogleCalendarLink(calendarEvent));
+            break;
+          case "outlook":
+            openCalendarLink(generateOutlookCalendarLink(calendarEvent));
+            break;
+          case "office365":
+            openCalendarLink(generateOffice365CalendarLink(calendarEvent));
+            break;
+          case "apple":
+          case "download":
+            await downloadICSFileFromEvent(calendarEvent, `sportbuddy-${activity.id}.ics`);
+            break;
+        }
       }
       setIsOpen(false);
     } catch (error) {

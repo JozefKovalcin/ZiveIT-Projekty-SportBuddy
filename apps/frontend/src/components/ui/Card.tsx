@@ -20,10 +20,9 @@ export const Card: React.FC<CardProps> = ({
         rounded-3xl
         p-8
         shadow-xl shadow-black/20
-        transition-all duration-300 ease-out
         ${
           hover
-            ? "cursor-pointer hover:bg-white/[0.06] hover:border-white/20 hover:shadow-2xl hover:scale-[1.02]"
+            ? "transition-all duration-300 ease-out cursor-pointer hover:bg-white/[0.06] hover:border-white/20 hover:shadow-2xl hover:scale-[1.02]"
             : ""
         }
         ${className}

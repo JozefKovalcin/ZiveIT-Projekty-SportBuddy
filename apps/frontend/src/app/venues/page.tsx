@@ -45,7 +45,7 @@ const sportTypeLabels: Record<string, string> = {
 
 const mapContainerStyle = {
   width: "100%",
-  height: "calc(100vh - 120px)",
+  height: "60vh",
 };
 
 const defaultCenter = {
@@ -192,12 +192,12 @@ export default function VenuesPage() {
   }
 
   return (
-    <div className="min-h-screen p-8 pt-36">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8 pt-24 sm:pt-32 lg:pt-36">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-4xl font-bold text-white mb-2">Mapa aktivít</h1>
-          <p className="text-gray-300">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2">Mapa aktivít</h1>
+          <p className="text-sm sm:text-base text-gray-300">
             {activities.length} aktivít v tvojom okolí
           </p>
         </div>
@@ -372,20 +372,20 @@ export default function VenuesPage() {
         </Card>
 
         {/* Legend */}
-        <Card className="mt-6">
+        <Card className="mt-4 sm:mt-6">
           <CardHeader>
-            <CardTitle className="text-lg">Legenda</CardTitle>
+            <CardTitle className="text-base sm:text-lg">Legenda</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-white"></div>
-                <span className="text-sm">Tvoja poloha</span>
+                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-blue-500 border-2 border-white shrink-0"></div>
+                <span className="text-xs sm:text-sm">Tvoja poloha</span>
               </div>
               {Object.entries(sportTypeLabels).map(([key, label]) => (
                 <div key={key} className="flex items-center gap-2">
-                  <span className="text-2xl">{label.split(" ")[0]}</span>
-                  <span className="text-sm">
+                  <span className="text-xl sm:text-2xl shrink-0">{label.split(" ")[0]}</span>
+                  <span className="text-xs sm:text-sm truncate">
                     {label.split(" ").slice(1).join(" ")}
                   </span>
                 </div>

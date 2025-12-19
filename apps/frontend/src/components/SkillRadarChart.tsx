@@ -111,13 +111,15 @@ export function SkillRadarChart({
       .join(" ") + " Z";
 
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox={`0 0 ${size} ${size}`}
-      className="mx-auto"
-      style={{ overflow: "visible" }}
-    >
+    <div className="w-full overflow-hidden flex justify-center">
+      <svg
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        className="max-w-full h-auto"
+        style={{ overflow: "visible" }}
+      >
+        {/* SVG obsah */}
       <defs>
         <radialGradient id="radarGradient" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor="rgb(16, 185, 129)" stopOpacity="0.3" />
@@ -310,6 +312,7 @@ export function SkillRadarChart({
 
       {/* Center point */}
       <circle cx={center} cy={center} r="3" fill="rgba(255, 255, 255, 0.5)" />
-    </svg>
+      </svg>
+    </div>
   );
 }

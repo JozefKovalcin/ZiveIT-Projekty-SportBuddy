@@ -291,7 +291,8 @@ export default function MyActivitiesPage() {
           />
         </div>
         <Link href={`/activities/${activity.id}`} onClick={handleClick}>
-          <div className="absolute top-4 right-4 flex gap-2">
+          <CardHeader>
+            <div className="flex justify-end gap-2 mb-4">
             {((activity.isRecurring &&
               activity.recurrenceFrequency !== "NONE") ||
               activity.parentActivityId) && (
@@ -324,8 +325,6 @@ export default function MyActivitiesPage() {
               {statusInfo.label}
             </span>
           </div>
-
-          <CardHeader>
             <div className="flex items-start gap-4">
               <div className="text-center min-w-[60px]">
                 <div className="text-3xl font-bold text-emerald-500">

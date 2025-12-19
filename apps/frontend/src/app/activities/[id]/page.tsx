@@ -798,23 +798,43 @@ export default function ActivityDetailPage() {
 
   const handleBlockParticipant = async (userId: string, userName: string) => {
     showConfirm(
-      `Naozaj chcete zablokovať používateľa ${userName}? Nebude sa môcť znova prihlásiť.`,
+      `Naozaj chcete zablokovať používateľa ${userName}? Nebude sa môcť prihlasovať na žiadne vaše aktivity.`,
       async () => {
         try {
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/activities/${activity?.id}/participants/${userId}`,
+            `${process.env.NEXT_PUBLIC_API_URL}/api/users/blocked`,
             {
-              method: "PATCH",
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
               credentials: "include",
+              body: JSON.stringify({ userId }),
             }
           );
 
           if (!response.ok) {
             const data = await response.json();
-            throw new Error(data.error || "Chyba pri blokovaní účastníka");
+            throw new Error(data.error || "Chyba pri blokovaní používateľa");
           }
 
           showStatus(`Používateľ ${userName} bol zablokovaný`, "success");
+          
+          // Also remove them from the current activity if they're participating
+          const isParticipating = activity?.participations.some(
+            (p) => p.user.id === userId
+          );
+          
+          if (isParticipating) {
+            await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/activities/${activity?.id}/participants/${userId}`,
+              {
+                method: "DELETE",
+                credentials: "include",
+              }
+            );
+          }
+          
           await fetchActivity();
         } catch (err: any) {
           showStatus(err.message, "error");
@@ -1130,38 +1150,45 @@ export default function ActivityDetailPage() {
             {/* Add guests section for participants */}
             {isParticipating && activity.status === "OPEN" && (
               <div className="mt-6 p-4 bg-emerald-950/20 border border-emerald-800 rounded-lg">
-                <div className="flex gap-3 items-end">
-                  <div className="flex-1 max-w-xs">
-                    <label
-                      htmlFor="guestCount"
-                      className="block text-xs font-medium text-white mb-2"
+                <label
+                  htmlFor="guestCount"
+                  className="block text-xs sm:text-sm font-medium text-white mb-3"
+                >
+                  Počet hostí (okrem vás)
+                </label>
+                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+                  <div className="flex items-center bg-white/[0.03] border border-white/10 rounded-lg h-10 shrink-0">
+                    <button
+                      type="button"
+                      className="w-10 sm:w-8 h-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors rounded-l-lg"
+                      onClick={() => setGuestCount(Math.max(0, guestCount - 1))}
                     >
-                      Počet hostí (okrem vás)
-                    </label>
-                    <input
-                      id="guestCount"
-                      type="number"
-                      min="0"
-                      max={
-                        activity.maxParticipants -
-                        activity.currentParticipants +
-                        (activity.participations.find(
-                          (p) => p.user.id === currentUserId
-                        )?.guestCount || 0)
-                      }
-                      value={guestCount}
-                      onChange={(e) =>
-                        setGuestCount(
-                          Math.max(0, parseInt(e.target.value) || 0)
-                        )
-                      }
-                      className="w-full px-4 py-2 border border-white/10 rounded-lg bg-white/[0.03] text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    />
+                      -
+                    </button>
+                    <div className="flex-1 sm:w-10 text-center text-sm font-medium text-white">
+                      {guestCount}
+                    </div>
+                    <button
+                      type="button"
+                      className="w-10 sm:w-8 h-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors rounded-r-lg"
+                      onClick={() => {
+                        const maxGuests =
+                          activity.maxParticipants -
+                          activity.currentParticipants +
+                          (activity.participations.find(
+                            (p) => p.user.id === currentUserId
+                          )?.guestCount || 0);
+                        setGuestCount(Math.min(maxGuests, guestCount + 1));
+                      }}
+                    >
+                      +
+                    </button>
                   </div>
                   <Button
                     variant="primary"
                     onClick={handleAddGuests}
                     disabled={addingGuests}
+                    className="w-full sm:w-auto"
                   >
                     {addingGuests ? "Aktualizujem..." : "Aktualizovať"}
                   </Button>
@@ -1388,28 +1415,34 @@ export default function ActivityDetailPage() {
                                 <label className="block text-sm font-medium text-white mb-2">
                                   Počet hostí (pre každý termín):
                                 </label>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  max="10"
-                                  value={bulkJoinGuestCount}
-                                  onChange={(e) =>
-                                    setBulkJoinGuestCount(
-                                      Math.max(
-                                        0,
-                                        Math.min(
-                                          10,
-                                          parseInt(e.target.value) || 0
-                                        )
-                                      )
-                                    )
-                                  }
-                                  className="w-24 px-3 py-2 bg-white/[0.03] border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                />
-                                <span className="ml-2 text-sm text-gray-400">
-                                  (Celkom: {1 + bulkJoinGuestCount} osôb na
-                                  termín)
-                                </span>
+                                <div className="flex items-center gap-2">
+                                  <div className="flex items-center bg-white/[0.03] border border-white/10 rounded-lg h-10 shrink-0">
+                                    <button
+                                      type="button"
+                                      className="w-8 h-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors rounded-l-lg"
+                                      onClick={() =>
+                                        setBulkJoinGuestCount(Math.max(0, bulkJoinGuestCount - 1))
+                                      }
+                                    >
+                                      -
+                                    </button>
+                                    <div className="w-8 text-center text-sm font-medium text-white">
+                                      {bulkJoinGuestCount}
+                                    </div>
+                                    <button
+                                      type="button"
+                                      className="w-8 h-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors rounded-r-lg"
+                                      onClick={() =>
+                                        setBulkJoinGuestCount(Math.min(10, bulkJoinGuestCount + 1))
+                                      }
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                  <span className="text-sm text-gray-400">
+                                    (Celkom: {1 + bulkJoinGuestCount} osôb na termín)
+                                  </span>
+                                </div>
                               </div>
                               <div className="flex flex-wrap gap-2">
                                 <Button
@@ -1803,15 +1836,15 @@ export default function ActivityDetailPage() {
                                     </span>
                                   )}
                                 </div>
-                                <div className="flex gap-2 mt-3">
+                                <div className="flex flex-col sm:flex-row gap-2 mt-3">
                                   {!isCurrentActivity && (
                                     <Link
                                       href={`/activities/${instance.id}`}
-                                      className="flex-1"
+                                      className="w-full sm:flex-1"
                                     >
                                       <Button
                                         variant="secondary"
-                                        className="w-full text-sm py-2"
+                                        className="w-full text-xs sm:text-sm py-2"
                                       >
                                         Zobraziť detail
                                       </Button>
@@ -1820,10 +1853,10 @@ export default function ActivityDetailPage() {
                                   {!isParticipatingInInstance &&
                                     instance.currentParticipants <
                                       instance.maxParticipants && (
-                                      <div className="flex-1 flex gap-2">
-                                        <div className="flex items-center bg-white/[0.03] border border-white/10 rounded-lg h-10 shrink-0">
+                                      <div className="w-full sm:flex-1 flex gap-2">
+                                        <div className="flex items-center bg-white/[0.03] border border-white/10 rounded-lg h-10">
                                           <button
-                                            className="w-8 h-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors rounded-l-lg"
+                                            className="w-10 sm:w-8 h-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors rounded-l-lg"
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               setInstanceGuestCounts((prev) => {
@@ -1841,12 +1874,12 @@ export default function ActivityDetailPage() {
                                           >
                                             -
                                           </button>
-                                          <div className="w-8 text-center text-sm font-medium text-white">
+                                          <div className="flex-1 sm:w-10 text-center text-xs sm:text-sm font-medium text-white">
                                             {instanceGuestCounts[instance.id] ||
                                               0}
                                           </div>
                                           <button
-                                            className="w-8 h-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors rounded-r-lg"
+                                            className="w-10 sm:w-8 h-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors rounded-r-lg"
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               setInstanceGuestCounts((prev) => {
@@ -1867,7 +1900,7 @@ export default function ActivityDetailPage() {
                                         </div>
                                         <Button
                                           variant="primary"
-                                          className="flex-1 text-sm py-2"
+                                          className="flex-1 text-xs sm:text-sm py-2"
                                           onClick={async () => {
                                             const guests =
                                               instanceGuestCounts[

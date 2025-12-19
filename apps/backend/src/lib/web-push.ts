@@ -32,6 +32,7 @@ export async function sendWebPush(subscription: PushSubscription, payload: PushP
   }
 
   try {
+    console.log("[Web Push] Preparing to send notification:", { title: payload.title, hasActivityId: !!payload.activityId });
     const pushSubscription = {
       endpoint: subscription.endpoint,
       keys: {
@@ -40,24 +41,33 @@ export async function sendWebPush(subscription: PushSubscription, payload: PushP
       },
     };
 
+    const notificationPayload = {
+      title: payload.title,
+      body: payload.body || payload.message,
+      url: payload.url,
+      activityId: payload.activityId,
+      tag: payload.tag || `notification-${Date.now()}`,
+    };
+
+    console.log("[Web Push] Sending notification:", notificationPayload);
+
     await webpush.sendNotification(
       pushSubscription,
-      JSON.stringify({
-        title: payload.title,
-        body: payload.body || payload.message,
-        url: payload.url,
-        activityId: payload.activityId,
-        tag: payload.tag || `notification-${Date.now()}`,
-      })
+      JSON.stringify(notificationPayload)
     );
 
-    console.log(`[Web Push] Sent to ${subscription.endpoint.slice(-20)}`);
+    console.log(`[Web Push] Successfully sent to ${subscription.endpoint.slice(-20)}`);
     return true;
   } catch (error: any) {
-    console.error("[Web Push] Failed:", error.statusCode, error.body);
+    console.error("[Web Push] Failed:", { 
+      statusCode: error.statusCode, 
+      body: error.body,
+      message: error.message 
+    });
 
     // Return false for invalid subscriptions (410 Gone, 404 Not Found)
     if (error.statusCode === 410 || error.statusCode === 404) {
+      console.log("[Web Push] Subscription is invalid (410/404)");
       return false;
     }
 

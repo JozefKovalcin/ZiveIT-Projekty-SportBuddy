@@ -16,10 +16,17 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession();
     if (!session?.user?.id) {
+      console.log('[Subscribe] No session found');
       return NextResponse.json({ error: "Neautorizované" }, { status: 401 });
     }
 
+    console.log('[Subscribe] User:', session.user.id);
     const body = await request.json();
+    console.log('[Subscribe] Received subscription:', { 
+      endpoint: body.endpoint?.substring(0, 50) + '...',
+      hasKeys: !!body.keys 
+    });
+    
     const { endpoint, keys } = subscriptionSchema.parse(body);
 
     // Upsert subscription (update if endpoint exists, create if not)
@@ -40,12 +47,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    console.log('[Subscribe] Subscription saved:', subscription.id);
     return NextResponse.json({ success: true, id: subscription.id });
   } catch (error) {
     if (error instanceof z.ZodError) {
+      console.error('[Subscribe] Validation error:', error.errors);
       return NextResponse.json({ error: "Neplatné údaje" }, { status: 400 });
     }
-    console.error("Error saving push subscription:", error);
+    console.error('[Subscribe] Error saving push subscription:', error);
     return NextResponse.json({ error: "Chyba pri ukladaní subscription" }, { status: 500 });
   }
 }

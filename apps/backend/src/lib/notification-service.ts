@@ -47,11 +47,21 @@ export async function createNotification({
     });
 
     // Send email if enabled and instant
+    console.log('[Email] Checking email preferences:', { 
+      emailEnabled: prefs?.emailEnabled, 
+      emailFrequency: prefs?.emailFrequency,
+      userId 
+    });
     if (prefs?.emailEnabled && prefs.emailFrequency === "INSTANT") {
       const user = await prisma.user.findUnique({ where: { id: userId } });
       if (user?.email) {
+        console.log('[Email] Sending notification email to:', user.email);
         await sendNotificationEmail({ email: user.email, userName: user.name, notification });
+      } else {
+        console.log('[Email] User has no email address');
       }
+    } else {
+      console.log('[Email] Email notification skipped - not enabled or not INSTANT frequency');
     }
 
     // Send push notification if enabled
@@ -83,10 +93,16 @@ export async function notifyUsersAboutActivityDeleted(activityId: string) {
 
   const usersToNotify = activity.participations.map((p) => p.user);
 
-  // Include organizer if needed
-  // usersToNotify.push(activity.organizer);
-
   for (const user of usersToNotify) {
+    // Check notification preference
+    const prefs = await prisma.notificationPreferences.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (prefs?.notifyActivityCancelled === false) {
+      continue;
+    }
+
     await createNotification({
       userId: user.id,
       type: "ACTIVITY_CANCELLED",
@@ -117,12 +133,29 @@ export async function notifyUsersAboutUserJoined(activityId: string, userId: str
   const title = `${joiningUser.name} sa pridal k tvojej aktivite`;
   const message = `${joiningUser.name} sa pridal k aktivite "${activity.title}" naplánovanej na ${activity.date.toLocaleString()}.`;
 
-  const usersToNotify = [
-    activity.organizer,
-    ...activity.participations.map((p) => p.user),
-  ].filter((u) => u.id !== userId); // Exclude joining user
+  // Only notify organizer and existing participants (excluding the joining user)
+  // Filter out duplicates by using a Set of user IDs
+  const userIds = new Set<string>();
+  userIds.add(activity.organizer.id);
+  activity.participations.forEach(p => {
+    if (p.userId !== userId) {
+      userIds.add(p.userId);
+    }
+  });
+
+  const usersToNotify = await prisma.user.findMany({
+    where: { id: { in: Array.from(userIds) } },
+    include: {
+      notificationPreferences: true,
+    },
+  });
 
   for (const user of usersToNotify) {
+    // Check if user wants to be notified about participants joining
+    if (user.notificationPreferences?.notifyParticipantJoined === false) {
+      continue;
+    }
+
     await createNotification({
       userId: user.id,
       type: "PARTICIPANT_JOINED",
@@ -208,16 +241,26 @@ export async function sendPushNotification(
   userId: string,
   payload: { title: string; message: string; activityId?: string }
 ) {
+  console.log('[Push] Attempting to send push notification to user:', userId);
   const subscriptions = await prisma.pushSubscription.findMany({ where: { userId } });
+  console.log('[Push] Found', subscriptions.length, 'subscriptions for user');
+
+  if (subscriptions.length === 0) {
+    console.log('[Push] No subscriptions found for user', userId);
+    return;
+  }
 
   for (const sub of subscriptions) {
     try {
+      console.log('[Push] Sending to endpoint:', sub.endpoint.substring(0, 50) + '...');
       // Web Push logic - implemented in separate file
       await sendWebPush(sub, payload);
+      console.log('[Push] Successfully sent to subscription', sub.id);
     } catch (error) {
-      console.error("Push notification failed:", error);
+      console.error('[Push] Push notification failed:', error);
       // Remove invalid subscription
       if ((error as any).statusCode === 410) {
+        console.log('[Push] Removing invalid subscription', sub.id);
         await prisma.pushSubscription.delete({ where: { id: sub.id } });
       }
     }
@@ -249,12 +292,28 @@ export async function notifyUsersAboutUserLeft(activityId: string, userId: strin
   const title = `${leavingUser.name} opustil aktivitu`;
   const message = `${leavingUser.name} sa odhlásil z aktivity "${activity.title}".`;
 
-  const usersToNotify = [
-    activity.organizer,
-    ...activity.participations.map((p) => p.user),
-  ].filter((u) => u.id !== userId); // Exclude leaving user
+  // Filter out duplicates by using a Set of user IDs
+  const userIds = new Set<string>();
+  userIds.add(activity.organizer.id);
+  activity.participations.forEach(p => {
+    if (p.userId !== userId) {
+      userIds.add(p.userId);
+    }
+  });
+
+  const usersToNotify = await prisma.user.findMany({
+    where: { id: { in: Array.from(userIds) } },
+    include: {
+      notificationPreferences: true,
+    },
+  });
 
   for (const user of usersToNotify) {
+    // Check notification preference
+    if (user.notificationPreferences?.notifyParticipantLeft === false) {
+      continue;
+    }
+
     await createNotification({
       userId: user.id,
       type: "PARTICIPANT_LEFT",

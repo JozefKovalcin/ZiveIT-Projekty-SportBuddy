@@ -25,6 +25,7 @@ interface Activity {
   isRecurring: boolean;
   recurrenceFrequency: string;
   parentActivityId: string | null;
+  upcomingInstances?: Activity[];
   venue?: {
     id: string;
     name: string;
@@ -68,6 +69,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 };
 
 function ActivityCard({ activity }: { activity: Activity }) {
+  const [showInstances, setShowInstances] = useState(false);
   const date = new Date(activity.date);
   const formattedDate = date.toLocaleDateString("sk-SK", {
     day: "numeric",
@@ -82,106 +84,188 @@ function ActivityCard({ activity }: { activity: Activity }) {
   const freeSpots = activity.maxParticipants - activity.currentParticipants;
   const statusInfo = statusLabels[activity.status] || statusLabels.OPEN;
 
+  const hasUpcomingInstances = activity.upcomingInstances && activity.upcomingInstances.length > 0;
+
   const handleClick = () => {
     if (typeof window !== "undefined") {
       sessionStorage.setItem("activityListSource", "/activities");
     }
   };
 
+  const handleToggleInstances = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowInstances(!showInstances);
+  };
+
   return (
-    <Link href={`/activities/${activity.id}`} onClick={handleClick}>
-      <Card hover className="h-full">
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex-1">
-              <h3 className="text-xl font-bold text-white mb-2">
-                {activity.title}
-              </h3>
-              <div className="flex items-center gap-2 flex-wrap">
-                <p className="text-sm text-gray-300">
-                  {sportTypeLabels[activity.sportType] || activity.sportType}
-                </p>
-                {((activity.isRecurring &&
-                  activity.recurrenceFrequency !== "NONE") ||
-                  activity.parentActivityId) && (
-                  <span
-                    className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full backdrop-blur-xl"
-                    style={{
-                      background: "rgba(168, 85, 247, 0.2)",
-                      border: "1px solid rgba(168, 85, 247, 0.5)",
-                      color: "#c084fc",
-                      boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
-                    }}
-                  >
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+    <div>
+      <Link href={`/activities/${activity.id}`} onClick={handleClick}>
+        <Card hover className="h-full">
+          <div className="flex flex-col h-full">
+            {/* Header */}
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-white mb-2">
+                  {activity.title}
+                </h3>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-sm text-gray-300">
+                    {sportTypeLabels[activity.sportType] || activity.sportType}
+                  </p>
+                  {((activity.isRecurring &&
+                    activity.recurrenceFrequency !== "NONE") ||
+                    activity.parentActivityId) && (
+                    <span
+                      className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full backdrop-blur-xl"
+                      style={{
+                        background: "rgba(168, 85, 247, 0.2)",
+                        border: "1px solid rgba(168, 85, 247, 0.5)",
+                        color: "#c084fc",
+                        boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
+                      }}
                     >
-                      <polyline points="23 4 23 10 17 10"></polyline>
-                      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                    </svg>
-                    Opakovaná
+                      <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                      </svg>
+                      Opakovaná
+                    </span>
+                  )}
+                </div>
+              </div>
+              <span className={`text-sm font-medium ${statusInfo.color}`}>
+                {statusInfo.label}
+              </span>
+            </div>
+
+            {/* Date & Time */}
+            <div className="mb-3 space-y-1">
+              <p className="text-sm text-white">📅 {formattedDate}</p>
+              <p className="text-sm text-white">
+                🕐 {formattedTime} ({activity.duration} min)
+              </p>
+            </div>
+
+            {/* Show upcoming instances button if recurring */}
+            {hasUpcomingInstances && (
+              <button
+                onClick={handleToggleInstances}
+                className="mb-3 text-left px-3 py-2 rounded-lg transition-all backdrop-blur-xl hover:bg-white/5"
+                style={{
+                  background: "rgba(168, 85, 247, 0.1)",
+                  border: "1px solid rgba(168, 85, 247, 0.3)",
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-purple-300">
+                    {showInstances ? "Skryť termíny" : `+${activity.upcomingInstances!.length} ďalších ${activity.upcomingInstances!.length === 1 ? 'termín' : activity.upcomingInstances!.length < 5 ? 'termíny' : 'termínov'}`}
                   </span>
-                )}
+                  <svg
+                    className={`w-4 h-4 text-purple-300 transition-transform ${showInstances ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </button>
+            )}
+
+            {/* Location */}
+            <div className="mb-3">
+              <p className="text-sm text-white">
+                📍 {activity.locationName || activity.location}
+              </p>
+            </div>
+
+            {/* Skill Level */}
+            <div className="mb-3">
+              <span
+                className="inline-block px-4 py-1.5 text-xs font-semibold rounded-full backdrop-blur-xl"
+                style={{
+                  background: "rgba(16, 185, 129, 0.15)",
+                  border: "1px solid rgba(16, 185, 129, 0.4)",
+                  color: "#34d399",
+                  boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
+                }}
+              >
+                {skillLevelLabels[activity.skillLevel] || activity.skillLevel}
+              </span>
+            </div>
+
+            {/* Participants */}
+            <div className="mt-auto pt-3 border-t border-white/10">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-300">
+                  Účastníci: {activity.currentParticipants}/
+                  {activity.maxParticipants}
+                </span>
+                <span className="text-sm font-medium text-emerald-400">
+                  {freeSpots > 0 ? `${freeSpots} voľných miest` : "Obsadené"}
+                </span>
               </div>
             </div>
-            <span className={`text-sm font-medium ${statusInfo.color}`}>
-              {statusInfo.label}
-            </span>
           </div>
+        </Card>
+      </Link>
 
-          {/* Date & Time */}
-          <div className="mb-3 space-y-1">
-            <p className="text-sm text-white">📅 {formattedDate}</p>
-            <p className="text-sm text-white">
-              🕐 {formattedTime} ({activity.duration} min)
-            </p>
-          </div>
+      {/* Upcoming instances dropdown */}
+      {showInstances && hasUpcomingInstances && (
+        <div className="mt-2 space-y-2">
+          {activity.upcomingInstances!.map((instance) => {
+            const instanceDate = new Date(instance.date);
+            const instanceFormattedDate = instanceDate.toLocaleDateString("sk-SK", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            });
+            const instanceFormattedTime = instanceDate.toLocaleTimeString("sk-SK", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+            const instanceFreeSpots = instance.maxParticipants - instance.currentParticipants;
 
-          {/* Location */}
-          <div className="mb-3">
-            <p className="text-sm text-white">
-              📍 {activity.locationName || activity.location}
-            </p>
-          </div>
-
-          {/* Skill Level */}
-          <div className="mb-3">
-            <span
-              className="inline-block px-4 py-1.5 text-xs font-semibold rounded-full backdrop-blur-xl"
-              style={{
-                background: "rgba(16, 185, 129, 0.15)",
-                border: "1px solid rgba(16, 185, 129, 0.4)",
-                color: "#34d399",
-                boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
-              }}
-            >
-              {skillLevelLabels[activity.skillLevel] || activity.skillLevel}
-            </span>
-          </div>
-
-          {/* Participants */}
-          <div className="mt-auto pt-3 border-t border-white/10">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-300">
-                Účastníci: {activity.currentParticipants}/
-                {activity.maxParticipants}
-              </span>
-              <span className="text-sm font-medium text-emerald-400">
-                {freeSpots > 0 ? `${freeSpots} voľných miest` : "Obsadené"}
-              </span>
-            </div>
-          </div>
+            return (
+              <Link key={instance.id} href={`/activities/${instance.id}`} onClick={handleClick}>
+                <div
+                  className="p-3 rounded-lg cursor-pointer transition-colors hover:border-purple-500/40"
+                  style={{
+                    background: "rgba(0, 0, 0, 0.3)",
+                    border: "1px solid rgba(168, 85, 247, 0.2)",
+                  }}
+                >
+                  <div className="flex justify-between items-start text-sm">
+                    <div>
+                      <p className="text-white font-medium">📅 {instanceFormattedDate}</p>
+                      <p className="text-gray-300 text-xs mt-1">🕐 {instanceFormattedTime}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-gray-300 text-xs">
+                        {instance.currentParticipants}/{instance.maxParticipants} účastníkov
+                      </p>
+                      <p className="text-emerald-400 text-xs mt-1">
+                        {instanceFreeSpots > 0 ? `${instanceFreeSpots} voľných` : "Obsadené"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
-      </Card>
-    </Link>
+      )}
+    </div>
   );
 }
 
@@ -354,7 +438,7 @@ export default function ActivitiesPage() {
 
         {/* Activities grid */}
         {!loading && activities.length > 0 && (
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
             {activities.map((activity) => (
               <ActivityCard key={activity.id} activity={activity} />
             ))}

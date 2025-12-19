@@ -83,6 +83,7 @@ export default function ProfileEditPage() {
     gymSkill: 1,
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     if (!isPending && !session) {
@@ -96,11 +97,18 @@ export default function ProfileEditPage() {
     }
   }, [session]);
 
+  useEffect(() => {
+    setImageError(false);
+  }, [imagePreview]);
+
   const fetchProfile = async () => {
     try {
       setLoading(true);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+      console.log("Fetching profile from:", `${apiUrl}/api/profile`);
+      
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/profile`,
+        `${apiUrl}/api/profile`,
         {
           credentials: "include",
         }
@@ -111,6 +119,9 @@ export default function ProfileEditPage() {
       }
 
       const data = await response.json();
+      console.log("Profile data received:", data);
+      console.log("User image:", data.image);
+      
       setProfile(data);
       setFormData({
         name: data.name || "",
@@ -131,6 +142,7 @@ export default function ProfileEditPage() {
         swimmingSkill: data.profile?.swimmingSkill || 1,
         gymSkill: data.profile?.gymSkill || 1,
       });
+      console.log("Setting imagePreview to:", data.image);
       setImagePreview(data.image);
     } catch (err) {
       console.error("Error fetching profile:", err);
@@ -213,6 +225,40 @@ export default function ProfileEditPage() {
     setImagePreview(null);
   };
 
+  const handleSyncGoogleImage = async () => {
+    setError(null);
+    setSaving(true);
+    
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/sync-google-image`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Sync Google Image response:", data);
+        if (data.image) {
+          setFormData((prev) => ({ ...prev, image: data.image }));
+          setImagePreview(data.image);
+          setSuccess(true);
+          setTimeout(() => setSuccess(false), 3000);
+        }
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || "Nepodarilo sa synchronizovať fotku z Google účtu");
+      }
+    } catch (err) {
+      console.error("Sync error:", err);
+      setError("Chyba pri synchronizácii fotky");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (isPending || loading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
@@ -292,11 +338,14 @@ export default function ProfileEditPage() {
                   </label>
                   <div className="flex items-center gap-6">
                     <div className="flex-shrink-0">
-                      {imagePreview ? (
+                      {imagePreview && !imageError ? (
                         <img
+                          key={imagePreview}
                           src={imagePreview}
                           alt="Náhľad"
                           className="w-24 h-24 rounded-full object-cover shadow-lg shadow-black/30"
+                          onError={() => setImageError(true)}
+                          referrerPolicy="no-referrer"
                         />
                       ) : (
                         <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center shadow-lg shadow-black/30">
@@ -315,7 +364,7 @@ export default function ProfileEditPage() {
                         onChange={handleImageUpload}
                         className="hidden"
                       />
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 flex-wrap">
                         <label
                           htmlFor="imageUpload"
                           className="acrylic text-center transition-all duration-300 border border-white/10 hover:border-emerald-500/40 font-bold tracking-wide text-gray-200 hover:text-emerald-400 cursor-pointer"
@@ -333,6 +382,25 @@ export default function ProfileEditPage() {
                         >
                           Nahrať obrázok
                         </label>
+                        <button
+                          type="button"
+                          onClick={handleSyncGoogleImage}
+                          disabled={saving}
+                          className="acrylic text-center transition-all duration-300 border border-white/10 hover:border-blue-500/40 font-bold tracking-wide text-gray-200 hover:text-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{
+                            borderRadius: "9999px",
+                            padding: "10px 24px",
+                            fontSize: "14px",
+                            textDecoration: "none",
+                            background: "rgba(255, 255, 255, 0.03)",
+                            backdropFilter: "blur(24px) saturate(180%)",
+                            WebkitBackdropFilter: "blur(24px) saturate(180%)",
+                            boxShadow:
+                              "0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                          }}
+                        >
+                          Sync z Google
+                        </button>
                         {imagePreview && (
                           <button
                             type="button"

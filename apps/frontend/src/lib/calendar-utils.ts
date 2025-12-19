@@ -1,5 +1,45 @@
 // Calendar utility functions for generating calendar links
 
+/**
+ * Generate ICS file content
+ */
+function generateICSContent(event: CalendarEvent): string {
+  const formatICSDate = (date: Date): string => {
+    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  };
+
+  const escape = (str: string): string => {
+    return str.replace(/[,;\\]/g, '\\$&').replace(/\n/g, '\\n');
+  };
+
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//SportBuddy//Calendar//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:${Date.now()}@sportbuddy.app`,
+    `DTSTAMP:${formatICSDate(new Date())}`,
+    `DTSTART:${formatICSDate(event.startTime)}`,
+    `DTEND:${formatICSDate(event.endTime)}`,
+    `SUMMARY:${escape(event.title)}`,
+    `DESCRIPTION:${escape(event.description)}`,
+    `LOCATION:${escape(event.location)}`,
+    'STATUS:CONFIRMED',
+    'SEQUENCE:0',
+    'BEGIN:VALARM',
+    'TRIGGER:-PT1H',
+    'ACTION:DISPLAY',
+    `DESCRIPTION:Pripomienka: ${escape(event.title)}`,
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  return icsContent;
+}
+
 export interface CalendarEvent {
   title: string;
   description: string;
@@ -76,6 +116,64 @@ export function generateICSDownloadLink(activityId: string): string {
 }
 
 /**
+ * Download ICS file from browser-generated content
+ */
+export async function downloadICSFileFromEvent(event: CalendarEvent, filename: string = 'event.ics'): Promise<void> {
+  try {
+    const icsContent = generateICSContent(event);
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    
+    // Detect mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      // On mobile, create data URI and open it - this should trigger calendar app
+      const dataUri = `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`;
+      window.location.href = dataUri;
+      return;
+    }
+    
+    // Desktop: Try using the modern download approach first
+    if ('showSaveFilePicker' in window) {
+      try {
+        // @ts-ignore - File System Access API
+        const handle = await window.showSaveFilePicker({
+          suggestedName: filename,
+          types: [{
+            description: 'Calendar Event',
+            accept: { 'text/calendar': ['.ics'] },
+          }],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return;
+      } catch (e) {
+        // User cancelled or not supported, fall through to legacy method
+      }
+    }
+    
+    // Fallback to traditional download
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Cleanup
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+  } catch (error) {
+    console.error('Download ICS error:', error);
+    throw error;
+  }
+}
+
+/**
  * Download ICS file
  */
 export async function downloadICSFile(activityId: string): Promise<void> {
@@ -103,8 +201,19 @@ export async function downloadICSFile(activityId: string): Promise<void> {
 }
 
 /**
- * Open calendar link in new window
+ * Open calendar link in new window or redirect on mobile
  */
 export function openCalendarLink(url: string): void {
-  window.open(url, '_blank', 'noopener,noreferrer');
+  // Detect if mobile device
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
+  
+  if (isMobile) {
+    // On mobile, use location.href to allow native calendar apps to handle the URL
+    window.location.href = url;
+  } else {
+    // On desktop, open in new tab
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
 }

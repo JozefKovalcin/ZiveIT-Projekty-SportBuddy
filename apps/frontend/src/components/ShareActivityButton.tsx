@@ -90,16 +90,26 @@ export default function ShareActivityButton({
   };
 
   const handleNativeShare = async () => {
-    const shareData = {
-      title: activity.title,
-      text: generateShareText(),
-      url: getShareUrl(),
-    };
-
     try {
-      await navigator.share(shareData);
+      // Combine text and URL into one string for better app compatibility
+      const shareText = `${generateShareText()}\n\n${getShareUrl()}`;
+      
+      await navigator.share({
+        title: activity.title,
+        text: shareText,
+      });
     } catch (err) {
-      console.error("Error sharing:", err);
+      // User cancelled or error occurred
+      if (err instanceof Error && err.name !== 'AbortError') {
+        console.error("Error sharing:", err);
+        // Fallback - copy to clipboard
+        try {
+          await navigator.clipboard.writeText(`${generateShareText()}\n\n${getShareUrl()}`);
+          showToast("Odkaz bol skopírovaný do schránky", "success");
+        } catch (clipErr) {
+          showToast("Nepodarilo sa zdieľať aktivitu", "error");
+        }
+      }
     }
   };
 
@@ -151,7 +161,10 @@ export default function ShareActivityButton({
         shareUrl = `mailto:?subject=${encodeURIComponent(
           `Pozvánka na ${activity.title}`
         )}&body=${text}%0A%0A${url}`;
-        break;
+        // Use location.href for email to open default mail client
+        window.location.href = shareUrl;
+        setIsOpen(false);
+        return; // Return early to avoid the window.open below
     }
 
     window.open(shareUrl, "_blank", "width=600,height=400");

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
+import { createPortal } from "react-dom";
 
 interface Notification {
   id: string;
@@ -30,10 +31,28 @@ export default function NotificationBell({
   const [loading, setLoading] = useState(false);
   const [selectedNotification, setSelectedNotification] =
     useState<Notification | null>(null);
+  const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const lastLatestIdRef = useRef<string | null>(null);
   const router = useRouter();
   const { showToast } = useToast();
+
+  // Track if component is mounted (for portal)
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  // Detect if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024); // lg breakpoint
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Fetch notifications
   const fetchNotifications = async () => {
@@ -150,7 +169,13 @@ export default function NotificationBell({
   return (
     <div className="relative" ref={dropdownRef}>
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          if (isMobile) {
+            router.push('/notifications');
+          } else {
+            setIsOpen(!isOpen);
+          }
+        }}
         className="relative p-2.5 rounded-full hover:bg-[color:var(--fluent-surface-secondary)] transition-all duration-200 cursor-pointer"
         aria-label="Notifikácie"
       >
@@ -179,7 +204,7 @@ export default function NotificationBell({
         )}
       </button>
 
-      {isOpen && (
+      {isOpen && !isMobile && (
         <div
           className={`absolute right-0 mt-2 w-96 max-h-[70vh] rounded-3xl overflow-hidden z-50 border transition-all duration-300
              ${
@@ -268,53 +293,66 @@ export default function NotificationBell({
         </div>
       )}
 
-      {selectedNotification && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {mounted && selectedNotification && createPortal(
+        <>
+          {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm"
             onClick={() => setSelectedNotification(null)}
           />
-          <div className="relative bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 max-w-md w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-bold text-white mb-2">
-              {selectedNotification.title}
-            </h3>
-            <p className="text-gray-300 mb-6 whitespace-pre-wrap">
-              {selectedNotification.message}
-            </p>
+          
+          {/* Modal */}
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none">
+            <div className="bg-[#0a0a0a] border border-white/10 rounded-3xl p-6 max-w-md w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200 pointer-events-auto">
+              <h3 className="text-xl font-bold text-white mb-2">
+                {selectedNotification.title}
+              </h3>
+              <p className="text-gray-300 mb-6 whitespace-pre-wrap">
+                {selectedNotification.message}
+              </p>
 
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setSelectedNotification(null)}
-                className="px-5 py-2.5 rounded-full font-semibold backdrop-blur-xl transition-colors"
-                style={{
-                  background: "rgba(255, 255, 255, 0.03)",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  color: "#9ca3af",
-                }}
-              >
-                Zavrieť
-              </button>
-              {selectedNotification.activityId && (
+              <div className="flex justify-end gap-3">
                 <button
-                  onClick={() => {
-                    router.push(
-                      `/activities/${selectedNotification.activityId}`
-                    );
-                    setSelectedNotification(null);
-                  }}
+                  onClick={() => setSelectedNotification(null)}
                   className="px-5 py-2.5 rounded-full font-semibold backdrop-blur-xl transition-colors"
                   style={{
-                    background: "rgba(16, 185, 129, 0.2)",
-                    border: "1px solid rgba(16, 185, 129, 0.5)",
-                    color: "#34d399",
+                    background: "rgba(255, 255, 255, 0.03)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    color: "#9ca3af",
                   }}
                 >
-                  Otvoriť aktivitu
+                  Zavrieť
                 </button>
-              )}
+                {selectedNotification.activityId && (
+                  <button
+                    onClick={() => {
+                      setSelectedNotification(null);
+                      // Small delay to allow modal to close before navigation
+                      setTimeout(() => {
+                        router.push(
+                          `/activities/${selectedNotification.activityId}`
+                        );
+                        // Scroll to top after navigation
+                        setTimeout(() => {
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }, 100);
+                      }, 200);
+                    }}
+                    className="px-5 py-2.5 rounded-full font-semibold backdrop-blur-xl transition-colors"
+                    style={{
+                      background: "rgba(16, 185, 129, 0.2)",
+                      border: "1px solid rgba(16, 185, 129, 0.5)",
+                      color: "#34d399",
+                    }}
+                  >
+                    Otvoriť aktivitu
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </>,
+        document.body
       )}
     </div>
   );

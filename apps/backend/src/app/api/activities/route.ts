@@ -105,12 +105,23 @@ export async function GET(request: NextRequest) {
     // Build where clause
     const where: any = {
       status: status as any,
-      parentActivityId: null, // Only show parent activities, not recurring instances
-      date: {
+    };
+
+    // Date filtering logic:
+    // If date filter is active: show child activities in range (and parents in range)
+    // If no date filter: show only parent activities (upcoming)
+    if (dateFrom || dateTo) {
+      // Show both parent activities AND child activities that fall in the date range
+      where.date = {
         gte: dateFrom ? new Date(dateFrom) : new Date(),
         ...(dateTo && { lte: getEndOfDay(dateTo) }),
-      },
-    };
+      };
+      // Don't filter by parentActivityId - show both parents and children
+    } else {
+      // No date filter - show only parent activities (not recurring instances)
+      where.parentActivityId = null;
+      where.date = { gte: new Date() };
+    }
 
     // Full-text search on title and description
     if (search && search.trim()) {
@@ -187,7 +198,70 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(activities);
+    // For each recurring activity, fetch upcoming instances
+    const activitiesWithInstances = await Promise.all(
+      activities.map(async (activity) => {
+        // Only fetch upcomingInstances for parent activities (not for children)
+        if (
+          !activity.parentActivityId &&
+          activity.isRecurring &&
+          activity.recurrenceFrequency !== "NONE"
+        ) {
+          // Build where clause for child activities
+          const childWhere: any = {
+            parentActivityId: activity.id,
+            status: "OPEN",
+          };
+
+          // If date filter is active, filter children by that range
+          // Otherwise show all upcoming
+          if (dateFrom || dateTo) {
+            childWhere.date = {
+              gte: dateFrom ? new Date(dateFrom) : new Date(),
+              ...(dateTo && { lte: getEndOfDay(dateTo) }),
+            };
+          } else {
+            childWhere.date = { gte: new Date() };
+          }
+
+          const upcomingInstances = await prisma.activity.findMany({
+            where: childWhere,
+            include: {
+              organizer: {
+                select: {
+                  id: true,
+                  name: true,
+                  image: true,
+                },
+              },
+              participations: {
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      name: true,
+                      image: true,
+                    },
+                  },
+                },
+              },
+            },
+            orderBy: {
+              date: "asc",
+            },
+            take: 10, // Limit to next 10 instances
+          });
+
+          return {
+            ...activity,
+            upcomingInstances,
+          };
+        }
+        return activity;
+      })
+    );
+
+    return NextResponse.json(activitiesWithInstances);
   } catch (error) {
     console.error("Error fetching activities:", error);
     return NextResponse.json(

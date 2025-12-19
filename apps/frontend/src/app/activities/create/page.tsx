@@ -1036,21 +1036,42 @@ export default function CreateActivityPage() {
                           <label className="block text-sm font-medium mb-2 text-white">
                             Počet hostí (okrem teba)
                           </label>
-                          <Input
-                            type="number"
-                            min="0"
-                            max={formData.maxParticipants - 1}
-                            value={formData.autoJoinGuestCount}
-                            onChange={(e) => {
-                              const value = parseInt(e.target.value) || 0;
-                              const maxGuests = formData.maxParticipants - 1;
-                              setFormData((prev) => ({
-                                ...prev,
-                                autoJoinGuestCount: Math.min(value, maxGuests),
-                              }));
-                            }}
-                            placeholder="0"
-                          />
+                          <div className="flex items-center bg-white/[0.03] border border-white/10 rounded-lg h-10 shrink-0">
+                            <button
+                              type="button"
+                              className="w-8 h-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors rounded-l-lg"
+                              onClick={() => {
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  autoJoinGuestCount: Math.max(
+                                    0,
+                                    prev.autoJoinGuestCount - 1
+                                  ),
+                                }));
+                              }}
+                            >
+                              -
+                            </button>
+                            <div className="w-8 text-center text-sm font-medium text-white">
+                              {formData.autoJoinGuestCount}
+                            </div>
+                            <button
+                              type="button"
+                              className="w-8 h-full flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 transition-colors rounded-r-lg"
+                              onClick={() => {
+                                const maxGuests = formData.maxParticipants - 1;
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  autoJoinGuestCount: Math.min(
+                                    maxGuests,
+                                    prev.autoJoinGuestCount + 1
+                                  ),
+                                }));
+                              }}
+                            >
+                              +
+                            </button>
+                          </div>
                           <p className="text-xs text-gray-400 mt-1">
                             Počet ľudí, ktorých berieš so sebou (hosťa) - max{" "}
                             {formData.maxParticipants - 1}

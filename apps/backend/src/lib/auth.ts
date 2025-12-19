@@ -16,7 +16,14 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       enabled:
         !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET,
+      scope: [
+        "openid",
+        "email",
+        "profile",
+        "https://www.googleapis.com/auth/userinfo.profile",
+      ],
       mapProfileToUser: (profile) => {
+        console.log("Google profile data:", JSON.stringify(profile, null, 2));
         return {
           name:
             profile.name ||
@@ -31,6 +38,7 @@ export const auth = betterAuth({
             profile.image ||
             profile.avatar_url ||
             profile.avatarUrl ||
+            profile.pictureUrl ||
             null,
         };
       },

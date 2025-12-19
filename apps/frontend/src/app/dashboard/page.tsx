@@ -10,65 +10,63 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 interface Activity {
   id: string;
   title: string;
-  description: string | null;
   sportType: string;
-  skillLevel: string;
   date: string;
-  duration: number;
-  maxParticipants: number;
-  currentParticipants: number;
-  status: string;
   location?: string;
   locationName?: string | null;
-  venue: {
-    id: string;
-    name: string;
-    city: string;
-    address: string;
-  } | null;
+  currentParticipants: number;
+  maxParticipants: number;
   organizer: {
     id: string;
     name: string;
-    image: string | null;
   };
-  participations: Array<{
-    user: {
-      id: string;
-      name: string;
-      image: string | null;
-    };
-  }>;
 }
 
-interface UserActivities {
-  created: Activity[];
-  joined: Activity[];
-  stats: {
-    totalCreated: number;
-    totalJoined: number;
-    upcomingCreated: number;
-    upcomingJoined: number;
+interface Notification {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+  activity?: {
+    id: string;
+    title: string;
+  };
+}
+
+interface BlockedUser {
+  id: string;
+  createdAt: string;
+  blocked: {
+    id: string;
+    name: string;
+    email: string;
+    image: string | null;
   };
 }
 
 const SPORT_LABELS: Record<string, string> = {
-  FOOTBALL: "Futbal",
-  BASKETBALL: "Basketbal",
-  TENNIS: "Tenis",
-  VOLLEYBALL: "Volejbal",
-  BADMINTON: "Bedminton",
-  TABLE_TENNIS: "Stolný tenis",
-  RUNNING: "Beh",
-  CYCLING: "Cyklistika",
-  SWIMMING: "Plávanie",
-  GYM: "Fitnes",
-  OTHER: "Iné",
+  FOOTBALL: "⚽",
+  BASKETBALL: "🏀",
+  TENNIS: "🎾",
+  VOLLEYBALL: "🏐",
+  BADMINTON: "🏸",
+  TABLE_TENNIS: "🏓",
+  RUNNING: "🏃",
+  CYCLING: "🚴",
+  SWIMMING: "🏊",
+  GYM: "💪",
+  OTHER: "🎯",
 };
 
 export default function DashboardPage() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
-  const [activities, setActivities] = useState<UserActivities | null>(null);
+  const [upcomingActivities, setUpcomingActivities] = useState<Activity[]>([]);
+  const [todayActivities, setTodayActivities] = useState<Activity[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [blockedUsers, setBlockedUsers] = useState<BlockedUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -79,46 +77,126 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (session) {
-      fetchActivities();
+      fetchDashboardData();
     }
   }, [session]);
 
-  const fetchActivities = async () => {
+  const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/activities/my`,
-        {
+      
+      const [activitiesRes, notifRes, blockedRes] = await Promise.all([
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/activities/my`, {
           credentials: "include",
-        }
-      );
+        }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications?limit=5`, {
+          credentials: "include",
+        }),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/blocked`, {
+          credentials: "include",
+        }).catch(() => ({ ok: false })),
+      ]);
 
-      if (response.ok) {
-        const data = await response.json();
-        setActivities(data);
+      if (activitiesRes.ok) {
+        const data = await activitiesRes.json();
+        const now = new Date();
+        const today = new Date(now);
+        today.setHours(23, 59, 59, 999);
+
+        // Deduplicate activities by ID (user might be both organizer and participant)
+        const uniqueActivities = Array.from(
+          new Map(
+            [...data.created, ...data.joined].map((a: Activity) => [a.id, a])
+          ).values()
+        );
+
+        const allActivities = uniqueActivities
+          .filter((a: Activity) => new Date(a.date) >= now)
+          .sort(
+            (a: Activity, b: Activity) =>
+              new Date(a.date).getTime() - new Date(b.date).getTime()
+          );
+
+        setUpcomingActivities(allActivities.slice(0, 6));
+        setTodayActivities(
+          allActivities.filter((a: Activity) => new Date(a.date) <= today)
+        );
+      }
+
+      if (notifRes.ok) {
+        const data = await notifRes.json();
+        setNotifications(data.notifications || []);
+      }
+
+      if (blockedRes.ok) {
+        const data = await blockedRes.json();
+        setBlockedUsers(data || []);
       }
     } catch (error) {
-      console.error("Error fetching activities:", error);
+      console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const handleUnblock = async (blockId: string) => {
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/blocked/${blockId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      if (res.ok) {
+        setBlockedUsers((prev) => prev.filter((b) => b.id !== blockId));
+      }
+    } catch (error) {
+      console.error("Error unblocking user:", error);
+    }
+  };
+
+  const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("sk-SK", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
+    return date.toLocaleTimeString("sk-SK", {
       hour: "2-digit",
       minute: "2-digit",
     });
   };
 
+  const getTimeUntil = (dateString: string) => {
+    const now = new Date();
+    const target = new Date(dateString);
+    const diff = target.getTime() - now.getTime();
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (hours < 24) {
+      return `o ${hours}h ${minutes}m`;
+    }
+    const days = Math.floor(hours / 24);
+    return `o ${days} ${days === 1 ? "deň" : days < 5 ? "dni" : "dní"}`;
+  };
+
+  const getRelativeTime = (dateString: string) => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (minutes < 1) return "práve teraz";
+    if (minutes < 60) return `pred ${minutes}m`;
+    if (hours < 24) return `pred ${hours}h`;
+    return `pred ${days}d`;
+  };
+
   if (isPending || loading) {
     return (
       <main className="min-h-screen flex items-center justify-center relative overflow-hidden">
-        {/* Background Effects (Orbs) */}
         <div className="fixed top-[-20%] left-[-10%] w-[800px] h-[800px] bg-emerald-900/20 rounded-full blur-[130px] pointer-events-none z-0"></div>
         <div className="fixed bottom-[-20%] right-[-10%] w-[700px] h-[700px] bg-green-900/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
         <div className="text-center relative z-10">
@@ -134,128 +212,206 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen relative overflow-hidden pt-36">
-      {/* Background Effects (Orbs) */}
+    <main className="min-h-screen relative overflow-hidden pt-36 pb-12">
       <div className="fixed top-[-20%] left-[-10%] w-[800px] h-[800px] bg-emerald-900/20 rounded-full blur-[130px] pointer-events-none z-0"></div>
       <div className="fixed bottom-[-20%] right-[-10%] w-[700px] h-[700px] bg-green-900/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
-        {/* Hero Section */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-emerald-800 py-12 px-8 rounded-3xl text-white mb-12 shadow-xl">
-          <div className="relative z-10">
-            <h1 className="text-4xl md:text-5xl font-bold mb-3 drop-shadow-lg">
-              Ahoj{session.user?.name ? `, ${session.user.name}` : ""} 👋
-            </h1>
-            <p className="text-xl opacity-90 drop-shadow">
-              Vitajte vo vašom športovom dashboarde
-            </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2">
+            Ahoj{session.user?.name ? `, ${session.user.name}` : ""} 👋
+          </h1>
+          <p className="text-gray-300">
+            {todayActivities.length > 0
+              ? `Máte ${todayActivities.length} ${
+                  todayActivities.length === 1
+                    ? "aktivitu"
+                    : todayActivities.length < 5
+                    ? "aktivity"
+                    : "aktivít"
+                } dnes`
+              : "Vitajte späť vo vašom športovom dashboarde"}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Today's Activities */}
+            {todayActivities.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <span className="text-2xl">🔥</span>
+                    Dnes ({todayActivities.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {todayActivities.map((activity) => (
+                    <Link key={activity.id} href={`/activities/${activity.id}`}>
+                      <div className="p-4 bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 rounded-lg transition-all cursor-pointer">
+                        <div className="flex items-center gap-3">
+                          <span className="text-3xl">
+                            {SPORT_LABELS[activity.sportType] || "🎯"}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-white truncate">
+                              {activity.title}
+                            </h3>
+                            <p className="text-sm text-gray-400">
+                              {formatTime(activity.date)} •{" "}
+                              {activity.locationName || activity.location}
+                            </p>
+                          </div>
+                          <div className="text-emerald-400 font-semibold text-sm whitespace-nowrap">
+                            {getTimeUntil(activity.date)}
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Upcoming Activities */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="text-xl sm:text-2xl">📅</span>
+                    <span className="truncate text-base sm:text-xl">Nadchádzajúce aktivity</span>
+                  </CardTitle>
+                  <Link href="/my-activities" className="shrink-0">
+                    <Button variant="secondary" className="text-xs sm:text-sm px-3 sm:px-4 py-2 whitespace-nowrap">
+                      Všetky
+                    </Button>
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {upcomingActivities.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-400 mb-4">
+                      Žiadne nadchádzajúce aktivity
+                    </p>
+                    <Link href="/activities">
+                      <Button variant="primary">Nájsť aktivity</Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {upcomingActivities.map((activity) => {
+                      const activityDate = new Date(activity.date);
+                      const isToday =
+                        activityDate.toDateString() ===
+                        new Date().toDateString();
+
+                      return (
+                        <Link
+                          key={activity.id}
+                          href={`/activities/${activity.id}`}
+                        >
+                          <div className="p-4 bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 rounded-lg transition-all cursor-pointer">
+                            <div className="flex items-center gap-3">
+                              <div className="text-center min-w-[50px]">
+                                <div className="text-2xl font-bold text-emerald-400">
+                                  {activityDate.getDate()}
+                                </div>
+                                <div className="text-xs text-gray-400 uppercase">
+                                  {activityDate.toLocaleDateString("sk-SK", {
+                                    month: "short",
+                                  })}
+                                </div>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="text-xl">
+                                    {SPORT_LABELS[activity.sportType] || "🎯"}
+                                  </span>
+                                  <h3 className="font-semibold text-white truncate">
+                                    {activity.title}
+                                  </h3>
+                                </div>
+                                <p className="text-sm text-gray-400 truncate">
+                                  {formatTime(activity.date)} •{" "}
+                                  {activity.locationName || activity.location}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-xs text-gray-400">
+                                  {activity.currentParticipants}/
+                                  {activity.maxParticipants}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Blocked Users Management */}
+            {blockedUsers.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <span className="text-2xl">🚫</span>
+                    Zablokovaní používatelia ({blockedUsers.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {blockedUsers.map((blocked) => (
+                      <div
+                        key={blocked.id}
+                        className="p-4 bg-white/[0.03] border border-white/10 rounded-lg"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center flex-shrink-0">
+                            <span className="text-white font-bold">
+                              {blocked.blocked.name.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-white">
+                              {blocked.blocked.name}
+                            </h3>
+                            <p className="text-sm text-gray-400 truncate">
+                              {blocked.blocked.email}
+                            </p>
+                          </div>
+                          <Button
+                            variant="secondary"
+                            className="text-sm"
+                            onClick={() => handleUnblock(blocked.id)}
+                          >
+                            Odblokovať
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
-        </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <Card>
-            <CardHeader>
-              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl mb-4 flex items-center justify-center shadow-lg">
-                <svg
-                  className="w-8 h-8 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
-              </div>
-              <CardTitle>Moje aktivity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-white">
-                {activities?.stats.totalCreated || 0}
-              </p>
-              <p className="text-sm text-gray-300 mt-1">
-                Vytvorené aktivity ({activities?.stats.upcomingCreated || 0}{" "}
-                nadchádzajúcich)
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-700 rounded-xl mb-4 flex items-center justify-center shadow-lg">
-                <svg
-                  className="w-8 h-8 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <CardTitle>Prihlásený na</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-white">
-                {activities?.stats.totalJoined || 0}
-              </p>
-              <p className="text-sm text-gray-300 mt-1">
-                Aktivít ({activities?.stats.upcomingJoined || 0}{" "}
-                nadchádzajúcich)
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-cyan-700 rounded-xl mb-4 flex items-center justify-center shadow-lg">
-                <svg
-                  className="w-8 h-8 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                  />
-                </svg>
-              </div>
-              <CardTitle>Celkom aktivít</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-white">
-                {(activities?.stats.totalCreated || 0) +
-                  (activities?.stats.totalJoined || 0)}
-              </p>
-              <p className="text-sm text-gray-300 mt-1">
-                Účastí na športových aktivitách
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-white mb-6">Rýchle akcie</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Link href="/activities/create">
-              <Card hover className="h-full cursor-pointer">
-                <CardContent className="flex items-center gap-4 p-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+          {/* Right Column */}
+          <div className="space-y-6">
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Rýchle akcie</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Link href="/activities/create" className="block">
+                  <Button variant="primary" className="w-full justify-start">
                     <svg
-                      className="w-8 h-8 text-white"
+                      className="w-5 h-5 mr-2 flex-shrink-0"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -267,25 +423,16 @@ export default function DashboardPage() {
                         d="M12 4v16m8-8H4"
                       />
                     </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-1">
-                      Vytvoriť aktivitu
-                    </h3>
-                    <p className="text-sm text-gray-300">
-                      Zorganizujte novú športovú aktivitu
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/activities">
-              <Card hover className="h-full cursor-pointer">
-                <CardContent className="flex items-center gap-4 p-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-teal-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <span className="truncate">Vytvoriť aktivitu</span>
+                  </Button>
+                </Link>
+                <Link href="/activities" className="block">
+                  <Button
+                    variant="secondary"
+                    className="w-full justify-start"
+                  >
                     <svg
-                      className="w-8 h-8 text-white"
+                      className="w-5 h-5 mr-2 flex-shrink-0"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -297,261 +444,75 @@ export default function DashboardPage() {
                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                       />
                     </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-white mb-1">
-                      Hľadať aktivity
-                    </h3>
-                    <p className="text-sm text-gray-300">
-                      Nájdite si spoluhráčov vo vašom meste
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          </div>
-        </div>
-
-        {/* Activities Lists */}
-        {activities &&
-        (activities.created.length > 0 || activities.joined.length > 0) ? (
-          <div className="space-y-8">
-            {/* Created Activities */}
-            {activities.created.length > 0 && (
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-6">
-                  Moje vytvorené aktivity
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {activities.created.map((activity) => (
-                    <Link key={activity.id} href={`/activities/${activity.id}`}>
-                      <Card hover className="h-full cursor-pointer">
-                        <CardContent className="p-6">
-                          <div className="flex items-start justify-between mb-4">
-                            <span
-                              className="px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-xl"
-                              style={{
-                                background: "rgba(16, 185, 129, 0.15)",
-                                border: "1px solid rgba(16, 185, 129, 0.4)",
-                                color: "#34d399",
-                                boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
-                              }}
-                            >
-                              {SPORT_LABELS[activity.sportType] ||
-                                activity.sportType}
-                            </span>
-                            <span className="text-xs text-gray-400">
-                              Organizátor
-                            </span>
-                          </div>
-                          <h3 className="text-lg font-bold text-white mb-2">
-                            {activity.title}
-                          </h3>
-                          <div className="space-y-2 text-sm text-gray-300">
-                            <div className="flex items-center gap-2">
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                />
-                              </svg>
-                              <span>{formatDate(activity.date)}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                />
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                />
-                              </svg>
-                              <span>
-                                {activity.locationName || activity.location}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                                />
-                              </svg>
-                              <span>
-                                {activity.currentParticipants}/
-                                {activity.maxParticipants} účastníkov
-                              </span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Joined Activities */}
-            {activities.joined.length > 0 && (
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-6">
-                  Aktivity, na ktoré som prihlásený
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {activities.joined.map((activity) => (
-                    <Link key={activity.id} href={`/activities/${activity.id}`}>
-                      <Card hover className="h-full cursor-pointer">
-                        <CardContent className="p-6">
-                          <div className="flex items-start justify-between mb-4">
-                            <span
-                              className="px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-xl"
-                              style={{
-                                background: "rgba(16, 185, 129, 0.15)",
-                                border: "1px solid rgba(16, 185, 129, 0.4)",
-                                color: "#34d399",
-                                boxShadow: "0 4px 12px -3px rgba(0, 0, 0, 0.3)",
-                              }}
-                            >
-                              {SPORT_LABELS[activity.sportType] ||
-                                activity.sportType}
-                            </span>
-                            <span className="text-xs text-gray-400">
-                              Účastník
-                            </span>
-                          </div>
-                          <h3 className="text-lg font-bold text-white mb-2">
-                            {activity.title}
-                          </h3>
-                          <div className="space-y-2 text-sm text-gray-300">
-                            <div className="flex items-center gap-2">
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                />
-                              </svg>
-                              <span>{formatDate(activity.date)}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                />
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                />
-                              </svg>
-                              <span>
-                                {activity.locationName || activity.location}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                />
-                              </svg>
-                              <span>Organizuje: {activity.organizer.name}</span>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          /* Empty State */
-          <Card>
-            <CardContent className="text-center py-16">
-              <div className="w-20 h-20 bg-white/[0.05] rounded-full mx-auto mb-6 flex items-center justify-center shadow-lg">
-                <svg
-                  className="w-10 h-10 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">
-                Zatiaľ žiadne aktivity
-              </h3>
-              <p className="text-gray-300 mb-6 max-w-md mx-auto">
-                Začnite vytvorením novej aktivity alebo sa pripojte k
-                existujúcim aktivitám vo vašom okolí.
-              </p>
-              <div className="flex gap-4 justify-center">
-                <Link href="/activities/create">
-                  <Button size="lg">Vytvoriť aktivitu</Button>
-                </Link>
-                <Link href="/activities">
-                  <Button variant="secondary" size="lg">
-                    Prehliadať aktivity
+                    <span className="truncate">Hľadať aktivity</span>
                   </Button>
                 </Link>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              </CardContent>
+            </Card>
+
+            {/* Recent Notifications */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <span className="text-xl">🔔</span>
+                    Notifikácie
+                  </CardTitle>
+                  <Link href="/profile/notifications">
+                    <button className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors">
+                      Nastavenia
+                    </button>
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {notifications.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-4">
+                    Žiadne nové notifikácie
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {notifications.map((notif) => (
+                      <Link
+                        key={notif.id}
+                        href={
+                          notif.activity
+                            ? `/activities/${notif.activity.id}`
+                            : "/notifications"
+                        }
+                      >
+                        <div
+                          className={`p-3 rounded-lg transition-all cursor-pointer ${
+                            notif.read
+                              ? "bg-white/[0.03] hover:bg-white/[0.06]"
+                              : "bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30"
+                          }`}
+                        >
+                          <div className="flex items-start gap-2">
+                            {!notif.read && (
+                              <div className="w-2 h-2 bg-emerald-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-sm font-semibold text-white mb-1">
+                                {notif.title}
+                              </h4>
+                              <p className="text-xs text-gray-400 line-clamp-2">
+                                {notif.message}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {getRelativeTime(notif.createdAt)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </main>
   );

@@ -40,6 +40,7 @@ export async function POST(
       where: { id: id },
       include: {
         participations: true,
+        organizer: true,
       },
     });
 
@@ -47,6 +48,23 @@ export async function POST(
       return NextResponse.json(
         { error: "Aktivita nenájdená" },
         { status: 404 }
+      );
+    }
+
+    // Check if user is blocked by the organizer
+    const isBlocked = await prisma.userBlock.findUnique({
+      where: {
+        blockerId_blockedId: {
+          blockerId: activity.organizerId,
+          blockedId: session.user.id,
+        },
+      },
+    });
+
+    if (isBlocked) {
+      return NextResponse.json(
+        { error: "Organizátor vás zablokoval a nemôžete sa prihlásiť na túto aktivitu" },
+        { status: 403 }
       );
     }
 

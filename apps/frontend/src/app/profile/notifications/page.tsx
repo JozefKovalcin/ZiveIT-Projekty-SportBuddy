@@ -13,8 +13,14 @@ interface NotificationPreferences {
   inAppEnabled: boolean;
   notifyNewActivities: boolean;
   notifyReminders: boolean;
-  notifyParticipants: boolean;
+  notifyParticipants: boolean; // Legacy
+  notifyParticipantJoined: boolean;
+  notifyParticipantLeft: boolean;
   notifyActivityFull: boolean;
+  notifyActivityUpdated: boolean;
+  notifyActivityCancelled: boolean;
+  notifyMessages: boolean;
+  notifyRatings: boolean;
   onlyFavoriteSports: boolean;
   maxDistance: number | null;
   maxPrice: number | null;
@@ -35,6 +41,7 @@ export default function NotificationSettingsPage() {
   const [pushSupported, setPushSupported] = useState(false);
   const [pushPermission, setPushPermission] =
     useState<NotificationPermission>("default");
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
 
   useEffect(() => {
     if (!isPending && !session) router.push("/auth/signin");
@@ -71,20 +78,79 @@ export default function NotificationSettingsPage() {
   };
 
   const requestPushPermission = async () => {
-    const permission = await Notification.requestPermission();
-    setPushPermission(permission);
-    if (permission === "granted") {
-      const reg = await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-      });
-      await fetch(`${API_URL}/api/notifications/subscribe`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(sub.toJSON()),
-      });
+    if (isRequestingPermission) {
+      console.log('[Push] Already requesting permission, skipping...');
+      return;
+    }
+    
+    try {
+      setIsRequestingPermission(true);
+      console.log('[Push] Requesting permission...');
+      const permission = await Notification.requestPermission();
+      console.log('[Push] Permission result:', permission);
+      setPushPermission(permission);
+      
+      if (permission === "granted") {
+        console.log('[Push] Waiting for service worker...');
+        const reg = await navigator.serviceWorker.ready;
+        console.log('[Push] Service worker ready');
+        
+        // Convert VAPID key from base64url to Uint8Array
+        const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (!vapidPublicKey) {
+          console.error('[Push] VAPID public key not found');
+          alert('Chyba: VAPID kľúč nie je nakonfigurovaný');
+          return;
+        }
+        
+        console.log('[Push] VAPID key:', vapidPublicKey.substring(0, 20) + '...');
+        
+        const urlBase64ToUint8Array = (base64String: string) => {
+          const padding = '='.repeat((4 - base64String.length % 4) % 4);
+          const base64 = (base64String + padding)
+            .replace(/\-/g, '+')
+            .replace(/_/g, '/');
+          const rawData = window.atob(base64);
+          const outputArray = new Uint8Array(rawData.length);
+          for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+          }
+          return outputArray;
+        };
+        
+        const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
+        
+        console.log('[Push] Subscribing to push...');
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: applicationServerKey,
+        });
+        
+        console.log('[Push] Subscription created:', sub.endpoint);
+        
+        console.log('[Push] Sending subscription to server...');
+        const response = await fetch(`${API_URL}/api/notifications/subscribe`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(sub.toJSON()),
+        });
+        
+        if (!response.ok) {
+          const error = await response.text();
+          console.error('[Push] Failed to save subscription:', error);
+          alert('Chyba pri ukladaní subscription: ' + error);
+          return;
+        }
+        
+        console.log('[Push] Subscription saved successfully');
+        alert('Push notifikácie boli úspešne povolené!');
+      }
+    } catch (error) {
+      console.error('[Push] Error:', error);
+      alert('Chyba pri povolení push notifikácií: ' + error);
+    } finally {
+      setIsRequestingPermission(false);
     }
   };
 
@@ -215,12 +281,16 @@ export default function NotificationSettingsPage() {
           <h2 className="text-xl font-bold text-[color:var(--fluent-text)] mb-4">
             🔔 Typy notifikácií
           </h2>
-          <Toggle
-            checked={prefs.notifyNewActivities}
-            onChange={(v) => update("notifyNewActivities", v)}
-            label="Nové aktivity"
-            desc="Keď sa vytvorí aktivita podľa tvojich preferencií"
-          />
+          
+          <div className="mb-4 pb-4 border-b border-white/10">
+            <h3 className="text-sm font-semibold text-emerald-400 mb-3">Nové aktivity</h3>
+            <Toggle
+              checked={prefs.notifyNewActivities}
+              onChange={(v) => update("notifyNewActivities", v)}
+              label="Nové aktivity v okolí"
+              desc="Keď sa vytvorí aktivita podľa tvojich preferencií"
+            />
+          </div>
 
           {/* Radius Slider for New Activities */}
           {prefs.notifyNewActivities && (
@@ -255,24 +325,65 @@ export default function NotificationSettingsPage() {
             </div>
           )}
 
-          <Toggle
-            checked={prefs.notifyReminders}
-            onChange={(v) => update("notifyReminders", v)}
-            label="Pripomienky"
-            desc="Pripomienka pred začiatkom aktivity"
-          />
-          <Toggle
-            checked={prefs.notifyParticipants}
-            onChange={(v) => update("notifyParticipants", v)}
-            label="Účastníci"
-            desc="Keď sa niekto pridá alebo odíde z tvojej aktivity"
-          />
-          <Toggle
-            checked={prefs.notifyActivityFull}
-            onChange={(v) => update("notifyActivityFull", v)}
-            label="Aktivita je plná"
-            desc="Keď sa naplní kapacita aktivity, ktorú sleduješ"
-          />
+          <div className="mb-4 pb-4 border-b border-white/10">
+            <h3 className="text-sm font-semibold text-emerald-400 mb-3">Moje aktivity</h3>
+            <Toggle
+              checked={prefs.notifyParticipantJoined}
+              onChange={(v) => update("notifyParticipantJoined", v)}
+              label="Niekto sa pridal"
+              desc="Keď sa nový účastník pridá na tvoju aktivitu"
+            />
+            <Toggle
+              checked={prefs.notifyParticipantLeft}
+              onChange={(v) => update("notifyParticipantLeft", v)}
+              label="Niekto odišiel"
+              desc="Keď sa účastník odhlásite z tvojej aktivity"
+            />
+            <Toggle
+              checked={prefs.notifyActivityFull}
+              onChange={(v) => update("notifyActivityFull", v)}
+              label="Aktivita je plná"
+              desc="Keď sa naplní kapacita tvojej aktivity"
+            />
+          </div>
+
+          <div className="mb-4 pb-4 border-b border-white/10">
+            <h3 className="text-sm font-semibold text-emerald-400 mb-3">Prihlásené aktivity</h3>
+            <Toggle
+              checked={prefs.notifyReminders}
+              onChange={(v) => update("notifyReminders", v)}
+              label="Pripomienky"
+              desc="Pripomienka 1 hodinu pred začiatkom aktivity"
+            />
+            <Toggle
+              checked={prefs.notifyActivityUpdated}
+              onChange={(v) => update("notifyActivityUpdated", v)}
+              label="Zmeny v aktivite"
+              desc="Keď organizátor zmení čas, miesto alebo iné detaily"
+            />
+            <Toggle
+              checked={prefs.notifyActivityCancelled}
+              onChange={(v) => update("notifyActivityCancelled", v)}
+              label="Zrušenie aktivity"
+              desc="Keď organizátor zruší aktivitu"
+            />
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-emerald-400 mb-3">Sociálne</h3>
+            <Toggle
+              checked={prefs.notifyMessages}
+              onChange={(v) => update("notifyMessages", v)}
+              label="Správy"
+              desc="Nové správy v chate aktivity"
+            />
+            <Toggle
+              checked={prefs.notifyRatings}
+              onChange={(v) => update("notifyRatings", v)}
+              label="Hodnotenia"
+              desc="Keď ťa niekto ohodnotí po aktivite"
+            />
+          </div>
         </Card>
 
         {/* Filters */}
@@ -290,23 +401,64 @@ export default function NotificationSettingsPage() {
             <p className="text-[color:var(--fluent-text)] font-medium mb-2">
               Maximálna cena aktivity
             </p>
-            <div className="flex items-center gap-3">
+            <div className="relative flex items-center">
+              <button
+                type="button"
+                onClick={() =>
+                  update("maxPrice", Math.max(0, (prefs.maxPrice ?? 0) - 1))
+                }
+                className="absolute left-0 h-full px-3 text-gray-400 hover:text-white hover:bg-white/[0.05] rounded-l-lg transition-colors z-10"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M20 12H4"
+                  />
+                </svg>
+              </button>
               <input
                 type="number"
                 min="0"
-                value={prefs.maxPrice ?? ""}
+                value={prefs.maxPrice ?? 0}
                 onChange={(e) =>
                   update(
                     "maxPrice",
                     e.target.value ? Number(e.target.value) : null
                   )
                 }
-                placeholder="Bez limitu"
-                className="bg-[color:var(--fluent-surface-secondary)] border border-[color:var(--fluent-border)] rounded-lg px-4 py-2 text-[color:var(--fluent-text)] w-32 focus:outline-none focus:ring-2 focus:ring-[color:var(--fluent-accent)]"
+                className="bg-[color:var(--fluent-surface-secondary)] border border-[color:var(--fluent-border)] rounded-lg px-4 py-2 text-[color:var(--fluent-text)] w-full text-center focus:outline-none focus:ring-2 focus:ring-[color:var(--fluent-accent)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
-              <span className="text-[color:var(--fluent-text-secondary)]">
-                €
-              </span>
+              <button
+                type="button"
+                onClick={() =>
+                  update(
+                    "maxPrice",
+                    Math.min(1000, (prefs.maxPrice ?? 0) + 1)
+                  )
+                }
+                className="absolute right-0 h-full px-3 text-gray-400 hover:text-white hover:bg-white/[0.05] rounded-r-lg transition-colors z-10"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+              </button>
             </div>
           </div>
         </Card>
@@ -373,16 +525,66 @@ export default function NotificationSettingsPage() {
             <p className="text-[color:var(--fluent-text)] font-medium mb-2">
               Maximum notifikácií denne
             </p>
-            <input
-              type="number"
-              min="1"
-              max="100"
-              value={prefs.maxNotificationsPerDay}
-              onChange={(e) =>
-                update("maxNotificationsPerDay", Number(e.target.value))
-              }
-              className="bg-[color:var(--fluent-surface-secondary)] border border-[color:var(--fluent-border)] rounded-lg px-4 py-2 text-[color:var(--fluent-text)] w-24 focus:outline-none focus:ring-2 focus:ring-[color:var(--fluent-accent)]"
-            />
+            <div className="relative flex items-center">
+              <button
+                type="button"
+                onClick={() =>
+                  update(
+                    "maxNotificationsPerDay",
+                    Math.max(1, prefs.maxNotificationsPerDay - 1)
+                  )
+                }
+                className="absolute left-0 h-full px-3 text-gray-400 hover:text-white hover:bg-white/[0.05] rounded-l-lg transition-colors z-10"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M20 12H4"
+                  />
+                </svg>
+              </button>
+              <input
+                type="number"
+                min="1"
+                max="100"
+                value={prefs.maxNotificationsPerDay}
+                onChange={(e) =>
+                  update("maxNotificationsPerDay", Number(e.target.value))
+                }
+                className="bg-[color:var(--fluent-surface-secondary)] border border-[color:var(--fluent-border)] rounded-lg px-4 py-2 text-[color:var(--fluent-text)] w-full text-center focus:outline-none focus:ring-2 focus:ring-[color:var(--fluent-accent)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  update(
+                    "maxNotificationsPerDay",
+                    Math.min(100, prefs.maxNotificationsPerDay + 1)
+                  )
+                }
+                className="absolute right-0 h-full px-3 text-gray-400 hover:text-white hover:bg-white/[0.05] rounded-r-lg transition-colors z-10"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </Card>
 
