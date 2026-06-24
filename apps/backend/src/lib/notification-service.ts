@@ -211,7 +211,7 @@ async function findMatchingUsers(activity: any) {
     where: {
       id: { not: activity.organizerId },
       notificationPreferences: {
-        OR: [{ notifyNewActivities: true }, { notifyNewActivities: null }],
+        notifyNewActivities: true,
       },
     },
     include: {

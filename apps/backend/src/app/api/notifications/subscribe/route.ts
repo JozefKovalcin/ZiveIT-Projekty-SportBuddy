@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, id: subscription.id });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('[Subscribe] Validation error:', error.errors);
+      console.error('[Subscribe] Validation error:', error.issues);
       return NextResponse.json({ error: "Neplatné údaje" }, { status: 400 });
     }
     console.error('[Subscribe] Error saving push subscription:', error);

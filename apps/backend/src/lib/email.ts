@@ -5,14 +5,12 @@ const HAS_BREVO_KEY =
   !!process.env.BREVO_API_KEY && process.env.BREVO_API_KEY !== "brevo_test_key";
 
 // Initialize Brevo API client
-let apiInstance: brevo.TransactionalEmailsApi | null = null;
+let apiInstance: brevo.BrevoClient | null = null;
 if (HAS_BREVO_KEY) {
   try {
-    apiInstance = new brevo.TransactionalEmailsApi();
-    apiInstance.setApiKey(
-      brevo.TransactionalEmailsApiApiKeys.apiKey,
-      process.env.BREVO_API_KEY!
-    );
+    apiInstance = new brevo.BrevoClient({
+      apiKey: process.env.BREVO_API_KEY!,
+    });
   } catch (error) {
     console.error("Failed to initialize Brevo API:", error);
     apiInstance = null;
@@ -55,15 +53,14 @@ export async function sendPasswordResetEmail({
   }
 
   try {
-    const sendSmtpEmail = new brevo.SendSmtpEmail();
-    sendSmtpEmail.subject = "SportBuddy - Reset hesla";
-    sendSmtpEmail.to = [{ email, name: userName }];
-    // Use your verified Brevo sender email (the one you registered with)
-    sendSmtpEmail.sender = {
-      name: "SportBuddy",
-      email: process.env.BREVO_SENDER_EMAIL || "kberecky@gmail.com", // Change to your verified Brevo email
-    };
-    sendSmtpEmail.htmlContent = `
+    const sendSmtpEmail = {
+      subject: "SportBuddy - Reset hesla",
+      to: [{ email, name: userName }],
+      sender: {
+        name: "SportBuddy",
+        email: process.env.BREVO_SENDER_EMAIL || "no-reply@sportbuddy.local",
+      },
+      htmlContent: `
 <!DOCTYPE html>
 <html lang="sk">
 <head>
@@ -269,9 +266,10 @@ export async function sendPasswordResetEmail({
   </div>
 </body>
 </html>
-      `;
+      `,
+    };
 
-    const data = await apiInstance!.sendTransacEmail(sendSmtpEmail);
+    const data = await apiInstance!.transactionalEmails.sendTransacEmail(sendSmtpEmail);
     console.log("Password reset email sent:", data);
     return { success: true, data };
   } catch (error) {

@@ -94,7 +94,7 @@ export default function DashboardPage() {
         }),
         fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/blocked`, {
           credentials: "include",
-        }).catch(() => ({ ok: false })),
+        }).catch(() => null),
       ]);
 
       if (activitiesRes.ok) {
@@ -128,7 +128,7 @@ export default function DashboardPage() {
         setNotifications(data.notifications || []);
       }
 
-      if (blockedRes.ok) {
+      if (blockedRes?.ok) {
         const data = await blockedRes.json();
         setBlockedUsers(data || []);
       }

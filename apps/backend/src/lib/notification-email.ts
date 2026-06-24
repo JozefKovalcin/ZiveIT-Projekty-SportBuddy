@@ -2,10 +2,11 @@ import * as brevo from "@getbrevo/brevo";
 
 const HAS_BREVO_KEY = !!process.env.BREVO_API_KEY && process.env.BREVO_API_KEY !== "brevo_test_key";
 
-let apiInstance: brevo.TransactionalEmailsApi | null = null;
+let apiInstance: brevo.BrevoClient | null = null;
 if (HAS_BREVO_KEY) {
-  apiInstance = new brevo.TransactionalEmailsApi();
-  apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY!);
+  apiInstance = new brevo.BrevoClient({
+    apiKey: process.env.BREVO_API_KEY!,
+  });
 }
 
 interface NotificationEmailParams {
@@ -29,15 +30,14 @@ export async function sendNotificationEmail({ email, userName, notification }: N
   }
 
   try {
-    const sendSmtpEmail = new brevo.SendSmtpEmail();
-    sendSmtpEmail.subject = `SportBuddy - ${notification.title}`;
-    sendSmtpEmail.to = [{ email, name: userName }];
-    sendSmtpEmail.sender = { name: "SportBuddy", email: process.env.BREVO_SENDER_EMAIL || "kberecky@gmail.com" };
-    sendSmtpEmail.htmlContent = generateEmailHtml(userName, notification, activityUrl, unsubscribeUrl);
-
     console.log('[Email] Sending via Brevo to:', email);
-    const result = await apiInstance!.sendTransacEmail(sendSmtpEmail);
-    console.log('[Email] ✅ Successfully sent! Message ID:', result.body?.messageId || result.response?.body?.messageId);
+    const result = await apiInstance!.transactionalEmails.sendTransacEmail({
+      subject: `SportBuddy - ${notification.title}`,
+      to: [{ email, name: userName }],
+      sender: { name: "SportBuddy", email: process.env.BREVO_SENDER_EMAIL || "no-reply@sportbuddy.local" },
+      htmlContent: generateEmailHtml(userName, notification, activityUrl, unsubscribeUrl),
+    });
+    console.log('[Email] ✅ Successfully sent! Message ID:', result.messageId);
     return { success: true };
   } catch (error) {
     console.error("[Email] ❌ Failed to send:", error);

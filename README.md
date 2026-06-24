@@ -1,402 +1,158 @@
 # SportBuddy
 
-Moderná webová aplikácia pre športových nadšencov - hľadanie spoluhráčov, organizácia športových aktivít a prehľad športovísk.
+SportBuddy is a full-stack web application for organizing local sports activities. It helps users discover nearby games, create activities, manage participation, chat with other players, review participants, and use AI-assisted search or activity creation in Slovak.
 
-## Technológie
+This repository is structured as a small monorepo with separate Next.js applications for the frontend and backend, a PostgreSQL database managed by Prisma, and Docker Compose for local development.
 
-**Frontend:** Next.js (latest), React (latest), TypeScript (latest), Tailwind CSS (latest)
-**Backend:** Next.js API Routes, Prisma ORM (latest), Better Auth (latest), PostgreSQL (latest)
-**DevOps:** Docker & Docker Compose, Node.js (alpine)
+## Highlights
 
-> **Poznámka:** Všetky verzie používajú najnovšie Alpine Linux obrazy a npm balíčky pre najnovšie stabilné vydania.
+- Activity discovery with filtering by sport, skill level, location, date, age range, price, and gender preference.
+- Activity creation flow with recurring activities, venue/location support, calendar export, and participant management.
+- User authentication, profile editing, public profiles, ratings, password reset by email, and user blocking.
+- In-app notifications, activity chat with polling, and notification preferences.
+- AI-assisted natural language search and activity creation powered by Google Gemini.
+- Dockerized local environment with PostgreSQL, frontend, and backend services.
 
----
+## Tech Stack
 
-## Rýchly štart
+- Frontend: Next.js, React, TypeScript, Tailwind CSS
+- Backend: Next.js API routes, Prisma ORM, Better Auth, PostgreSQL
+- Shared package: TypeScript types and validation helpers
+- Integrations: Google Maps, Google Gemini, Brevo email, Web Push
+- DevOps: Docker, Docker Compose, pnpm
 
-### Predpoklady
-- [Docker Desktop](https://www.docker.com/products/docker-desktop) (najnovšia verzia)
+## Architecture
+
+```text
+apps/
+  backend/      Next.js API application, Prisma schema, auth, email, AI, uploads
+  frontend/     Next.js UI application, PWA assets, reusable components
+  postgres/     Custom PostgreSQL Docker image setup
+packages/
+  shared/       Shared TypeScript exports and domain types
+```
+
+The frontend talks to the backend through `NEXT_PUBLIC_API_URL`. The backend owns authentication, database access, file upload serving, email delivery, AI calls, notifications, and Prisma migrations.
+
+## Getting Started
+
+### Prerequisites
+
 - Git
-- Ideálne WSL2 (Docker Engine nech beží tiež na WSL2)
+- Docker Desktop with Docker Compose
+- Node.js 20+ and pnpm, only if you want to run services outside Docker
 
-### Inštalácia (4 kroky)
+### Local Setup
 
 ```bash
-# 1. Klonuj projekt
-git clone git@git.kemt.fei.tuke.sk:kb159dr/SportBuddy.git
-cd sportbuddy
+git clone https://github.com/JozefKovalcin/ZiveIT-Projekty-SportBuddy.git
+cd ZiveIT-Projekty-SportBuddy
 
-# 2. Skopíruj premenné prostredia (DÔLEŽITÉ!)
 cp .env.example .env
-
-# 3. Spusti Docker Compose (automaticky stiahne závislosti a spustí všetky služby)
-docker-compose up -d
-   - custom PostgreSQL image (databáza)
-# 4. Otvor aplikáciu v prehliadači
-# Frontend: http://localhost:3000
-# Backend API: http://localhost:3001/api
+docker compose up -d --build
 ```
 
-   - Aplikuje databázové migrácie (`prisma migrate deploy`)
+Open:
 
----
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:3001/api
+- PostgreSQL: localhost:5432
 
-## Pre vývojárov
+The backend container generates the Prisma client and applies existing migrations during startup.
 
-### Pri prvom spustení:
+## Environment Variables
 
-**⚠️ Pred spustením: Uisti sa, že máš `.env` súbor (pozri krok 2 v inštalácii vyššie)**
+Copy `.env.example` to `.env` and fill only the integrations you need. The app can run locally without optional OAuth, email, Maps, or AI keys, but those features will be disabled or limited.
 
-1. **Docker stiahne obrazy:**
-   - `postgres:alpine` (databáza)
-   - `node:alpine` (Node.js prostredie)
+Important variables:
 
-2. **Backend automaticky:**
-   - Nainštaluje npm závislosti
-   - Vygeneruje Prisma klienta
-   - Vytvorí databázové tabuľky (`prisma db push`)
-   - Spustí vývojársky server na porte **3001**
+- `DATABASE_URL` - PostgreSQL connection string used by Prisma.
+- `BETTER_AUTH_SECRET` - random 32+ character secret for auth.
+- `BETTER_AUTH_URL` - backend URL, usually `http://localhost:3001`.
+- `NEXT_PUBLIC_API_URL` - frontend-to-backend API URL.
+- `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` - enables map/location features.
+- `GEMINI_API_KEY` - enables AI search and AI activity creation.
+- `BREVO_API_KEY` - enables password reset email delivery.
+- `BREVO_SENDER_EMAIL` - verified sender used by Brevo.
+- `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, and `NEXT_PUBLIC_VAPID_PUBLIC_KEY` - enable Web Push notifications.
+- `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` - optional Google OAuth.
 
-   - Nainštaluje npm závislosti
-   - Spustí vývojársky server na porte **3000**
+Never commit real secrets. If a real key was ever committed, rotate it in the provider dashboard because deleting it from the repository does not remove it from Git history.
 
-4. **PostgreSQL:**
-   - Vytvorí databázu `sportbuddy`
-   - Beží na porte **5432**
-
-### Automatické načítanie zmien (Hot Reload)
-
-Vďaka **pripojeniu zväzkov (volume mounts)** - okamžité načítanie zmien:
-
-```
-Zmeníš súbor → Uložíš (Ctrl+S) → Zmena sa okamžite prejaví v prehliadači
-```
-
-Nemusíš reštartovať Docker kontajnery!
-
----
-
-## Príkazy Docker pre vývoj
+## Useful Commands
 
 ```bash
-# Spustenie všetkých služieb
-docker-compose up -d
+# Start all services
+docker compose up -d
 
-# Sledovanie záznamov (užitočné pre ladenie)
-docker-compose logs -f
-docker-compose logs -f backend    # len backend
-docker-compose logs -f frontend   # len frontend
+# Rebuild containers after dependency or Dockerfile changes
+docker compose up -d --build
 
-# Opätovné zostavenie po zmene Dockerfile
-docker-compose up -d --build
+# Follow logs
+docker compose logs -f
+docker compose logs -f backend
+docker compose logs -f frontend
 
-# Zastavenie služieb
-docker-compose down
+# Open Prisma Studio
+docker compose exec backend pnpm exec prisma studio
 
-# Vyčistenie všetkého (vrátane databázy!)
-docker-compose down -v
+# Stop services
+docker compose down
 
-# Pripojenie do kontajnera (pre manuálne príkazy)
-docker-compose exec backend sh
-docker-compose exec frontend sh
-
-# Prisma Studio (grafické rozhranie pre databázu)
-docker-compose exec backend npx prisma studio
-│       │   │   └── GoogleMapsProvider.tsx # Google Maps provider
+# Stop services and remove database volume
+docker compose down -v
 ```
 
----
+## Running Without Docker
 
-## Štruktúra projektu
-
-```
-sportbuddy/
-├── apps/
-│   ├── backend/                    # Backend API (Next.js + Prisma)
-│   │   ├── prisma/
-│   │   │   ├── schema.prisma       # Databázová schéma
-│   │   │   └── seed.ts             # Počiatočné dáta do databázy (športoviská)
-│   │   ├── src/
-│   │   │   ├── app/api/            # API koncové body
-│   │   │   │   ├── activities/     # Activity CRUD + prihlásenie/odhlásenie
-│   │   │   │   ├── auth/           # Better Auth koncové body + vlastný reset hesla
-│   │   │   │   ├── profile/        # API používateľského profilu
-│   │   │   │   └── venues/         # API športovísk
-│   │   │   └── lib/                # Serverové utility
-│   │   │       ├── auth.ts         # Better Auth konfigurácia
-│   │   │       ├── auth-client.ts  # Nastavenie Auth klienta
-│   │   │       ├── email.ts        # Brevo emailová služba (na reset hesla)
-│   │   │       ├── get-session.ts  # Session helper
-│   │   │       └── prisma.ts       # Prisma klient
-│   │   ├── Dockerfile              # Multi-stage Docker (dev + prod)
-│   │   ├── middleware.ts           # Next.js middleware
-│   │   ├── next.config.mjs         # Next.js konfigurácia (CORS hlavičky)
-│   │   ├── package.json            # Závislosti
-│   │   └── tsconfig.json           # TypeScript konfigurácia
-│   │
-│   └── frontend/                   # Frontend UI (Next.js + React)
-│       ├── public/
-│       │   ├── manifest.json       # PWA manifest
-│       │   └── sw.js               # Service Worker
-│       ├── src/
-│       │   ├── app/                # Next.js App Router stránky
-│       │   │   ├── auth/           # Autentifikačné stránky (prihlásenie, registrácia)
-│       │   │   ├── dashboard/      # Stránka dashboardu
-│       │   │   ├── profile/        # Stránky profilu
-│       │   │   ├── globals.css     # Globálne štýly
-│       │   │   ├── layout.tsx      # Hlavné rozloženie
-│       │   │   └── page.tsx        # Domovská stránka
-│       │   ├── components/         # React komponenty
-│       │   │   ├── ui/             # UI elementy (Button, Card, Input, Select, etc.)
-│       │   │   ├── Navigation.tsx  # Navigačný komponent
-│       │   │   └── TemplateWrapper.tsx # Wrapper s layoutom
-│       │   ├── contexts/
-│       │   │   └── GoogleMapsContext.tsx # Google Maps provider
-│       │   └── lib/
-│       │       └── auth-client.ts  # Better Auth klient
-│       ├── Dockerfile              # Viacstupňový Docker (dev + prod)
-│       ├── next.config.mjs         # Next.js konfigurácia
-│       ├── package.json            # Závislosti
-│       ├── postcss.config.mjs      # PostCSS konfigurácia
-│       ├── tailwind.config.ts      # Tailwind CSS konfigurácia
-│       └── tsconfig.json           # TypeScript konfigurácia
-│
-├── packages/
-│   └── shared/                     # Zdieľané TypeScript typy
-│       ├── src/
-│       │   ├── types/
-│       │   │   └── index.ts        # Zdieľané typy (SportType, SkillLevel, atď.)
-│       │   └── index.ts            # Exporty balíčka
-│       └── package.json
-│
-├── .dockerignore                   # Dockerignore
-├── .env                            # Premenné prostredia (len lokálne, nie v Gite!)
-├── .env.example                    # Šablóna premenných prostredia (commituj toto)
-├── .gitignore                      # Gitignore
-├── docker-compose.yml              # Docker Compose konfigurácia (3 služby)
-├── README.md                       # Projektová dokumentácia
-└── USER_STORIES.md                 # User stories & tasky
-```
-
-**Poznámka:** V Docker projekte nepotrebujeme root `package.json`, `tsconfig.json` ani `package-lock.json` súbory. Každá aplikácia má vlastné závislosti.
-
----
-
-## Premenné prostredia
-
-### Konfigurácia (.env súbor)
-
-Projekt používa jeden `.env` súbor v root adresári. **Nikdy necommituj `.env` do Gitu!**
-
-**Pre nových vývojárov:**
-```bash
-cp .env.example .env
-```
-
-### Premenné v .env:
-
-```properties
-# PostgreSQL
-POSTGRES_USER=sportbuddy
-POSTGRES_PASSWORD=sportbuddy123
-POSTGRES_DB=sportbuddy
-
-# Backend
-DATABASE_URL="postgresql://sportbuddy:sportbuddy123@postgres:5432/sportbuddy"
-BETTER_AUTH_SECRET="change-this-in-production"
-BETTER_AUTH_URL="http://localhost:3001"
-BREVO_API_KEY="tvoj-skutocny-brevo-api-key"
-pozn. - V apps/backend/src/lib/email.ts zmeň sender email na svoj overený email
-
-# Frontend
-NEXT_PUBLIC_API_URL="http://localhost:3001"
-
-# Google Maps API (pre výber lokácie aktivít)
-# Pozri GOOGLE_MAPS_SETUP.md pre inštrukcie
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=""
-# Gemini AI
-GEMINI_API_KEY=
-
-# OAuth (voliteľné)
-GOOGLE_CLIENT_ID=""
-GOOGLE_CLIENT_SECRET=""
-```
-
----
-
-## Pracovný postup pri vývoji
-
-### 1. Práca na user stories
-
-Pozri [USER_STORIES.md](USER_STORIES.md) pre aktuálny stav projektu a zoznam úloh.
-
-### 2. Práca s databázou (Prisma)
+Each application owns its dependencies. Install and run them from their own directories:
 
 ```bash
-# Zmena schémy (prisma/schema.prisma)
-# → Potom spusti:
-docker-compose exec backend npx prisma db push
-
-# Otvor Prisma Studio (grafické rozhranie)
-docker-compose exec backend npx prisma studio
-
-# Reset databázy (POZOR: vymaže všetky dáta!)
-docker-compose exec backend npx prisma db push --force-reset
-```
-
-### 3. Ladenie
-
-```bash
-# Záznamy backendu (API požiadavky, chyby)
-docker-compose logs -f backend
-
-# Záznamy frontendu (výstup zostavenia, chyby)
-docker-compose logs -f frontend
-
-# Záznamy databázy
-docker-compose logs -f postgres
-```
-
-### 4. Pridávanie nových závislostí
-
-```bash
-# Backend
-docker-compose exec backend npm install <package>
-# Potom restart
-docker-compose restart backend
-
-# Frontend
-docker-compose exec frontend npm install <package>
-# Potom restart
-docker-compose restart frontend
-```
-
-**Tip:** Po `npm install` v kontajneri, zmeň aj `package.json` lokálne a commitni ho.
-
----
-
-## Architektúra Docker projektu
-
-### Zjednotené Dockerfiles
-
-Každý Dockerfile má **viacstupňové zostavenie (multi-stage build)** s dvoma režimami:
-
-- **Vývojársky režim** (používa docker-compose.yml)
-  - Automatické načítanie zmien cez pripojenie zväzkov
-  - `npm run dev`
-  - Vhodné pre ladenie
-
-- **Produkčný režim** (pre nasadenie)
-  - Optimalizované zostavenie
-  - Viacstupňový obraz (menšia veľkosť)
-  - `npm run build`
-
-### Ako to funguje?
-
-```yaml
-# docker-compose.yml používa 'development' target
-backend:
-  build:
-    context: ./apps/backend
-    target: development  # ← Development režim
-```
-
-### Produkčný build (pre nasadenie)
-
-```bash
-# Backend
 cd apps/backend
-docker build --target production -t sportbuddy-backend .
+pnpm install
+pnpm exec prisma generate
+pnpm run dev
 
-# Frontend
-cd apps/frontend
-docker build --target production -t sportbuddy-frontend .
+cd ../frontend
+pnpm install
+pnpm run dev
 ```
 
----
+For local non-Docker development, set `DATABASE_URL` to a reachable PostgreSQL instance and keep frontend/backend ports aligned with `.env`.
 
-## Pre vývojárov - Osvedčené postupy
+## Project Structure
 
-### ✅ Commituj:
-- Všetok kód v `apps/*/src/`
-- `package.json`, `package-lock.json` (po pridaní závislostí)
-- `prisma/schema.prisma` (po zmene schémy)
-- `Dockerfile`, `docker-compose.yml`
-- `.env.example` (template bez secrets)
-
-### ❌ Necommituj:
-- `node_modules/` (automaticky ignorované)
-- `.next/` (výsledky zostavenia obrazov)
-- `.env` (obsahuje tajné kľúče - NIKDY necommituj!)
-- `.vscode/`, `.idea/` (nastavenia IDE)
-
-### 🔄 Po každom git pull:
-
-```bash
-# Ak niekto zmenil Dockerfile alebo závislosti
-docker-compose down
-docker-compose up -d --build
+```text
+apps/backend/src/app/api/     API route handlers
+apps/backend/src/lib/         Auth, Prisma, email, AI, notification utilities
+apps/backend/prisma/          Prisma schema, migrations, seed script
+apps/frontend/src/app/        Next.js App Router pages
+apps/frontend/src/components/ Reusable UI and feature components
+apps/frontend/src/contexts/   Client-side providers
+packages/shared/src/          Shared TypeScript exports
 ```
 
-### 🐛 Keď niečo nefunguje:
+## What This Demonstrates
 
-```bash
-# 1. Skús reštart
-docker-compose restart
+- Building a real multi-service TypeScript application with frontend, backend, database, auth, and external APIs.
+- Modeling a relational domain with Prisma migrations and practical API boundaries.
+- Implementing production-shaped user flows: authentication, profiles, notifications, chat, ratings, password reset, and uploads.
+- Dockerizing a development environment for consistent onboarding.
+- Integrating AI features while keeping a manual fallback path.
 
-# 2. Skús opätovné zostavenie
-docker-compose up -d --build
+## Security Notes
 
-# 3. Vyčisti všetko a začni odznova
-docker-compose down -v
-cp .env.example .env  # Obnov .env ak bol zmazaný
-docker-compose up -d --build
+This is a portfolio/student project, not an audited production service. The repository intentionally keeps example values in `.env.example`, but real API keys, VAPID keys, OAuth secrets, uploaded user files, and production credentials must remain outside Git.
 
-# 4. Skontroluj záznamy
-docker-compose logs -f
-```
+Runtime uploads are ignored by Git and should be stored in durable object storage for a production deployment.
 
----
+## Current Limitations
 
-## AI funkcie (Gemini)
+- The frontend and backend are separate Next.js apps rather than a single deployed platform.
+- Real-time chat uses polling instead of WebSockets.
+- Some optional integrations require external provider setup.
+- Production deployment would need stronger secret management, persistent upload storage, monitoring, and provider-specific configuration.
 
-SportBuddy využíva **Google Gemini 2.5 Flash** pre inteligentné funkcie:
+## License
 
-- **🔍 AI Vyhľadávanie** - Vyhľadávanie aktivít prirodzeným jazykom ("futbal zajtra v Košiciach")
-- **📝 AI Vytvorenie aktivity** - Vytvorenie aktivity pomocou prirodzeného jazyka
-
-### Konfigurácia Gemini
-
-1. Získaj API kľúč na [Google AI Studio](https://aistudio.google.com/app/apikey)
-2. Pridaj kľúč do `.env`:
-```properties
-GEMINI_API_KEY="tvoj-api-kluc"
-```
-
-Free tier tohto modelu má limit 15 requests/minútu.
-
----
-
-## Ďalšie kroky
-
-1. **Prečítaj si** [USER_STORIES.md](USER_STORIES.md) - zoznam všetkých používateľských príbehov a ich stav
-2. **Vyber si úlohu**
-3. **Pozri databázovú schému** - `apps/backend/prisma/schema.prisma`
-4. **Pozri API - backend** - `apps/backend/src/app/api/`
-
----
-
-## Oficiálna dokumentácia
-
-- [Next.js Docs](https://nextjs.org/docs)
-- [React Docs](https://react.dev)
-- [Prisma Docs](https://www.prisma.io/docs)
-- [Better Auth Docs](https://www.better-auth.com/docs)
-- [Tailwind CSS Docs](https://tailwindcss.com/docs)
-- [Docker Docs](https://docs.docker.com/)
-
----
-
-## Kontakt
-
-Pre otázky ohľadom projektu kontaktuj tím alebo otvor issue v repozitári.
+No license file is currently included. Treat the code as all rights reserved unless a license is added.

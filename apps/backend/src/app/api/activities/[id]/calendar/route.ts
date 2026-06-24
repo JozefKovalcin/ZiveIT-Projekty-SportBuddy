@@ -66,10 +66,10 @@ function generateICS(activity: any): string {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const activityId = params.id;
+    const { id: activityId } = await params;
     
     // Fetch activity with venue details
     const activity = await prisma.activity.findUnique({

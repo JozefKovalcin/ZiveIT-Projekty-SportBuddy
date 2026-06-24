@@ -4,7 +4,7 @@ import path from "path";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
     // Await params in Next.js 15+

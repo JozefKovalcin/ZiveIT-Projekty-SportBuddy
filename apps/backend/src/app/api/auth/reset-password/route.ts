@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { scrypt, randomBytes } from "node:crypto";
-import { promisify } from "node:util";
-
-const scryptAsync = promisify(scrypt);
+import { scryptSync, randomBytes } from "node:crypto";
 
 // POST /api/auth/reset-password
 export async function POST(request: NextRequest) {
@@ -60,7 +57,7 @@ export async function POST(request: NextRequest) {
     // N: 16384, r: 16, p: 1, dkLen: 64
     // Format: salt:key (both hex-encoded)
     const salt = randomBytes(16).toString("hex");
-    const derivedKey = (await scryptAsync(
+    const derivedKey = scryptSync(
       password.normalize("NFKC"), // Better Auth normalizes password
       salt,
       64, // dkLen
@@ -70,7 +67,7 @@ export async function POST(request: NextRequest) {
         p: 1,
         maxmem: 128 * 16384 * 16 * 2, // 128 * N * r * 2
       }
-    )) as Buffer;
+    );
     const hashedPassword = `${salt}:${derivedKey.toString("hex")}`;
 
     // Update user password in Account table

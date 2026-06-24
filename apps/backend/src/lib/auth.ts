@@ -23,23 +23,30 @@ export const auth = betterAuth({
         "https://www.googleapis.com/auth/userinfo.profile",
       ],
       mapProfileToUser: (profile) => {
-        console.log("Google profile data:", JSON.stringify(profile, null, 2));
+        const extendedProfile = profile as typeof profile & {
+          displayName?: string;
+          emailVerified?: boolean;
+          image?: string;
+          avatar_url?: string;
+          avatarUrl?: string;
+          pictureUrl?: string;
+        };
+
         return {
           name:
             profile.name ||
             profile.given_name ||
-            profile.displayName ||
+            extendedProfile.displayName ||
             profile.email ||
             "Používateľ",
           email: profile.email,
-          emailVerified: !!(profile.email_verified ?? profile.emailVerified),
+          emailVerified: !!(profile.email_verified ?? extendedProfile.emailVerified),
           image:
             profile.picture ||
-            profile.image ||
-            profile.avatar_url ||
-            profile.avatarUrl ||
-            profile.pictureUrl ||
-            null,
+            extendedProfile.image ||
+            extendedProfile.avatar_url ||
+            extendedProfile.avatarUrl ||
+            extendedProfile.pictureUrl,
         };
       },
     },
@@ -65,7 +72,9 @@ export const auth = betterAuth({
     updateAge: 60 * 60 * 24, // 1 day
   },
   advanced: {
-    generateId: () => crypto.randomUUID(),
+    database: {
+      generateId: () => crypto.randomUUID(),
+    },
   },
   trustedOrigins: ["http://localhost:3000"],
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3001",

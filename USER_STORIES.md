@@ -809,7 +809,7 @@ aby som sa mohol znova prihlásiť do aplikácie
 ### Tasky:
 - ✅ Prisma schema: PasswordReset model (token, userId, expiresAt, used)
 - ✅ Email service setup (Brevo - 300 emailov/deň zadarmo)
-- ✅ Verified sender email (kberecky@gmail.com) v Brevo dashboard
+- ✅ Verified sender email configured in Brevo dashboard
 - ✅ API: POST /api/auth/forgot-password (generuje token a posiela email)
 - ✅ API: POST /api/auth/reset-password (resetuje heslo s tokenom)
 - ✅ Email template pre reset link (HTML s responsive dizajnom)
