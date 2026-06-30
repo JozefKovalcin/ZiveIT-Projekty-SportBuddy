@@ -138,14 +138,13 @@ Screenshot placeholders are tracked in [docs/screenshots/](docs/screenshots/). R
 
 ## My Contribution
 
-This was a team project. The exact responsibility split should be filled in before using the repository in applications.
+This was a team project developed for Zive IT projekty 2026. My main contributions included working on the application structure, database-backed features, local development setup, and selected frontend/backend functionality.
 
-TODO:
-
-- Replace this line with your exact frontend contributions.
-- Replace this line with your exact backend/API contributions.
-- Replace this line with your exact Docker, database, testing, or integration contributions.
-- Replace this line with what you personally presented or defended during the competition.
+Contributed to the Next.js/TypeScript application structure and reusable full-stack project organization.
+Worked with Prisma/PostgreSQL data modeling and database-backed user/activity flows.
+Helped implement or integrate activity discovery, activity creation, user profiles, and related application logic.
+Worked with Docker-based local setup to make the project easier to run and test consistently.
+Participated in preparing the project for the Zive IT projekty 2026 competition, where the project reached the Top 20.
 
 ## What This Demonstrates for Employers
 
