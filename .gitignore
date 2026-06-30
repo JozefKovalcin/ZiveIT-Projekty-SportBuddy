@@ -32,10 +32,16 @@ build/
 
 # Environment files (IMPORTANT: never commit .env with secrets!)
 .env
+.env.*
+!.env.example
 .env*.local
 .env.production
 .env.development.local
 .env.test.local
+apps/**/.env
+apps/**/.env.*
+!apps/**/.env.example
+komplet_env.md
 
 # IDEs
 .vscode/
@@ -54,9 +60,15 @@ next-env.d.ts
 # Prisma
 node_modules/.prisma/
 .prisma/
+*.db
+*.sqlite
+*.sqlite3
+*.dump
+*.bak
 
 # Runtime uploads
 apps/backend/public/uploads/
+uploads/
 
 # Docker (keep docker-compose.yml and Dockerfiles in Git)
 docker-compose.override.yml

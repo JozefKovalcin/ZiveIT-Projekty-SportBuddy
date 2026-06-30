@@ -1,14 +1,20 @@
 # SportBuddy
 
-SportBuddy is a full-stack web application for organizing local sports activities. It helps users discover nearby games, create activities, manage participation, chat with other players, review participants, and use AI-assisted search or activity creation in Slovak.
+[![CI](https://github.com/JozefKovalcin/sportbuddy-fullstack-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/JozefKovalcin/sportbuddy-fullstack-ai/actions/workflows/ci.yml)
 
-This repository is structured as a small monorepo with separate Next.js applications for the frontend and backend, a PostgreSQL database managed by Prisma, and Docker Compose for local development.
+SportBuddy is a full-stack web application for organizing local sports activities. Users can discover nearby games, create activities, manage participation, chat with other players, review participants and venues, and use AI-assisted search or activity creation in Slovak.
 
-## Highlights
+This is a team portfolio/student project built as a small monorepo with separate Next.js frontend and backend applications, PostgreSQL managed by Prisma, and Docker Compose for local development.
 
-- Activity discovery with filtering by sport, skill level, location, date, age range, price, and gender preference.
-- Activity creation flow with recurring activities, venue/location support, calendar export, and participant management.
-- User authentication, profile editing, public profiles, ratings, password reset by email, and user blocking.
+## Competition Context
+
+SportBuddy reached the Top 20 at Zive IT projekty 2026, a Slovak student project competition. The project is presented here as a practical full-stack application with real user flows, external integrations, and Dockerized local setup.
+
+## Features
+
+- Activity discovery with filters for sport, skill level, location, date, age range, price, and gender preference.
+- Activity creation with recurring activities, venue/location support, calendar export, and participant management.
+- Authentication, profile editing, public profiles, ratings, password reset by email, and user blocking.
 - In-app notifications, activity chat with polling, and notification preferences.
 - AI-assisted natural language search and activity creation powered by Google Gemini.
 - Dockerized local environment with PostgreSQL, frontend, and backend services.
@@ -19,22 +25,22 @@ This repository is structured as a small monorepo with separate Next.js applicat
 - Backend: Next.js API routes, Prisma ORM, Better Auth, PostgreSQL
 - Shared package: TypeScript types and validation helpers
 - Integrations: Google Maps, Google Gemini, Brevo email, Web Push
-- DevOps: Docker, Docker Compose, pnpm
+- DevOps: Docker, Docker Compose, pnpm, GitHub Actions
 
 ## Architecture
 
 ```text
 apps/
-  backend/      Next.js API application, Prisma schema, auth, email, AI, uploads
-  frontend/     Next.js UI application, PWA assets, reusable components
-  postgres/     Custom PostgreSQL Docker image setup
+  backend/      Next.js API app, Prisma schema, auth, email, AI, uploads
+  frontend/     Next.js UI app, PWA assets, reusable components
+  postgres/     PostgreSQL Docker image setup
 packages/
   shared/       Shared TypeScript exports and domain types
 ```
 
-The frontend talks to the backend through `NEXT_PUBLIC_API_URL`. The backend owns authentication, database access, file upload serving, email delivery, AI calls, notifications, and Prisma migrations.
+The frontend communicates with the backend through `NEXT_PUBLIC_API_URL`. The backend owns authentication, database access, file upload serving, email delivery, AI calls, notifications, and Prisma migrations.
 
-## Getting Started
+## Local Setup with Docker
 
 ### Prerequisites
 
@@ -42,11 +48,11 @@ The frontend talks to the backend through `NEXT_PUBLIC_API_URL`. The backend own
 - Docker Desktop with Docker Compose
 - Node.js 20+ and pnpm, only if you want to run services outside Docker
 
-### Local Setup
+### Start the App
 
 ```bash
-git clone https://github.com/JozefKovalcin/ZiveIT-Projekty-SportBuddy.git
-cd ZiveIT-Projekty-SportBuddy
+git clone https://github.com/JozefKovalcin/sportbuddy-fullstack-ai.git
+cd sportbuddy-fullstack-ai
 
 cp .env.example .env
 docker compose up -d --build
@@ -62,7 +68,7 @@ The backend container generates the Prisma client and applies existing migration
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and fill only the integrations you need. The app can run locally without optional OAuth, email, Maps, or AI keys, but those features will be disabled or limited.
+Copy `.env.example` to `.env` and fill only the integrations you need. The app can run locally without optional OAuth, email, Maps, AI, or push-notification keys; those features will be disabled, limited, or logged locally depending on the feature.
 
 Important variables:
 
@@ -105,7 +111,7 @@ docker compose down -v
 
 ## Running Without Docker
 
-Each application owns its dependencies. Install and run them from their own directories:
+Each application owns its dependencies and lockfile. Install and run them from their own directories:
 
 ```bash
 cd apps/backend
@@ -120,38 +126,50 @@ pnpm run dev
 
 For local non-Docker development, set `DATABASE_URL` to a reachable PostgreSQL instance and keep frontend/backend ports aligned with `.env`.
 
-## Project Structure
+## Screenshots
 
-```text
-apps/backend/src/app/api/     API route handlers
-apps/backend/src/lib/         Auth, Prisma, email, AI, notification utilities
-apps/backend/prisma/          Prisma schema, migrations, seed script
-apps/frontend/src/app/        Next.js App Router pages
-apps/frontend/src/components/ Reusable UI and feature components
-apps/frontend/src/contexts/   Client-side providers
-packages/shared/src/          Shared TypeScript exports
-```
+Screenshot placeholders are tracked in [docs/screenshots/](docs/screenshots/). Recommended screenshots:
 
-## What This Demonstrates
+- activity discovery and filtering,
+- activity detail with participants,
+- activity creation flow,
+- chat or notification view,
+- mobile/PWA view if available.
 
-- Building a real multi-service TypeScript application with frontend, backend, database, auth, and external APIs.
+## My Contribution
+
+This was a team project. The exact responsibility split should be filled in before using the repository in applications.
+
+TODO:
+
+- Replace this line with your exact frontend contributions.
+- Replace this line with your exact backend/API contributions.
+- Replace this line with your exact Docker, database, testing, or integration contributions.
+- Replace this line with what you personally presented or defended during the competition.
+
+## What This Demonstrates for Employers
+
+- Building a multi-service TypeScript application with frontend, backend, database, auth, and external APIs.
 - Modeling a relational domain with Prisma migrations and practical API boundaries.
 - Implementing production-shaped user flows: authentication, profiles, notifications, chat, ratings, password reset, and uploads.
 - Dockerizing a development environment for consistent onboarding.
-- Integrating AI features while keeping a manual fallback path.
+- Integrating AI features while keeping manual app flows available when API keys are missing.
+- Communicating team-project scope honestly.
 
-## Security Notes
+## Security Notes and Limitations
 
 This is a portfolio/student project, not an audited production service. The repository intentionally keeps example values in `.env.example`, but real API keys, VAPID keys, OAuth secrets, uploaded user files, and production credentials must remain outside Git.
 
-Runtime uploads are ignored by Git and should be stored in durable object storage for a production deployment.
+Runtime uploads are ignored by Git and should be stored in durable object storage for a production deployment. Production deployment would also need stronger secret management, monitoring, rate limiting, backup strategy, and provider-specific hardening.
+
+For reporting security concerns, see [SECURITY.md](SECURITY.md).
 
 ## Current Limitations
 
 - The frontend and backend are separate Next.js apps rather than a single deployed platform.
 - Real-time chat uses polling instead of WebSockets.
 - Some optional integrations require external provider setup.
-- Production deployment would need stronger secret management, persistent upload storage, monitoring, and provider-specific configuration.
+- Production deployment needs additional operational hardening.
 
 ## License
 
