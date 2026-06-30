@@ -51,6 +51,7 @@
     "eslint-config-next": "latest",
     "prisma": "latest",
     "tsx": "latest",
-    "typescript": "latest"
+    "typescript": "latest",
+    "typescript-eslint": "8.62.0"
   }
 }

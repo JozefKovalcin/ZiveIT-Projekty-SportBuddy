@@ -30,7 +30,7 @@ jobs:
         run: corepack pnpm install --frozen-lockfile
 
       - name: Lint
-        run: corepack pnpm run lint
+        run: corepack pnpm exec eslint src --ext .ts,.tsx
 
       - name: Build
         run: corepack pnpm run build
@@ -77,7 +77,7 @@ jobs:
         run: corepack pnpm exec prisma generate
 
       - name: Lint
-        run: corepack pnpm run lint
+        run: corepack pnpm exec eslint src middleware.ts prisma.config.ts --ext .ts,.tsx
 
       - name: Build
         run: corepack pnpm run build
